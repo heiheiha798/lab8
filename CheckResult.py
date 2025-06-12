@@ -4,8 +4,8 @@ import os
 # import struct # Not used in this version
 
 # --- 全局参数 ---
-MATRIX_DIM = 32
-TILE_DIM = 32
+MATRIX_DIM = 512
+TILE_DIM = 512
 DATA_TYPE_IN_NP = np.int8 # NumPy data type for loaded A and B matrices
 
 # TILES_PER_ROW_COL determines how many TILE_DIMxTILE_DIM blocks fit in MATRIX_DIM
@@ -104,11 +104,25 @@ def main():
     print("Calculating golden result C = A_orig * B_orig (using float32 precision)...")
     golden_result_f32 = np.dot(matrix_a_float, matrix_b_float)
     
-    np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True, formatter={'float': '{:8.2f}'.format, 'int': '{:4d}'.format})
+    DISPLAY_SUB_DIM = 16
+    
+    original_print_options = np.get_printoptions() # 保存原始打印选项
+    np.set_printoptions(threshold=DISPLAY_SUB_DIM*DISPLAY_SUB_DIM + 1, linewidth=DISPLAY_SUB_DIM * 10, suppress=True, formatter={'float': '{:8.2f}'.format, 'int': '{:4d}'.format})
 
-    print(f"\nMatrix A (original SINT8, {MATRIX_DIM}x{MATRIX_DIM}):\n{matrix_a_orig_sint8}")
-    print(f"\nMatrix B (original SINT8, {MATRIX_DIM}x{MATRIX_DIM}):\n{matrix_b_orig_sint8}")
-    print(f"\nGolden Result C (calculated as float32, {MATRIX_DIM}x{MATRIX_DIM}):\n{golden_result_f32}")
+    print(f"\nMatrix A (original SINT8, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
+    print(matrix_a_orig_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) # <-- 修改点
+
+    print(f"\nMatrix B (original SINT8, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
+    print(matrix_b_orig_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) # <-- 修改点
+
+    print(f"\nGolden Result C (calculated as float32, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
+    print(golden_result_f32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) # <-- 修改点
+    
+    # np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True, formatter={'float': '{:8.2f}'.format, 'int': '{:4d}'.format})
+
+    # print(f"\nMatrix A (original SINT8, {MATRIX_DIM}x{MATRIX_DIM}):\n{matrix_a_orig_sint8}")
+    # print(f"\nMatrix B (original SINT8, {MATRIX_DIM}x{MATRIX_DIM}):\n{matrix_b_orig_sint8}")
+    # print(f"\nGolden Result C (calculated as float32, {MATRIX_DIM}x{MATRIX_DIM}):\n{golden_result_f32}")
     print("-" * 40)
 
     # 3. --- 读取硬件结果 ---
@@ -119,9 +133,8 @@ def main():
         print("Could not parse hardware results. Aborting comparison.")
         return
         
-    print(f"\nHW Accelerator Result C (from CSV, converted to float32, {MATRIX_DIM}x{MATRIX_DIM}):")
-    # np.set_printoptions(formatter={'float': '{:8.2f}'.format}) # Ensure consistent float printing
-    print(hw_result_f32)
+    print(f"\nHW Accelerator Result C (from CSV, converted to float32, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
+    print(hw_result_f32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) # <-- 修改点
     # np.set_printoptions(suppress=False, formatter=None) 
 
 
