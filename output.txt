@@ -1,0 +1,220 @@
+VCD info: dumpfile wave.vcd opened for output.
+T=  30.00 ns: --- Sending comp_enb pulse ---
+T=  40.00 ns: Waiting for 'done' signal from accelerator...
+PE_DBG[0][0] @685.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=16)
+PE_DBG[0][1] @685.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=16)
+PE_DBG[0][2] @685.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=16)
+PE_DBG[0][3] @685.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=16)
+PE_DBG[15][15] @685.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=16)
+PE_DBG_ACCUM[0][0] @715.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][0] @725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][1] @725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][2] @735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][1] @735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/16 | a_R=0000(v1) b_R=4000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][0] @735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/16 | a_R=c100(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=4180 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][0] @745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=4180(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=4180
+PE_DBG_ACCUM[0][1] @745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/16 | a_R=c100(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][2] @745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][3] @745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][3] @755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/16 | a_R=0000(v1) b_R=c080(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][2] @755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/16 | a_R=c100(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][1] @755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_ACCUM[0][0] @755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/16 | a_R=0000(v1) b_R=c100(v1) | mul_R(old)=0000(v1) acc_R(old)=4180 | mul_out(new_mulR)=8000 add_out(new_acc)=4180
+PE_DBG_ACCUM[0][0] @765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/16 | a_R=4080(v1) b_R=c100(v1) | mul_R(old)=8000(v1) acc_R(old)=4180 | mul_out(new_mulR)=c200 add_out(new_acc)=4180
+PE_DBG_ACCUM[0][1] @765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][2] @765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_ACCUM[0][3] @765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/16 | a_R=c100(v1) b_R=c120(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=42a0 add_out(new_acc)=8000
+PE_DBG_ACCUM[0][3] @775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=42a0(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=42a0
+PE_DBG_ACCUM[0][2] @775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][1] @775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/16 | a_R=4080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][0] @775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/16 | a_R=c0e0(v1) b_R=c080(v1) | mul_R(old)=c200(v1) acc_R(old)=4180 | mul_out(new_mulR)=41e0 add_out(new_acc)=c180
+PE_DBG_ACCUM[0][0] @785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/16 | a_R=c110(v1) b_R=c0e0(v1) | mul_R(old)=41e0(v1) acc_R(old)=c180 | mul_out(new_mulR)=427c add_out(new_acc)=4140
+PE_DBG_ACCUM[0][1] @785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/16 | a_R=c0e0(v1) b_R=c120(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=428c add_out(new_acc)=0000
+PE_DBG_ACCUM[0][2] @785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/16 | a_R=4080(v1) b_R=4080(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=4180 add_out(new_acc)=0000
+PE_DBG_ACCUM[0][3] @785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/16 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=42a0 | mul_out(new_mulR)=8000 add_out(new_acc)=42a0
+PE_DBG_ACCUM[0][3] @795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/16 | a_R=4080(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=42a0 | mul_out(new_mulR)=0000 add_out(new_acc)=42a0
+PE_DBG_ACCUM[0][2] @795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/16 | a_R=c0e0(v1) b_R=0000(v1) | mul_R(old)=4180(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=4180
+PE_DBG_ACCUM[0][1] @795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/16 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=428c(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][0] @795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/16 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=427c(v1) acc_R(old)=4140 | mul_out(new_mulR)=8000 add_out(new_acc)=4296
+PE_DBG_ACCUM[0][0] @805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4296 | mul_out(new_mulR)=0000 add_out(new_acc)=4296
+PE_DBG_ACCUM[0][1] @805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][2] @805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/16 | a_R=c110(v1) b_R=40e0(v1) | mul_R(old)=8000(v1) acc_R(old)=4180 | mul_out(new_mulR)=c27c add_out(new_acc)=4180
+PE_DBG_ACCUM[0][3] @805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/16 | a_R=c0e0(v1) b_R=c110(v1) | mul_R(old)=0000(v1) acc_R(old)=42a0 | mul_out(new_mulR)=427c add_out(new_acc)=42a0
+PE_DBG_ACCUM[0][3] @815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/16 | a_R=c110(v1) b_R=40c0(v1) | mul_R(old)=427c(v1) acc_R(old)=42a0 | mul_out(new_mulR)=c258 add_out(new_acc)=430f
+PE_DBG_ACCUM[0][2] @815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/16 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=c27c(v1) acc_R(old)=4180 | mul_out(new_mulR)=8000 add_out(new_acc)=c23c
+PE_DBG_ACCUM[0][1] @815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][0] @815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4296 | mul_out(new_mulR)=0000 add_out(new_acc)=4296
+PE_DBG_ACCUM[0][0] @825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/16 | a_R=c000(v1) b_R=4110(v1) | mul_R(old)=0000(v1) acc_R(old)=4296 | mul_out(new_mulR)=c190 add_out(new_acc)=4296
+PE_DBG_ACCUM[0][1] @825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][2] @825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c23c | mul_out(new_mulR)=0000 add_out(new_acc)=c23c
+PE_DBG_ACCUM[0][3] @825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=c258(v1) acc_R(old)=430f | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][3] @835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][2] @835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/16 | a_R=0000(v1) b_R=4100(v1) | mul_R(old)=0000(v1) acc_R(old)=c23c | mul_out(new_mulR)=0000 add_out(new_acc)=c23c
+PE_DBG_ACCUM[0][1] @835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/16 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=428c | mul_out(new_mulR)=8000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][0] @835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=c190(v1) acc_R(old)=4296 | mul_out(new_mulR)=0000 add_out(new_acc)=4264
+PE_DBG_ACCUM[0][0] @845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4264 | mul_out(new_mulR)=0000 add_out(new_acc)=4264
+PE_DBG_ACCUM[0][1] @845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][2] @845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/16 | a_R=c000(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=c23c | mul_out(new_mulR)=4080 add_out(new_acc)=c23c
+PE_DBG_ACCUM[0][3] @845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][3] @855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/16 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=8000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][2] @855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=4080(v1) acc_R(old)=c23c | mul_out(new_mulR)=0000 add_out(new_acc)=c22c
+PE_DBG_ACCUM[0][1] @855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/16 | a_R=0000(v1) b_R=c0c0(v1) | mul_R(old)=0000(v1) acc_R(old)=428c | mul_out(new_mulR)=8000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][0] @855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4264 | mul_out(new_mulR)=0000 add_out(new_acc)=4264
+PE_DBG_ACCUM[0][0] @865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/16 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=4264 | mul_out(new_mulR)=0000 add_out(new_acc)=4264
+PE_DBG_VALID[0][0] @865.00 ns: >>> MAC_COUNT_TARGET (16) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x4264 <<<
+PE_DBG_ACCUM[0][1] @865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_ACCUM[0][2] @865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/16 | a_R=0000(v1) b_R=3f80(v1) | mul_R(old)=0000(v1) acc_R(old)=c22c | mul_out(new_mulR)=0000 add_out(new_acc)=c22c
+PE_DBG_ACCUM[0][3] @865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][3] @875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][2] @875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/16 | a_R=0000(v1) b_R=4110(v1) | mul_R(old)=0000(v1) acc_R(old)=c22c | mul_out(new_mulR)=0000 add_out(new_acc)=c22c
+PE_DBG_ACCUM[0][1] @875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/16 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=428c | mul_out(new_mulR)=0000 add_out(new_acc)=428c
+PE_DBG_VALID[0][1] @875.00 ns: >>> MAC_COUNT_TARGET (16) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x428c <<<
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @875.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @885.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @885.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_ACCUM[0][2] @885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/16 | a_R=0000(v0) b_R=4110(v0) | mul_R(old)=0000(v1) acc_R(old)=c22c | mul_out(new_mulR)=0000 add_out(new_acc)=c22c
+PE_DBG_VALID[0][2] @885.00 ns: >>> MAC_COUNT_TARGET (16) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0xc22c <<<
+PE_DBG_ACCUM[0][3] @885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_ACCUM[0][3] @895.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/16 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=42b2 | mul_out(new_mulR)=0000 add_out(new_acc)=42b2
+PE_DBG_VALID[0][3] @895.00 ns: >>> MAC_COUNT_TARGET (16) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x42b2 <<<
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @895.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @895.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @895.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @905.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @905.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @905.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @905.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @915.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @915.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @915.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @915.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @925.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @925.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @925.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @925.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @935.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @935.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @935.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @935.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @945.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @945.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @945.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @945.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @955.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @955.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @955.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @955.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @965.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @965.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @965.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @965.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @975.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @975.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @975.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @975.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @985.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @985.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @985.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @985.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @995.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @995.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @995.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @995.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1005.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1005.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1005.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1005.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1015.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/16 | a_R=4000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1015.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1015.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1015.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1015.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1025.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1025.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1025.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1025.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1025.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[15][15] @1035.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/16 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1035.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1035.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1035.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1035.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1045.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1045.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1045.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1045.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1045.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_ACCUM[15][15] @1055.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/16 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1055.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1055.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1055.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1055.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1065.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1065.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1065.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1065.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1065.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/16 | a_R=0000(v1) b_R=c110(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=8000
+PE_DBG_ACCUM[15][15] @1075.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1075.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1075.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1075.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1075.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1085.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1085.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1085.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1085.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1085.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[15][15] @1095.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1095.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1095.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1095.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1095.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1105.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1105.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1105.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1105.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1105.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/16 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_ACCUM[15][15] @1115.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1115.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1115.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1115.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1115.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1125.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1125.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1125.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1125.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1125.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/16 | a_R=0000(v1) b_R=40c0(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_ACCUM[15][15] @1135.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/16 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1135.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1135.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1135.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1135.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1145.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1145.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1145.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1145.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1145.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
+PE_DBG_ACCUM[15][15] @1155.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/16 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1155.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1155.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1155.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1155.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1165.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1165.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1165.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1165.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_ACCUM[15][15] @1165.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/16 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
+PE_DBG_VALID[15][15] @1165.00 ns: >>> MAC_COUNT_TARGET (16) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x0000 <<<
+PE_DBG_PAUSED_ACC_FROZEN[15][15] @1175.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x0000 | mul_out(new_mulR)=0000 add_out(hypo)=0000
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1175.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1175.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1175.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1175.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][0] @1185.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4264 | mul_out(new_mulR)=0000 add_out(hypo)=4264
+PE_DBG_PAUSED_ACC_FROZEN[0][1] @1185.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x428c | mul_out(new_mulR)=0000 add_out(hypo)=428c
+PE_DBG_PAUSED_ACC_FROZEN[0][2] @1185.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc22c | mul_out(new_mulR)=0000 add_out(hypo)=c22c
+PE_DBG_PAUSED_ACC_FROZEN[0][3] @1185.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x42b2 | mul_out(new_mulR)=0000 add_out(hypo)=42b2
+PE_DBG_PAUSED_ACC_FROZEN[15][15] @1185.00 ns: DoneLatch=1| MACsDone=16 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x0000 | mul_out(new_mulR)=0000 add_out(hypo)=0000
+T=1985.00 ns: Accelerator 'done' signal received. Computation complete.
+T=2005.00 ns: Writing accelerator results to result_mem.csv ...
+T=2005.00 ns: Results written. Simulation finished.

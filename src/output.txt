@@ -1,0 +1,48 @@
+==============================================
+Starting NEW PE Testbench (Dataflow A & B)
+ACCUMULATION_CYCLES_TB = 4
+==============================================
+Test #1:                                                                                                                                                                                                                                                      Reset State - PASS
+
+--- Test: Basic MAC Series: (1*2)+(1*3)+(1*4)+(1*5) = 14 ---
+Test #2:                                                                                                                                                                                                                         MAC Series - Cycle 0 (Clear, Load A0,B0) - PASS
+Test #3:                                                                                                                                                                                                                    MAC Series - Cycle 1 (Load A1,B1; Mul0; Acc0) - PASS
+Test #4:                                                                                                                                                                                                                    MAC Series - Cycle 2 (Load A2,B2; Mul1; Acc1) - PASS
+Test #5:                                                                                                                                                                                                                    MAC Series - Cycle 3 (Load A3,B3; Mul2; Acc2) - PASS
+Test #6:                                                                                                                                                                                                                  MAC Series - Cycle 4 (Acc=9, Valid, Acc FROZEN) - PASS
+Test #7:                                                                                                                                                                                                           MAC Series - Cycle 5 (Valid low, Acc holds frozen 9.0) - PASS
+
+--- Test: Accumulator Frozen After DoneLatch ---
+Test #8:                                                                                                                                                                                                                                Acc Frozen Test - Cycle 3 (Acc=5) - PASS
+Test #9:                                                                                                                                                                                                             Acc Frozen Test - Cycle 4 (Acc=9, Valid, Acc FROZEN) - PASS
+Test #10:                                                                                                                                                                                                           Acc Frozen Test - Cycle 5 (Enable high, Acc STAYS 9.0) - PASS
+Test #11:                                                                                                                                                                                                           Acc Frozen Test - Cycle 6 (Enable high, Acc STAYS 9.0) - PASS
+
+--- Testing Stall ---
+Test #12:                                                                                                                                                                                                                                              Stall Test - Setup1 - PASS
+Test #13:                                                                                                                                                                                                                               Stall Test - Setup2 (Before Stall) - PASS
+Test #14:                                                                                                                                                                                                                                        Stall Test - During Stall - PASS
+Test #15:                                                                                                                                                                                                                                        Stall Test - After Resume - PASS
+
+--- Testing NaN Propagation (B input is NaN) ---
+Test #16:                                                                                                                                                                                                                       NaN Test - Cycle 0 (Load A0,B0_nan, Clear) - PASS
+Test #17:                                                                                                                                                                                                                           NaN Test - Cycle 1 (Load A1,B1. acc=0) - PASS
+Test #18:                                                                                                                                                                                                                         NaN Test - Cycle 2 (Load A2,B2. acc=NaN) - PASS
+Test #19:                                                                                                                                                                                                       NaN Test - Cycle 3 (Acc NaN, Cnt becomes 3, Valid still 0) - PASS
+Test #20:                                                                                                                                                                                                                NaN Test - Cycle 4 (NaN frozen, Valid PULSE HIGH) - PASS
+Test #21:                                                                                                                                                                                                                       NaN Test - Cycle 5 (Valid low, NaN frozen) - PASS
+
+--- Testing Inf Propagation (A input is Inf) ---
+Test #22:                                                                                                                                                                                                                       Inf Test - Cycle 0 (Load A0_inf,B0, Clear) - PASS
+Test #23:                                                                                                                                                                                                                           Inf Test - Cycle 1 (Load A1,B1. acc=0) - PASS
+Test #24:                                                                                                                                                                                                                         Inf Test - Cycle 2 (Load A2,B2. acc=Inf) - PASS
+Test #25:                                                                                                                                                                                                       Inf Test - Cycle 3 (Acc Inf, Cnt becomes 3, Valid still 0) - PASS
+Test #26:                                                                                                                                                                                                                Inf Test - Cycle 4 (Inf frozen, Valid PULSE HIGH) - PASS
+Test #27:                                                                                                                                                                                                                       Inf Test - Cycle 5 (Valid low, Inf frozen) - PASS
+------------------------------------------------------
+Test Summary:
+Total Tests: 27
+Passed:      27
+Failed:      0
+==============================================
+PE Testbench: All tests passed!
