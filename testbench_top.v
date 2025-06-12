@@ -4,11 +4,11 @@ module testbench_top;
 
     localparam CLK_PERIOD = 10;
 
-    localparam INPUT_MEM_WORDS_TB  = 64; // <<<<<<<<<< MODIFIED
-    localparam INPUT_ADDR_WIDTH_TB = $clog2(INPUT_MEM_WORDS_TB);   // $clog2(64) = 6
+    localparam INPUT_MEM_WORDS_TB  = 256; // <<<<<<<<<< MODIFIED
+    localparam RESULT_MEM_WORDS_TB = 256; // <<<<<<<<<< MODIFIED
 
-    localparam RESULT_MEM_WORDS_TB = 64; // <<<<<<<<<< MODIFIED
-    localparam RESULT_ADDR_WIDTH_TB = $clog2(RESULT_MEM_WORDS_TB); // $clog2(64) = 6
+    localparam INPUT_ADDR_WIDTH_TB = $clog2(INPUT_MEM_WORDS_TB);   
+    localparam RESULT_ADDR_WIDTH_TB = $clog2(RESULT_MEM_WORDS_TB); 
 
     reg clk = 0;
     reg rst;
