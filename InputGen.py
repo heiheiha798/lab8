@@ -2,8 +2,8 @@ import numpy as np
 import os
 
 # --- 全局参数 ---
-MATRIX_DIM = 512
-TILE_DIM = 512
+MATRIX_DIM = 32
+TILE_DIM = 32
 DATA_TYPE_IN = np.int8
 SPARSITY_NON_ZERO_RATIO = 0.35 # 35% non-zero elements
 RANDOM_SEED = 42 # For reproducible random numbers

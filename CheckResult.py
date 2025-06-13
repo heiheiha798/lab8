@@ -4,8 +4,8 @@ import os
 # import struct # Not used in this version
 
 # --- 全局参数 ---
-MATRIX_DIM = 512
-TILE_DIM = 512
+MATRIX_DIM = 32
+TILE_DIM = 32
 DATA_TYPE_IN_NP = np.int8 # NumPy data type for loaded A and B matrices
 
 # TILES_PER_ROW_COL determines how many TILE_DIMxTILE_DIM blocks fit in MATRIX_DIM
