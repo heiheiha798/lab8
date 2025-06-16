@@ -1,34 +1,18 @@
 import numpy as np
 import os
+import math # 仍然可以保留，以防未来需要其他数学运算
 
-# --- 全局参数 ---
-MATRIX_DIM = 128
-TILE_DIM = 16 
-DATA_TYPE_IN_NP = np.int8
+# --- Testbench/Hardware 参数 ---
+MATRIX_DIM_TB = 512
+PE_ACCUM_BITS_TB = 32
+RAM_DATA_WIDTH_TB = 64
 
-if MATRIX_DIM % TILE_DIM != 0:
-    raise ValueError("MATRIX_DIM must be divisible by TILE_DIM for this script's logic")
-TILES_PER_ROW_COL_HW = MATRIX_DIM // TILE_DIM # How many tiles in a row/col of the full matrix as stored/processed by HW
+SINT32_PER_RAM_WORD_TB = RAM_DATA_WIDTH_TB // PE_ACCUM_BITS_TB
+if RAM_DATA_WIDTH_TB % PE_ACCUM_BITS_TB != 0:
+    raise ValueError("RAM_DATA_WIDTH_TB must be a multiple of PE_ACCUM_BITS_TB.")
 
-WORDS_PER_BF16_ELEMENTS = 4 
-ELEMENTS_PER_TILE_ROW = TILE_DIM
-WORDS_PER_TILE_ROW_IN_CSV = TILE_DIM // WORDS_PER_BF16_ELEMENTS # How many 64-bit RAM words for one row of a tile
-WORDS_PER_RESULT_TILE_IN_CSV = (TILE_DIM * TILE_DIM) // WORDS_PER_BF16_ELEMENTS
-
-# --- 辅助函数 ---
-def bfloat16_hex_to_float32(bf16_hex_str):
-    uint16_val = int(bf16_hex_str, 16)
-    uint32_val = np.uint32(uint16_val) << 16
-    return uint32_val.view(np.float32)
-
-def bfloat16_uint16_to_float32_array(bf16_uint16_array):
-    bf16_uint16_array = np.asarray(bf16_uint16_array, dtype=np.uint16)
-    float32_int_array = (bf16_uint16_array.astype(np.uint32) << 16)
-    return float32_int_array.view(np.float32)
-
-def read_hw_result_from_csv_direct(fileName="result_mem.csv"):
-    hw_result_matrix_f32_from_csv = np.zeros((MATRIX_DIM, MATRIX_DIM), dtype=np.float32)
-    
+def read_hw_result_sint32_direct(fileName="result_mem.csv", matrix_dim_arg=MATRIX_DIM_TB):
+    all_sint32_elements_flat = []
     try:
         with open(fileName, "r") as f:
             lines_hex_ram_words = [line.strip() for line in f.readlines() if line.strip()]
@@ -36,167 +20,128 @@ def read_hw_result_from_csv_direct(fileName="result_mem.csv"):
         print(f"Error: {fileName} not found.")
         return None
 
-    expected_ram_words_for_c = (MATRIX_DIM * MATRIX_DIM) // WORDS_PER_BF16_ELEMENTS
+    # For 16x16 SINT32 result: 16*16 = 256 elements.
+    # Each 64-bit word stores 2 SINT32 elements. So, 256/2 = 128 RAM words.
+    expected_ram_words_for_c = (matrix_dim_arg * matrix_dim_arg) // SINT32_PER_RAM_WORD_TB
+    if (matrix_dim_arg * matrix_dim_arg) % SINT32_PER_RAM_WORD_TB != 0: # Should not happen if dim is reasonable
+        expected_ram_words_for_c +=1
+
     if len(lines_hex_ram_words) != expected_ram_words_for_c:
-        print(f"Warning: {fileName} has {len(lines_hex_ram_words)} lines (RAM words), but {expected_ram_words_for_c} were expected for C matrix.")
-        # return None # Allow partial processing for debugging
+        print(f"Warning: {fileName} has {len(lines_hex_ram_words)} lines (RAM words), "
+              f"but {expected_ram_words_for_c} were expected for {matrix_dim_arg}x{matrix_dim_arg} SINT32 C matrix.")
 
-    # This will store all BF16 values in the exact order they appear in the flattened C matrix (row-major)
-    all_bf16_elements_flat_uint16 = [] 
-    
-    # Debug: Print mapping for specific C matrix elements to RAM words and their content
-    # C[0][16] (Global addressing)
-    # Tile containing C[0][16] is C_tile[0][1] (rc_tile=0, cc_tile=1)
-    # Within this tile, it's element (row=0, col=0) because 16 = 1*TILE_DIM + 0
-    # RAM address calculation: base_c + (rc_tile * TILES_PER_ROW_COL_HW + cc_tile) * WORDS_PER_RESULT_TILE_IN_CSV 
-    #                          + (row_in_tile * WORDS_PER_TILE_ROW_IN_CSV) 
-    #                          + (col_in_tile // WORDS_PER_BF16_ELEMENTS)
-    # Element within that RAM word: col_in_tile % WORDS_PER_BF16_ELEMENTS
-
-    # Let's calculate the flat index in lines_hex_ram_words for C[0][16] and C[1][0]
-    # C[0][16]: global_row=0, global_col=16
-    # This is the (0 * MATRIX_DIM + 16)-th element in a fully flattened C matrix.
-    flat_idx_c0_16 = 0 * MATRIX_DIM + 16
-    csv_line_idx_c0_16 = flat_idx_c0_16 // WORDS_PER_BF16_ELEMENTS
-    element_pos_in_word_c0_16 = flat_idx_c0_16 % WORDS_PER_BF16_ELEMENTS
-
-    # C[1][0]: global_row=1, global_col=0
-    flat_idx_c1_0 = 1 * MATRIX_DIM + 0
-    csv_line_idx_c1_0 = flat_idx_c1_0 // WORDS_PER_BF16_ELEMENTS
-    element_pos_in_word_c1_0 = flat_idx_c1_0 % WORDS_PER_BF16_ELEMENTS
-
-    print(f"\n--- CSV Parsing Debug ---")
-    print(f"Targeting C[0][16]: Expected flat_idx={flat_idx_c0_16}, CSV line_idx={csv_line_idx_c0_16}, element_pos_in_word={element_pos_in_word_c0_16}")
-    print(f"Targeting C[1][0]: Expected flat_idx={flat_idx_c1_0}, CSV line_idx={csv_line_idx_c1_0}, element_pos_in_word={element_pos_in_word_c1_0}")
-
-
-    for line_idx, line_hex_64bit in enumerate(lines_hex_ram_words):
+    for line_idx, line_hex_ram_word in enumerate(lines_hex_ram_words):
         try:
-            val_64bit_int = int(line_hex_64bit, 16)
+            val_ram_word_int = int(line_hex_ram_word, 16)
         except ValueError:
-            print(f"Warning: Could not parse hex line '{line_hex_64bit}' in {fileName} at line index {line_idx}. Skipping line.")
+            print(f"Warning: Could not parse hex line '{line_hex_ram_word}' at line index {line_idx}. Skipping line, filling with zeros.")
+            all_sint32_elements_flat.extend([np.int32(0)] * SINT32_PER_RAM_WORD_TB)
             continue
-        
-        # Extract elements in the order: E0, E1, E2, E3 where E0 is LSB-aligned
-        elements_in_this_word_uint16 = [
-            np.uint16((val_64bit_int >>  0) & 0xFFFF), # Element 0 (e.g., C[r][c_base+0])
-            np.uint16((val_64bit_int >> 16) & 0xFFFF), # Element 1 (e.g., C[r][c_base+1])
-            np.uint16((val_64bit_int >> 32) & 0xFFFF), # Element 2 (e.g., C[r][c_base+2])
-            np.uint16((val_64bit_int >> 48) & 0xFFFF)  # Element 3 (e.g., C[r][c_base+3])
-        ]
-        all_bf16_elements_flat_uint16.extend(elements_in_this_word_uint16)
 
-        # Debug print for the specific lines we are interested in
-        if line_idx == csv_line_idx_c0_16:
-            extracted_bf16_for_c0_16 = elements_in_this_word_uint16[element_pos_in_word_c0_16]
-            converted_float_c0_16 = bfloat16_uint16_to_float32_array([extracted_bf16_for_c0_16])[0]
-            print(f"  CSV line {line_idx} (for C[0][16]): Raw='{line_hex_64bit}', Extracted E{element_pos_in_word_c0_16}=0x{extracted_bf16_for_c0_16:04x} -> {converted_float_c0_16:.4f}")
-        
-        if line_idx == csv_line_idx_c1_0:
-            extracted_bf16_for_c1_0 = elements_in_this_word_uint16[element_pos_in_word_c1_0]
-            converted_float_c1_0 = bfloat16_uint16_to_float32_array([extracted_bf16_for_c1_0])[0]
-            print(f"  CSV line {line_idx} (for C[1][0]): Raw='{line_hex_64bit}', Extracted E{element_pos_in_word_c1_0}=0x{extracted_bf16_for_c1_0:04x} -> {converted_float_c1_0:.4f}")
+        elements_in_this_word = []
+        for i in range(SINT32_PER_RAM_WORD_TB):
+            # Extract i-th SINT32 from the RAM word
+            # Assumes element 0 is in lower bits, element 1 in higher bits for a 2-element word
+            element_uint32 = (val_ram_word_int >> (i * PE_ACCUM_BITS_TB)) & ((1 << PE_ACCUM_BITS_TB) - 1)
+            # Convert to signed SINT32
+            if element_uint32 >= (1 << (PE_ACCUM_BITS_TB - 1)):
+                element_sint32 = element_uint32 - (1 << PE_ACCUM_BITS_TB)
+            else:
+                element_sint32 = element_uint32
+            elements_in_this_word.append(np.int32(element_sint32))
+        all_sint32_elements_flat.extend(elements_in_this_word)
+
+    expected_total_elements = matrix_dim_arg * matrix_dim_arg
+    # Pad with zeros if not enough elements were parsed due to warnings
+    if len(all_sint32_elements_flat) < expected_total_elements:
+        print(f"Padding parsed SINT32 elements from {len(all_sint32_elements_flat)} to {expected_total_elements} with zeros.")
+        all_sint32_elements_flat.extend([np.int32(0)] * (expected_total_elements - len(all_sint32_elements_flat)))
+    elif len(all_sint32_elements_flat) > expected_total_elements:
+        print(f"Trimming parsed SINT32 elements from {len(all_sint32_elements_flat)} to {expected_total_elements}.")
+        all_sint32_elements_flat = all_sint32_elements_flat[:expected_total_elements]
 
 
-    expected_total_elements = MATRIX_DIM * MATRIX_DIM
-    if len(all_bf16_elements_flat_uint16) != expected_total_elements:
-        print(f"Error: Parsed {len(all_bf16_elements_flat_uint16)} BF16 values, but expected {expected_total_elements}.")
-        # Potentially fill remaining with zeros or handle error
-        if len(all_bf16_elements_flat_uint16) < expected_total_elements:
-            all_bf16_elements_flat_uint16.extend([np.uint16(0)] * (expected_total_elements - len(all_bf16_elements_flat_uint16)))
-        else: # Too many elements, truncate
-            all_bf16_elements_flat_uint16 = all_bf16_elements_flat_uint16[:expected_total_elements]
-        # return None
-        
-    hw_result_flat_f32 = bfloat16_uint16_to_float32_array(np.array(all_bf16_elements_flat_uint16, dtype=np.uint16))
-    
+    hw_result_flat_sint32 = np.array(all_sint32_elements_flat, dtype=np.int32)
     try:
-        hw_result_matrix_f32_from_csv = hw_result_flat_f32.reshape((MATRIX_DIM, MATRIX_DIM))
+        hw_result_matrix_sint32 = hw_result_flat_sint32.reshape((matrix_dim_arg, matrix_dim_arg))
     except ValueError as e:
-        print(f"Error reshaping parsed data: {e}")
+        print(f"Error reshaping parsed SINT32 data ({len(hw_result_flat_sint32)} elements) to {matrix_dim_arg}x{matrix_dim_arg}: {e}.")
         return None
-    
-    print(f"--- End CSV Parsing Debug ---")
-    return hw_result_matrix_f32_from_csv
+    return hw_result_matrix_sint32
 
 # --- 主程序 ---
 def main():
-    # ... (加载 A, B 和计算 golden_result_f32 的部分不变) ...
+    # 对于16x16单瓦片，硬件输出的 result_mem.csv 应该已经是行主序 (内部打包到RAM字)
+    # 所以不需要 reorder_result_mem.py 的输出了。
+    hw_result_file = "result_mem.csv"
+    # 如果您决定对512x512仍使用reorder脚本，并重命名输出，则相应修改此处。
+    # hw_result_file = "result_mem_reordered_sint32.csv" 
+
     try:
-        matrix_a_orig_sint8 = np.load("matrix_a.npy")
-        matrix_b_orig_sint8 = np.load("matrix_b.npy")
+        matrix_a_sint8 = np.load("matrix_a.npy")
+        matrix_b_sint8 = np.load("matrix_b.npy")
+        golden_c_sint32 = np.load("matrix_c_expected_sint32.npy")
     except FileNotFoundError:
-        print("Error: matrix_a.npy or matrix_b.npy not found. Run data generation script first.")
+        print("Error: matrix_a.npy, matrix_b.npy, or matrix_c_expected_sint32.npy not found. Run data generation script first.")
         return
 
-    matrix_a_float = matrix_a_orig_sint8.astype(np.float32) 
-    matrix_b_float = matrix_b_orig_sint8.astype(np.float32)
+    DISPLAY_SUB_DIM = min(MATRIX_DIM_TB, 16)
+    original_print_options = np.get_printoptions()
+    np.set_printoptions(threshold=max(1024, DISPLAY_SUB_DIM*DISPLAY_SUB_DIM + 1),
+                        linewidth=max(400, DISPLAY_SUB_DIM * 10), # Wider for SINT32
+                        suppress=True,
+                        formatter={'int_kind': '{:9d}'.format}) # Format for SINT32
 
-    print("Calculating golden result C = A_orig * B_orig (using float32 precision)...")
-    golden_result_f32 = np.dot(matrix_a_float, matrix_b_float)
-    
-    DISPLAY_SUB_DIM = MATRIX_DIM
-    original_print_options = np.get_printoptions() 
-    np.set_printoptions(threshold=DISPLAY_SUB_DIM*DISPLAY_SUB_DIM + 1, linewidth=DISPLAY_SUB_DIM * 10, suppress=True, formatter={'float': '{:8.2f}'.format, 'int': '{:4d}'.format})
-
-    print(f"\nMatrix A (original SINT8, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
-    print(matrix_a_orig_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
-
-    print(f"\nMatrix B (original SINT8, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
-    print(matrix_b_orig_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
-
-    print(f"\nGolden Result C (calculated as float32, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
-    print(golden_result_f32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) 
+    print(f"\nMatrix A (SINT8 loaded from .npy):")
+    print(matrix_a_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
+    print(f"\nMatrix B (SINT8 loaded from .npy):")
+    print(matrix_b_sint8[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
+    print(f"\nGolden Result C (SINT32 loaded from .npy):")
+    print(golden_c_sint32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
     print("-" * 40)
 
-    print("Reading hardware accelerator's result from result_mem.csv...")
-    hw_result_f32 = read_hw_result_from_csv_direct(fileName="result_mem.csv")
-    
-    if hw_result_f32 is None:
+    hw_result_sint32 = read_hw_result_sint32_direct(fileName=hw_result_file, matrix_dim_arg=MATRIX_DIM_TB)
+
+    if hw_result_sint32 is None:
         print("Could not parse hardware results. Aborting comparison.")
-        return
-        
-    print(f"\nHW Accelerator Result C (from CSV, converted to float32, showing top-left {DISPLAY_SUB_DIM}x{DISPLAY_SUB_DIM} of {MATRIX_DIM}x{MATRIX_DIM}):")
-    print(hw_result_f32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM]) 
-
-    # --- Python Debug Print (after reshape) ---
-    print("\n--- Python Direct Access Debug ---")
-    print(f"Python: hw_result_f32[0, 16] directly after reshape = {hw_result_f32[0, 16]:.4f}")
-    print(f"Python: hw_result_f32[1, 0] directly after reshape = {hw_result_f32[1, 0]:.4f}")
-    print(f"Python: hw_result_f32[0, 0] directly after reshape = {hw_result_f32[0, 0]:.4f}")
-    print(f"Python: hw_result_f32[2, 0] directly after reshape = {hw_result_f32[2, 0]:.4f}")
-    print("--- End Python Direct Access Debug ---")
-
-
-    if golden_result_f32.shape != hw_result_f32.shape:
-        print(f"\nShape mismatch! Golden: {golden_result_f32.shape}, HW output: {hw_result_f32.shape}")
+        np.set_printoptions(**original_print_options)
         return
 
-    absolute_tolerance = 1e-5 
-    relative_tolerance = 1e-4 
-    
-    diff = np.abs(golden_result_f32 - hw_result_f32)
-    max_abs_diff = np.max(diff)
-    avg_abs_diff = np.mean(diff)
-    
-    num_mismatches = np.sum(~np.isclose(golden_result_f32, hw_result_f32, rtol=relative_tolerance, atol=absolute_tolerance))
+    print(f"\nHW Accelerator Result C (SINT32 parsed from '{hw_result_file}'):")
+    print(hw_result_sint32[:DISPLAY_SUB_DIM, :DISPLAY_SUB_DIM])
 
-    print(f"\n>> Comparison Summary:")
-    print(f">> Max Absolute Difference: {max_abs_diff:.4g}")
-    print(f">> Average Absolute Difference: {avg_abs_diff:.4g}")
-    print(f">> Number of elements with significant difference (rtol={relative_tolerance}, atol={absolute_tolerance}): {num_mismatches} / {golden_result_f32.size}")
+    if golden_c_sint32.shape != hw_result_sint32.shape:
+        print(f"\nShape mismatch! Golden SINT32: {golden_c_sint32.shape}, HW SINT32 output: {hw_result_sint32.shape}")
+        np.set_printoptions(**original_print_options)
+        return
 
+    diff_sq = (hw_result_sint32.astype(np.float64) - golden_c_sint32.astype(np.float64))**2
+    sse_hw_vs_golden_sint32 = np.sum(diff_sq)
+    
+    score_factor_sse = 1.0 # Default if SSE is exactly 0
+
+    print(f"\n>> Accuracy Metrics (vs SINT32 Golden):")
+    print(f">> SSE (HW SINT32 vs Golden SINT32): {sse_hw_vs_golden_sint32:.6e}")
+    print(f">> Score Factor from SSE (exp(SSE/C0)): {score_factor_sse:.6f}")
+    print("-" * 20)
+
+    num_mismatches = np.sum(golden_c_sint32 != hw_result_sint32)
+    total_elements = golden_c_sint32.size
+
+    print(f"\n>> Comparison Summary (HW SINT32 vs Golden SINT32):")
     if num_mismatches == 0:
-        print("\nCHECK PASSED! Hardware result matches golden result within specified tolerance.")
+        print(">> PASSED: Hardware SINT32 result exactly matches the golden SINT32 result.")
     else:
-        print("\nCHECK FAILED! Hardware result differs from golden result.")
-        print("  Indices of first few mismatches (golden vs hw):")
-        mismatch_indices = np.where(~np.isclose(golden_result_f32, hw_result_f32, rtol=relative_tolerance, atol=absolute_tolerance))
-        for i in range(min(10, len(mismatch_indices[0]))): 
-            r, c = mismatch_indices[0][i], mismatch_indices[1][i]
-            print(f"    C[{r}][{c}]: Golden={golden_result_f32[r,c]:.4f}, HW={hw_result_f32[r,c]:.4f}, Diff={diff[r,c]:.4g}")
-
-    np.set_printoptions(**original_print_options) # 恢复原始打印选项
+        print(f">> FAILED: Found {num_mismatches} mismatched SINT32 elements out of {total_elements}.")
+        mismatch_indices = np.where(golden_c_sint32 != hw_result_sint32)
+        if len(mismatch_indices[0]) > 0:
+            first_mismatch_row = mismatch_indices[0][0]
+            first_mismatch_col = mismatch_indices[1][0]
+            print(f"   First SINT32 mismatch at C[{first_mismatch_row}][{first_mismatch_col}]: "
+                  f"Golden = {golden_c_sint32[first_mismatch_row, first_mismatch_col]}, "
+                  f"HW = {hw_result_sint32[first_mismatch_row, first_mismatch_col]}")
+    print("-" * 20)
+    np.set_printoptions(**original_print_options)
 
 if __name__ == "__main__":
     main()

@@ -1,374 +1,177 @@
 ### Compiling Verilog with Verilator using 16 threads...
 # 新增：-O3 优化, --threads 16 开启多线程编译
-verilator -Wno-fatal -Wall -cc --timing --trace -O3 --threads 16 -Isrc testbench_top.v accelerator.v src/sint8_to_bf16_converter.v src/systolic_array.v src/pe.v src/bfloat16_multiplier.v src/bfloat16_adder.v mem.v --exe sim_main.cpp
-%Warning-EOFNEWLINE: accelerator.v:752:10: Missing newline at end of file (POSIX 3.206).
-                                         : ... Suggest add newline.
-  752 | endmodule
+verilator -Wno-fatal -Wall -cc --timing -O3 --threads 16 -Isrc testbench_top.v accelerator.v systolic_array.v pe.v ram_controller_behavioral.v --exe sim_main.cpp
+%Warning-EOFNEWLINE: testbench_top.v:126:10: Missing newline at end of file (POSIX 3.206).
+                                           : ... Suggest add newline.
+  126 | endmodule
       |          ^
                      ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.037
                      ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
-%Warning-EOFNEWLINE: src/sint8_to_bf16_converter.v:41:10: Missing newline at end of file (POSIX 3.206).
-                                                        : ... Suggest add newline.
-   41 | endmodule
+%Warning-EOFNEWLINE: accelerator.v:559:10: Missing newline at end of file (POSIX 3.206).
+                                         : ... Suggest add newline.
+  559 | endmodule
       |          ^
-%Warning-EOFNEWLINE: src/systolic_array.v:398:10: Missing newline at end of file (POSIX 3.206).
-                                                : ... Suggest add newline.
-  398 | endmodule
+%Warning-EOFNEWLINE: systolic_array.v:342:10: Missing newline at end of file (POSIX 3.206).
+                                            : ... Suggest add newline.
+  342 | endmodule
       |          ^
-%Warning-EOFNEWLINE: src/pe.v:226:10: Missing newline at end of file (POSIX 3.206).
-                                    : ... Suggest add newline.
-  226 | endmodule
-      |          ^
-%Warning-EOFNEWLINE: src/bfloat16_multiplier.v:110:10: Missing newline at end of file (POSIX 3.206).
-                                                     : ... Suggest add newline.
-  110 | endmodule
-      |          ^
-%Warning-EOFNEWLINE: src/bfloat16_adder.v:175:10: Missing newline at end of file (POSIX 3.206).
-                                                : ... Suggest add newline.
-  175 | endmodule
-      |          ^
-%Warning-EOFNEWLINE: mem.v:67:10: Missing newline at end of file (POSIX 3.206).
+%Warning-EOFNEWLINE: pe.v:152:10: Missing newline at end of file (POSIX 3.206).
                                 : ... Suggest add newline.
-   67 | endmodule
+  152 | endmodule
       |          ^
-%Warning-PINCONNECTEMPTY: src/pe.v:73:10: Instance pin connected by name with empty reference: 'is_zero'
-   73 |         .is_zero ()
-      |          ^~~~~~~
+%Warning-EOFNEWLINE: ram_controller_behavioral.v:179:10: Missing newline at end of file (POSIX 3.206).
+                                                       : ... Suggest add newline.
+  179 | endmodule
+      |          ^
+%Warning-PINCONNECTEMPTY: accelerator.v:171:10: Instance pin connected by name with empty reference: 'array_a_data_valid_out'
+  171 |         .array_a_data_valid_out(),
+      |          ^~~~~~~~~~~~~~~~~~~~~~
                           ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.037
                           ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
-%Warning-PINCONNECTEMPTY: src/pe.v:82:10: Instance pin connected by name with empty reference: 'is_zero'
-   82 |         .is_zero ()
-      |          ^~~~~~~
-%Warning-DECLFILENAME: mem.v:6:8: Filename 'mem' does not match MODULE name: 'ram'
-    6 | module ram #
-      |        ^~~
-                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.037
-                       ... Use "/* verilator lint_off DECLFILENAME */" and lint_on around source to disable this message.
-%Warning-WIDTHEXPAND: src/bfloat16_adder.v:106:64: Operator SUB expects 8 bits on the RHS, but RHS's VARREF 'lead_zeros_count_val_w' generates 4 bits.
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
-  106 |                     res_exp_biased_calc_reg = exp_large_biased - lead_zeros_count_val_w;
-      |                                                                ^
+%Warning-PINCONNECTEMPTY: accelerator.v:172:10: Instance pin connected by name with empty reference: 'array_a_out'
+  172 |         .array_a_out(),
+      |          ^~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: accelerator.v:173:10: Instance pin connected by name with empty reference: 'array_b_data_valid_out'
+  173 |         .array_b_data_valid_out(),
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-PINCONNECTEMPTY: accelerator.v:174:10: Instance pin connected by name with empty reference: 'array_b_out'
+  174 |         .array_b_out(),
+      |          ^~~~~~~~~~~
+%Warning-WIDTHEXPAND: pe.v:49:45: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'mul_result_reg' generates 16 bits.
+                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst'
+   49 |     assign add_output_data = mul_result_reg + local_accumulator_reg;
+      |                                             ^
                       ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.037
                       ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
-%Warning-WIDTHEXPAND: src/bfloat16_adder.v:101:47: Operator LTE expects 8 bits on the RHS, but RHS's VARREF 'lead_zeros_count_val_w' generates 4 bits.
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
-  101 |                 end else if (exp_large_biased <= lead_zeros_count_val_w) begin 
-      |                                               ^~
-%Warning-WIDTHEXPAND: src/systolic_array.v:203:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-  203 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
+%Warning-WIDTHEXPAND: ram_controller_behavioral.v:95:67: Operator EQ expects 2 bits on the RHS, but RHS's CONST '1'h1' generates 1 bits.
+                                                       : ... note: In instance 'testbench_top.u_accelerator.u_ram_controller'
+   95 |             if (current_state_rc == STATE_BUSY && busy_counter_rc == 1'b1) begin
+      |                                                                   ^~
+%Warning-WIDTHEXPAND: ram_controller_behavioral.v:163:46: Operator GT expects 2 bits on the RHS, but RHS's CONST '1'h1' generates 1 bits.
+                                                        : ... note: In instance 'testbench_top.u_accelerator.u_ram_controller'
+  163 |                 end else if (busy_counter_rc > 1'b1) begin
+      |                                              ^
+%Warning-WIDTHEXPAND: ram_controller_behavioral.v:152:37: Operator EQ expects 2 bits on the RHS, but RHS's CONST '1'h1' generates 1 bits.
+                                                        : ... note: In instance 'testbench_top.u_accelerator.u_ram_controller'
+  152 |                 if (busy_counter_rc == 1'b1) begin
+      |                                     ^~
+%Warning-WIDTHEXPAND: systolic_array.v:188:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
+                                             : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+  188 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
       |                                                             ^
-%Warning-WIDTHEXPAND: src/systolic_array.v:216:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-  216 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
+%Warning-WIDTHEXPAND: systolic_array.v:239:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
+                                             : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+  239 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
       |                                                             ^
-%Warning-WIDTHEXPAND: src/sint8_to_bf16_converter.v:28:76: Operator ADD expects 32 or 8 bits on the LHS, but LHS's VARREF 'msb_pos' generates 3 bits.
-                                                         : ... note: In instance 'testbench_top.u_accelerator.conv_gen[7].u_sint8_to_bf16'
-   28 |     assign bf16_exp_biased = (abs_val_unsigned == 7'b0) ? 8'h00 : (msb_pos + 127);
-      |                                                                            ^
-%Warning-WIDTHTRUNC: accelerator.v:151:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '152'h535f494e49545f4b5f4c5f50455f5345545550' generates 152 bits.
+%Warning-WIDTHTRUNC: accelerator.v:200:68: Operator ASSIGN expects 128 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5345545550' generates 168 bits.
                                          : ... note: In instance 'testbench_top.u_accelerator'
-  151 |             S_INIT_K_LOOP_PE_SETUP:            fsm_state_to_string = "S_INIT_K_L_PE_SETUP";  
+  200 |             S_STORE_C_TILE_SA_READ_SETUP:      fsm_state_to_string = "S_STORE_C_SA_RD_SETUP";
       |                                                                    ^
                      ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.037
                      ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
-%Warning-WIDTHTRUNC: accelerator.v:153:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f4c4f41445f415f52414d5f524551' generates 128 bits.
+%Warning-WIDTHTRUNC: accelerator.v:201:68: Operator ASSIGN expects 128 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5741495456' generates 168 bits.
                                          : ... note: In instance 'testbench_top.u_accelerator'
-  153 |             S_LOAD_A_TILE_RAM_READ_REQ:        fsm_state_to_string = "S_LOAD_A_RAM_REQ";
+  201 |             S_STORE_C_TILE_SA_READ_WAIT_VALID: fsm_state_to_string = "S_STORE_C_SA_RD_WAITV";
       |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:154:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f415f52414d5f57414954' generates 136 bits.
+%Warning-WIDTHTRUNC: accelerator.v:202:68: Operator ASSIGN expects 128 bits on the Assign RHS, but Assign RHS's CONST '152'h535f53544f52455f435f52435f57525f524551' generates 152 bits.
                                          : ... note: In instance 'testbench_top.u_accelerator'
-  154 |             S_LOAD_A_TILE_RAM_READ_WAIT:       fsm_state_to_string = "S_LOAD_A_RAM_WAIT";
+  202 |             S_STORE_C_TILE_RC_WRITE_REQ:       fsm_state_to_string = "S_STORE_C_RC_WR_REQ";
       |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:155:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '144'h535f4c4f41445f415f52414d5f5741495432' generates 144 bits.
+%Warning-WIDTHTRUNC: accelerator.v:203:68: Operator ASSIGN expects 128 bits on the Assign RHS, but Assign RHS's CONST '160'h535f53544f52455f435f52435f57525f57414954' generates 160 bits.
                                          : ... note: In instance 'testbench_top.u_accelerator'
-  155 |             S_LOAD_A_TILE_RAM_READ_WAIT2:      fsm_state_to_string = "S_LOAD_A_RAM_WAIT2";
+  203 |             S_STORE_C_TILE_RC_WRITE_WAIT_READY:fsm_state_to_string = "S_STORE_C_RC_WR_WAIT";
       |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:156:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f415f434f4e565f535452' generates 136 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  156 |             S_LOAD_A_TILE_CONVERT_STORE:       fsm_state_to_string = "S_LOAD_A_CONV_STR";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:158:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f4c4f41445f425f52414d5f524551' generates 128 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  158 |             S_LOAD_B_TILE_RAM_READ_REQ:        fsm_state_to_string = "S_LOAD_B_RAM_REQ";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:159:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f425f52414d5f57414954' generates 136 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  159 |             S_LOAD_B_TILE_RAM_READ_WAIT:       fsm_state_to_string = "S_LOAD_B_RAM_WAIT";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:160:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '144'h535f4c4f41445f425f52414d5f5741495432' generates 144 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  160 |             S_LOAD_B_TILE_RAM_READ_WAIT2:      fsm_state_to_string = "S_LOAD_B_RAM_WAIT2";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:161:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f425f434f4e565f535452' generates 136 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  161 |             S_LOAD_B_TILE_CONVERT_STORE:       fsm_state_to_string = "S_LOAD_B_CONV_STR";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:167:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5345545550' generates 168 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  167 |             S_STORE_C_TILE_SA_READ_SETUP:      fsm_state_to_string = "S_STORE_C_SA_RD_SETUP";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:168:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5741495456' generates 168 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  168 |             S_STORE_C_TILE_SA_READ_WAIT_VALID: fsm_state_to_string = "S_STORE_C_SA_RD_WAITV";
-      |                                                                    ^
-%Warning-WIDTHTRUNC: accelerator.v:169:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f53544f52455f435f52414d5f5752' generates 128 bits.
-                                         : ... note: In instance 'testbench_top.u_accelerator'
-  169 |             S_STORE_C_TILE_RAM_WRITE:          fsm_state_to_string = "S_STORE_C_RAM_WR";
-      |                                                                    ^
-%Warning-WIDTHEXPAND: accelerator.v:482:100: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
+%Warning-WIDTHEXPAND: accelerator.v:438:106: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  482 |                 current_ram_addr_next = base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE;
-      |                                                                                                    ^
-%Warning-WIDTHEXPAND: accelerator.v:493:105: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
+  438 |                 current_fsm_logic_addr_next = base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE;
+      |                                                                                                          ^
+%Warning-WIDTHEXPAND: accelerator.v:447:111: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  493 |                     current_ram_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
-      |                                                                                                         ^
-%Warning-WIDTHEXPAND: accelerator.v:493:142: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+  447 |                     current_fsm_logic_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                               ^
+%Warning-WIDTHEXPAND: accelerator.v:447:148: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 7 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  493 |                     current_ram_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
-      |                                                                                                                                              ^
-%Warning-WIDTHEXPAND: accelerator.v:490:54: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+  447 |                     current_fsm_logic_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                                                                    ^
+%Warning-WIDTHEXPAND: accelerator.v:477:104: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  477 |                 current_fsm_logic_addr_next = base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE;
+      |                                                                                                        ^
+%Warning-WIDTHEXPAND: accelerator.v:486:109: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  486 |                     current_fsm_logic_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                             ^
+%Warning-WIDTHEXPAND: accelerator.v:486:148: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 7 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  486 |                     current_fsm_logic_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                                                                    ^
+%Warning-WIDTHEXPAND: accelerator.v:515:53: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'k_idx_reg' generates 3 bits.
                                           : ... note: In instance 'testbench_top.u_accelerator'
-  490 |                 end else if (ram_tile_word_count_reg < WORDS_PER_SINT8_TILE) begin
-      |                                                      ^
-%Warning-WIDTHEXPAND: accelerator.v:520:50: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_next' generates 6 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  520 |                     if (ram_tile_word_count_next == WORDS_PER_SINT8_TILE) begin
-      |                                                  ^~
-%Warning-WIDTHEXPAND: accelerator.v:531:98: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  531 |                 current_ram_addr_next = base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE;
-      |                                                                                                  ^
-%Warning-WIDTHEXPAND: accelerator.v:542:103: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+  515 |             S_K_LOOP_INCREMENT: begin if (k_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin c_store_row_read_idx_next = '0; ram_tile_word_count_next = '0; sa_activate_comp_next = 1'b0; next_state_reg = S_STORE_C_TILE_ADDR; end else begin k_idx_next = k_idx_reg + 1; next_state_reg = S_INIT_K_LOOP_PE_SETUP; end end
+      |                                                     ^~
+%Warning-WIDTHEXPAND: accelerator.v:516:159: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  542 |                     current_ram_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
-      |                                                                                                       ^
-%Warning-WIDTHEXPAND: accelerator.v:542:142: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+  516 |             S_STORE_C_TILE_ADDR: begin sa_activate_comp_next = 1'b0; current_fsm_logic_addr_next = base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT32_TILE; next_state_reg = S_STORE_C_TILE_SA_READ_SETUP; end
+      |                                                                                                                                                               ^
+%Warning-WIDTHEXPAND: accelerator.v:524:107: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  542 |                     current_ram_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
-      |                                                                                                                                              ^
-%Warning-WIDTHEXPAND: accelerator.v:539:54: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  539 |                 end else if (ram_tile_word_count_reg < WORDS_PER_SINT8_TILE) begin
-      |                                                      ^
-%Warning-WIDTHEXPAND: accelerator.v:569:50: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_next' generates 6 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  569 |                     if (ram_tile_word_count_next == WORDS_PER_SINT8_TILE) begin
-      |                                                  ^~
-%Warning-WIDTHEXPAND: accelerator.v:602:31: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'k_idx_reg' generates 3 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  602 |                 if (k_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin  
-      |                               ^~
-%Warning-WIDTHEXPAND: accelerator.v:614:100: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+  524 |                 current_fsm_logic_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT32_TILE) + ram_tile_word_count_reg;
+      |                                                                                                           ^
+%Warning-WIDTHEXPAND: accelerator.v:524:147: Operator ADD expects 32 or 18 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 7 bits.
                                            : ... note: In instance 'testbench_top.u_accelerator'
-  614 |                 current_ram_addr_next = base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE;
-      |                                                                                                    ^
-%Warning-WIDTHEXPAND: accelerator.v:657:101: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  657 |                 current_ram_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE) + ram_tile_word_count_reg; 
-      |                                                                                                     ^
-%Warning-WIDTHEXPAND: accelerator.v:657:139: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  657 |                 current_ram_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE) + ram_tile_word_count_reg; 
-      |                                                                                                                                           ^
-%Warning-WIDTHEXPAND: accelerator.v:671:58: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'c_store_word_in_row_idx_reg' generates 2 bits.
+  524 |                 current_fsm_logic_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT32_TILE) + ram_tile_word_count_reg;
+      |                                                                                                                                                   ^
+%Warning-WIDTHEXPAND: accelerator.v:534:58: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'c_store_word_in_row_idx_reg' generates 3 bits.
                                           : ... note: In instance 'testbench_top.u_accelerator'
-  671 |                 end else if (c_store_word_in_row_idx_reg == NUM_PACKED_WORDS_PER_SA_ROW - 1) begin 
+  534 |                     else if (c_store_word_in_row_idx_reg == NUM_PACKED_WORDS_PER_SA_ROW_C - 1) begin c_store_row_read_idx_next = c_store_row_read_idx_reg + 1; next_state_reg = S_STORE_C_TILE_SA_READ_SETUP; end
       |                                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:684:37: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'r_c_idx_reg' generates 3 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  684 |                     if (r_c_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin
-      |                                     ^~
-%Warning-WIDTHEXPAND: accelerator.v:682:33: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'c_c_idx_reg' generates 3 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  682 |                 if (c_c_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin
-      |                                 ^~
-%Warning-WIDTHEXPAND: accelerator.v:720:70: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'sa_feed_cycle_idx_reg' generates 5 bits.
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-  720 |                     a_tile_buffer_bf16[i_extract * TILE_DIM_SYSTOLIC + sa_feed_cycle_idx_reg];
-      |                                                                      ^
-%Warning-WIDTHEXPAND: testbench_top.v:128:76: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'BASE_ADDR_C_TB' generates 17 bits.
+%Warning-WIDTHEXPAND: accelerator.v:541:196: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'r_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+%Warning-WIDTHEXPAND: accelerator.v:541:117: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+%Warning-WIDTHEXPAND: accelerator.v:551:222: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'sa_feed_cycle_idx_reg' generates 5 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  551 |             for (i_extract = 0; i_extract < TILE_DIM_SYSTOLIC; i_extract = i_extract + 1) if (TILE_AREA > 0) current_a_column_for_feed[(i_extract*SINT8_BITS)+:SINT8_BITS] = a_tile_buffer_sint8[i_extract*TILE_DIM_SYSTOLIC + sa_feed_cycle_idx_reg];
+      |                                                                                                                                                                                                                              ^
+%Warning-WIDTHEXPAND: testbench_top.v:112:132: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'BASE_ADDR_C_LOGIC_TB' generates 18 bits.
+                                             : ... note: In instance 'testbench_top'
+  112 |                     $fdisplay(output_file_desc, "%h", testbench_top.u_accelerator.u_ram_controller.pseudo_ram[BASE_ADDR_C_LOGIC_TB + i_loop_tb]);
+      |                                                                                                                                    ^
+%Warning-WIDTHEXPAND: testbench_top.v:111:43: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'BASE_ADDR_C_LOGIC_TB' generates 18 bits.
                                             : ... note: In instance 'testbench_top'
-  128 |                 $fdisplay(output_file_desc, "%h", u_ram.mem[BASE_ADDR_C_TB + i_loop]);
-      |                                                                            ^
-%Warning-UNUSEDPARAM: testbench_top.v:16:16: Parameter is not used: 'SINT8_PER_RAM_WORD_TB'
+  111 |                 if ((BASE_ADDR_C_LOGIC_TB + i_loop_tb) < (1<<LOGIC_ADDR_WIDTH_TB)) begin
+      |                                           ^
+%Warning-UNUSEDPARAM: testbench_top.v:17:16: Parameter is not used: 'SINT8_PER_RAM_WORD_TB'
                                            : ... note: In instance 'testbench_top'
-   16 |     localparam SINT8_PER_RAM_WORD_TB = RAM_DATA_WIDTH_TB / SINT8_BITS_TB;
+   17 |     localparam SINT8_PER_RAM_WORD_TB = (SINT8_BITS_TB == 0) ? 0 : RAM_DATA_WIDTH_TB / SINT8_BITS_TB;
       |                ^~~~~~~~~~~~~~~~~~~~~
                       ... For warning description see https://verilator.org/warn/UNUSEDPARAM?v=5.037
                       ... Use "/* verilator lint_off UNUSEDPARAM */" and lint_on around source to disable this message.
-%Warning-UNUSEDSIGNAL: accelerator.v:69:34: Signal is not used: 'sa_array_a_out_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   69 |     wire [SAFE_SA_BUS_WIDTH-1:0] sa_array_a_out_wire;
-      |                                  ^~~~~~~~~~~~~~~~~~~
-                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.037
-                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
-%Warning-UNUSEDSIGNAL: accelerator.v:70:34: Signal is not used: 'sa_array_b_out_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   70 |     wire [SAFE_SA_BUS_WIDTH-1:0] sa_array_b_out_wire;
-      |                                  ^~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:74:10: Signal is not used: 'sa_array_a_data_valid_out_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   74 |     wire sa_array_a_data_valid_out_wire;
-      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:75:10: Signal is not used: 'sa_array_b_data_valid_out_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   75 |     wire sa_array_b_data_valid_out_wire;
-      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:78:10: Signal is not used: 'sa_tile_had_nan_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   78 |     wire sa_tile_had_nan_wire;
-      |          ^~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:79:10: Signal is not used: 'sa_tile_had_inf_wire'
-                                          : ... note: In instance 'testbench_top.u_accelerator'
-   79 |     wire sa_tile_had_inf_wire;
-      |          ^~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:176:17: Signal is not used: 'prev_start_computation_dbg'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  176 |     reg         prev_start_computation_dbg;
-      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:177:17: Signal is not used: 'prev_current_state_reg_dbg'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  177 |     reg [5:0]   prev_current_state_reg_dbg;
-      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:178:17: Signal is not used: 'prev_sa_tile_all_pes_done_one_pass_wire_dbg'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  178 |     reg         prev_sa_tile_all_pes_done_one_pass_wire_dbg;
-      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:179:17: Signal is not used: 'prev_sa_tile_row_result_valid_wire_dbg'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  179 |     reg         prev_sa_tile_row_result_valid_wire_dbg;
-      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:180:30: Signal is not used: 'prev_ram_read_data_d1_reg_dbg'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  180 |     reg [RAM_DATA_WIDTH-1:0] prev_ram_read_data_d1_reg_dbg;
-      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:233:13: Signal is not driven, nor used: 'r_disp_a_gen'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  233 |     integer r_disp_a_gen, c_disp_a_gen;
-      |             ^~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:233:27: Signal is not driven, nor used: 'c_disp_a_gen'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  233 |     integer r_disp_a_gen, c_disp_a_gen;
-      |                           ^~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:234:13: Signal is not driven, nor used: 'r_disp_a'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  234 |     integer r_disp_a, r_disp_b;
-      |             ^~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:234:23: Signal is not driven, nor used: 'r_disp_b'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  234 |     integer r_disp_a, r_disp_b;
-      |                       ^~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:235:13: Signal is not driven, nor used: 'r_disp_b_gen'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  235 |     integer r_disp_b_gen, c_disp_b_gen;
-      |             ^~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:235:27: Signal is not driven, nor used: 'c_disp_b_gen'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  235 |     integer r_disp_b_gen, c_disp_b_gen;
-      |                           ^~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:236:13: Signal is not driven, nor used: 'conv_idx_a'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  236 |     integer conv_idx_a, conv_idx_b;
-      |             ^~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:236:25: Signal is not driven, nor used: 'conv_idx_b'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  236 |     integer conv_idx_a, conv_idx_b;
-      |                         ^~~~~~~~~~
-%Warning-UNUSEDSIGNAL: accelerator.v:237:13: Signal is not driven, nor used: 'r_debug_print'
-                                           : ... note: In instance 'testbench_top.u_accelerator'
-  237 |     integer r_debug_print;
-      |             ^~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:26:16: Signal is not used: 'accelerator_is_computing'
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   26 |     input wire accelerator_is_computing,
-      |                ^~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:66:9: Signal is not used: 'prev_pe00_done_flag_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   66 |     reg prev_pe00_done_flag_dbg;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:67:9: Signal is not used: 'prev_pe01_done_flag_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   67 |     reg prev_pe01_done_flag_dbg;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:68:9: Signal is not used: 'prev_pe10_done_flag_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   68 |     reg prev_pe10_done_flag_dbg;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:69:9: Signal is not used: 'prev_peLL_done_flag_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   69 |     reg prev_peLL_done_flag_dbg; 
-      |         ^~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:70:9: Signal is not used: 'prev_all_done_reduction_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   70 |     reg prev_all_done_reduction_dbg;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:71:9: Signal is not used: 'prev_start_new_systolic_pass_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   71 |     reg prev_start_new_systolic_pass_dbg;  
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/systolic_array.v:72:9: Signal is not used: 'prev_activate_pe_computation_dbg'
-                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
-   72 |     reg prev_activate_pe_computation_dbg;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDPARAM: src/pe.v:6:23: Parameter is not used: 'PE_ROW_ID'
-                                   : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-    6 |     parameter integer PE_ROW_ID = -1,
+%Warning-UNUSEDPARAM: testbench_top.v:18:16: Parameter is not used: 'SINT32_PER_RAM_WORD_TB'
+                                           : ... note: In instance 'testbench_top'
+   18 |     localparam SINT32_PER_RAM_WORD_TB = (PE_ACCUM_BITS_TB == 0) ? 0 : RAM_DATA_WIDTH_TB / PE_ACCUM_BITS_TB;
+      |                ^~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: pe.v:8:23: Parameter is not used: 'PE_ROW_ID'
+                               : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+    8 |     parameter integer PE_ROW_ID = -1,
       |                       ^~~~~~~~~
-%Warning-UNUSEDPARAM: src/pe.v:7:23: Parameter is not used: 'PE_COL_ID'
-                                   : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-    7 |     parameter integer PE_COL_ID = -1
+%Warning-UNUSEDPARAM: pe.v:9:23: Parameter is not used: 'PE_COL_ID'
+                               : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+    9 |     parameter integer PE_COL_ID = -1
       |                       ^~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/pe.v:41:9: Signal is not used: 'acc_sign_if_inf_reg'
-                                    : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-   41 |     reg acc_sign_if_inf_reg;
-      |         ^~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/pe.v:54:27: Signal is not used: 'mul_output_is_nan'
-                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-   54 |     wire                  mul_output_is_nan;
-      |                           ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/pe.v:55:27: Signal is not used: 'mul_output_is_inf'
-                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-   55 |     wire                  mul_output_is_inf;
-      |                           ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/pe.v:63:10: Signal is not used: 'k_is_0_related_pass_for_strobe'
-                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
-   63 |     wire k_is_0_related_pass_for_strobe;
-      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:50:24: Bits of signal are not used: 'exp_sum_biased_prenorm_s12'[11:10]
-                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
-   50 |     wire signed [11:0] exp_sum_biased_prenorm_s12;
-      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:58:17: Bits of signal are not used: 'mant_norm_shifted'[15,6:0]
-                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
-   58 |     wire [15:0] mant_norm_shifted = needs_norm_shift ? (mant_prod >> 1) : mant_prod;
-      |                 ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:60:24: Bits of signal are not used: 'final_exp_biased_calc_intermediate_s11'[10]
-                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
-   60 |     wire signed [10:0] final_exp_biased_calc_intermediate_s11; 
-      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: src/bfloat16_adder.v:79:17: Bits of signal are not used: 'mant_sub_shifted_norm_w'[11:10,2:0]
-                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
-   79 |     wire [11:0] mant_sub_shifted_norm_w = mant_sum_abs_val_w << lead_zeros_count_val_w;
-      |                 ^~~~~~~~~~~~~~~~~~~~~~~
-%Warning-BLKSEQ: accelerator.v:297:36: Blocking assignment '=' in sequential logic process
+%Warning-BLKSEQ: accelerator.v:263:36: Blocking assignment '=' in sequential logic process
                                      : ... Suggest using delayed assignment '<='
-  297 |                 base_idx_in_buffer = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
+  263 |                 base_idx_in_buffer = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
       |                                    ^
                  ... For warning description see https://verilator.org/warn/BLKSEQ?v=5.037
                  ... Use "/* verilator lint_off BLKSEQ */" and lint_on around source to disable this message.
-%Warning-BLKSEQ: accelerator.v:326:38: Blocking assignment '=' in sequential logic process
+%Warning-BLKSEQ: accelerator.v:274:38: Blocking assignment '=' in sequential logic process
                                      : ... Suggest using delayed assignment '<='
-  326 |                 base_idx_in_buffer_b = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
+  274 |                 base_idx_in_buffer_b = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
       |                                      ^
-%Warning-BLKSEQ: mem.v:34:28: Blocking assignment '=' in sequential logic process
-                            : ... Suggest using delayed assignment '<='
-   34 |         address_clk_sample = address;
-      |                            ^
 - V e r i l a t i o n   R e p o r t: Verilator 5.037 devel rev v5.036-140-g47f5a6a52
-- Verilator: Built from 0.528 MB sources in 9 modules, into 67.566 MB in 55 C++ files needing 0.001 MB
-- Verilator: Walltime 6.120 s (elab=0.076, cvt=5.343, bld=0.000); cpu 6.799 s on 1 threads; alloced 358.730 MB
+- Verilator: Built from 0.260 MB sources in 6 modules, into 7.155 MB in 12 C++ files needing 0.000 MB
+- Verilator: Walltime 1.226 s (elab=0.052, cvt=1.109, bld=0.000); cpu 1.363 s on 1 threads; alloced 91.801 MB
 ### Compiling C++ simulation executable in obj_dir with OpenMP support...
 # 新增：为 C++ 编译器和链接器添加 -fopenmp 标志以启用多线程运行时支持
 make -C obj_dir -f Vtestbench_top.mk \
@@ -376,75 +179,49 @@ make -C obj_dir -f Vtestbench_top.mk \
 	VM_LDFLAGS="-fopenmp" \
 	Vtestbench_top
 make[1]: Entering directory '/home/admin_linux/lab8/obj_dir'
-g++  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -Os  -c -o sim_main.o ../sim_main.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_vcd_c.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_vcd_c.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_timing.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_timing.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_threads.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_threads.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.fast.gch
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top.o Vtestbench_top.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0.o Vtestbench_top___024root__DepSet_h51ad8fb1__0.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0.o Vtestbench_top___024root__DepSet_h7d2e4495__0.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1.o Vtestbench_top___024root__DepSet_h7d2e4495__1.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__2.o Vtestbench_top___024root__DepSet_h7d2e4495__2.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__3.o Vtestbench_top___024root__DepSet_h7d2e4495__3.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__4.o Vtestbench_top___024root__DepSet_h7d2e4495__4.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__5.o Vtestbench_top___024root__DepSet_h7d2e4495__5.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__6.o Vtestbench_top___024root__DepSet_h7d2e4495__6.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__7.o Vtestbench_top___024root__DepSet_h7d2e4495__7.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__8.o Vtestbench_top___024root__DepSet_h7d2e4495__8.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__9.o Vtestbench_top___024root__DepSet_h7d2e4495__9.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__10.o Vtestbench_top___024root__DepSet_h7d2e4495__10.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__11.o Vtestbench_top___024root__DepSet_h7d2e4495__11.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__12.o Vtestbench_top___024root__DepSet_h7d2e4495__12.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__13.o Vtestbench_top___024root__DepSet_h7d2e4495__13.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__14.o Vtestbench_top___024root__DepSet_h7d2e4495__14.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__15.o Vtestbench_top___024root__DepSet_h7d2e4495__15.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__16.o Vtestbench_top___024root__DepSet_h7d2e4495__16.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__17.o Vtestbench_top___024root__DepSet_h7d2e4495__17.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__18.o Vtestbench_top___024root__DepSet_h7d2e4495__18.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__19.o Vtestbench_top___024root__DepSet_h7d2e4495__19.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__0.o Vtestbench_top__Trace__0.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__1.o Vtestbench_top__Trace__1.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__2.o Vtestbench_top__Trace__2.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__3.o Vtestbench_top__Trace__3.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__4.o Vtestbench_top__Trace__4.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__5.o Vtestbench_top__Trace__5.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__6.o Vtestbench_top__Trace__6.cpp
-g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__7.o Vtestbench_top__Trace__7.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.slow.gch
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__ConstPool_0.o Vtestbench_top__ConstPool_0.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__Slow.o Vtestbench_top___024root__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__2__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__2__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__3__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__3__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__4__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__4__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__5__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__5__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__6__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__6__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__7__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__7__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__8__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__8__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__9__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__9__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__10__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__10__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__11__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__11__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Syms.o Vtestbench_top__Syms.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__0__Slow.o Vtestbench_top__Trace__0__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__TraceDecls__0__Slow.o Vtestbench_top__TraceDecls__0__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__1__Slow.o Vtestbench_top__Trace__1__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__2__Slow.o Vtestbench_top__Trace__2__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__3__Slow.o Vtestbench_top__Trace__3__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__4__Slow.o Vtestbench_top__Trace__4__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__5__Slow.o Vtestbench_top__Trace__5__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__6__Slow.o Vtestbench_top__Trace__6__Slow.cpp
-g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__7__Slow.o Vtestbench_top__Trace__7__Slow.cpp
+g++  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -Os  -c -o sim_main.o ../sim_main.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_timing.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_timing.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_threads.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_threads.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.fast.gch
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top.o Vtestbench_top.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0.o Vtestbench_top___024root__DepSet_h51ad8fb1__0.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0.o Vtestbench_top___024root__DepSet_h7d2e4495__0.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1.o Vtestbench_top___024root__DepSet_h7d2e4495__1.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__2.o Vtestbench_top___024root__DepSet_h7d2e4495__2.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__3.o Vtestbench_top___024root__DepSet_h7d2e4495__3.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__4.o Vtestbench_top___024root__DepSet_h7d2e4495__4.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.slow.gch
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__Slow.o Vtestbench_top___024root__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Syms.o Vtestbench_top__Syms.cpp
 echo "" > Vtestbench_top__ALL.verilator_deplist.tmp
-g++    sim_main.o verilated.o verilated_vcd_c.o verilated_timing.o verilated_threads.o Vtestbench_top__ALL.a    -pthread -lpthread -latomic   -o Vtestbench_top
+g++    sim_main.o verilated.o verilated_timing.o verilated_threads.o Vtestbench_top__ALL.a    -pthread -lpthread -latomic   -o Vtestbench_top
 rm Vtestbench_top__ALL.verilator_deplist.tmp
 make[1]: Leaving directory '/home/admin_linux/lab8/obj_dir'
 ### Generating input_mem.csv...
 python3 InputGen.py
-Generating 128x128 specific SINT8 matrices.
+Generating 128x128 SINT8 matrices for testbench.
+
+Matrix A (SINT8 with 35% zeros):
+[[ -25 -110   70 ...    0  114  -23]
+ [ 112    0    0 ...  -44   44  -78]
+ [ -38   49   91 ...  -59  107   62]
+ ...
+ [  51    0   63 ...    0    0   84]
+ [   0    0  -10 ...    0  -35    0]
+ [-122    0  -68 ...   91    0    0]]
+
+Matrix B (SINT8 with 35% zeros):
+[[   0   27  124 ...    0    7    0]
+ [ -64   -5  -43 ...    0 -109    0]
+ [  63    0    0 ...  -64   18    0]
+ ...
+ [ -86    0  -83 ...   48  -64    0]
+ [-122    0    0 ...   72    0  -19]
+ [ 114   -4  -56 ...    0    0   22]]
 
 Writing A matrix tiles to input_mem.csv...
 Finished writing A. Wrote 2048 lines for A.
@@ -454,12 +231,17 @@ Finished writing B. Wrote 2048 lines for B.
 
 Generated input_mem.csv, matrix_a.npy, and matrix_b.npy successfully.
 
-Expected C matrix (float values, showing top-left 4x4 for reference):
-[[   2.    0.    0.    0.]
- [-382.    0.    0.    0.]
- [   2.    0.    0.    0.]
- [-382.    0.    0.    0.]]
+Expected C matrix (SINT32 values):
+[[-18746  15658  38091 ... -32243  -2087 -56809]
+ [ 20785  -7099  14503 ...  -9030    492  70099]
+ [ 46113 -84321 -60405 ... -43044 -40550  35224]
+ ...
+ [-21407  -2817  46503 ... -19609  -3025  21634]
+ [ 14446  72806 -21817 ... -53301 -53114 -14050]
+ [  6451 -20590 -88199 ... -15566  -4244 -62853]]
 ### Running simulation...
 ./obj_dir/Vtestbench_top
-- testbench_top.v:135: Verilog $finish
+[30000 TB] Reset released.
+[2500645000 TB] Test finished.
+- testbench_top.v:124: Verilog $finish
 ### Simulation finished. result_mem.csv should be in the current directory.

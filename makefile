@@ -4,7 +4,7 @@
 # 新增：线程数变量，可以从命令行覆盖 (e.g., make NUM_THREADS=8)
 NUM_THREADS ?= 12
 
-VERILOG_SOURCES = testbench_top.v accelerator.v src/sint8_to_bf16_converter.v src/systolic_array.v src/pe.v src/bfloat16_multiplier.v src/bfloat16_adder.v mem.v
+VERILOG_SOURCES = testbench_top.v accelerator.v systolic_array.v pe.v ram_controller_behavioral.v
 TARGET_NAME = Vtestbench_top
 CPP_WRAPPER = sim_main.cpp
 PYTHON = python3
@@ -17,7 +17,7 @@ all: run
 compile:
 	@echo "### Compiling Verilog with Verilator using $(NUM_THREADS) threads..."
 	# 新增：-O3 优化, --threads $(NUM_THREADS) 开启多线程编译
-	verilator -Wno-fatal -Wall -cc --timing --trace -O3 --threads $(NUM_THREADS) -Isrc $(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
+	verilator -Wno-fatal -Wall -cc --timing -O3 --threads $(NUM_THREADS) -Isrc $(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
 	
 	@echo "### Compiling C++ simulation executable in obj_dir with OpenMP support..."
 	# 新增：为 C++ 编译器和链接器添加 -fopenmp 标志以启用多线程运行时支持

@@ -1,138 +1,122 @@
 import numpy as np
 import os
+import math # For exp
+import random # 导入 random 模块
 
-# --- 全局参数 ---
-MATRIX_DIM = 128
-TILE_DIM = 16 # 保持瓦片维度，因为硬件设计是基于瓦片的
+# --- Testbench 参数 (与 testbench_top.v 匹配) ---
+MATRIX_DIM_TB = 512
+TILE_DIM_TB = 16
+RAM_DATA_WIDTH_TB = 64
+SINT8_BITS_TB = 8
+
 DATA_TYPE_IN = np.int8
 
-# 确保参数匹配 (如果 TILE_DIM 仍然相关于如何写入文件)
-if MATRIX_DIM % TILE_DIM != 0:
-    raise ValueError("MATRIX_DIM must be divisible by TILE_DIM for tiled writing, if still used.")
+if MATRIX_DIM_TB % TILE_DIM_TB != 0:
+    raise ValueError("MATRIX_DIM_TB must be divisible by TILE_DIM_TB.")
 
-TILES_PER_ROW_COL = MATRIX_DIM // TILE_DIM # 如果按瓦片写入，则需要
-SINT8_PER_MEM_WORD = 8
+TILES_PER_ROW_COL_TB = MATRIX_DIM_TB // TILE_DIM_TB
+SINT8_PER_MEM_WORD_TB = RAM_DATA_WIDTH_TB // SINT8_BITS_TB
 
-# --- 辅助函数 ---
+# --- 辅助函数 (number_to_sint8_hex, convert_tile_to_hex_lines_row_major) ---
+# 这部分可以保持不变，因为它处理SINT8和基于SINT8_PER_MEM_WORD_TB的打包。
 def number_to_sint8_hex(number):
-    """将一个整数转换为其8位有符号补码的2字符十六进制表示。"""
     py_int_number = int(number)
-    # Clamp to SINT8 range
     if py_int_number > 127: py_int_number = 127
     elif py_int_number < -128: py_int_number = -128
-
     if py_int_number < 0:
-        # 2's complement for negative numbers
         py_int_number = (1 << 8) + py_int_number
     return f'{py_int_number:02x}'
 
-def convert_matrix_to_tiled_hex_row_major(matrix_to_convert):
-    """
-    将整个矩阵按行主序（非瓦片化，但仍然按SINT8_PER_MEM_WORD分块）转换为十六进制行。
-    这是为了确保数据在 input_mem.csv 中是连续的，与硬件的线性读取方式匹配。
-    """
+def convert_tile_to_hex_lines_row_major(tile_matrix):
     hex_lines = []
-    flat_matrix = matrix_to_convert.flatten() # 将整个矩阵展平
-
-    for i in range(0, len(flat_matrix), SINT8_PER_MEM_WORD):
-        chunk = flat_matrix[i : i + SINT8_PER_MEM_WORD]
-        # RAM通常是小端存储字节，所以数组中靠后的元素在字的低位
+    flat_tile = tile_matrix.flatten()
+    for i in range(0, len(flat_tile), SINT8_PER_MEM_WORD_TB):
+        chunk = flat_tile[i : i + SINT8_PER_MEM_WORD_TB]
+        # 注意：这里假设 SINT8_PER_MEM_WORD_TB 是 8，并且每个字是 64 位。
+        # SINT8_PER_MEM_WORD_TB = RAM_DATA_WIDTH_TB // SINT8_BITS_TB = 64 // 8 = 8
+        # 所以是 8 个 SINT8 组成一个 64 位字。
+        # 'reversed(chunk)' 是为了 LSB (Least Significant Bit) first 的顺序
         hex_word = "".join([number_to_sint8_hex(n) for n in reversed(chunk)])
         hex_lines.append(hex_word)
     return hex_lines
 
 # --- 主程序 ---
 def main():
-    print(f"Generating {MATRIX_DIM}x{MATRIX_DIM} specific SINT8 matrices.")
+    print(f"Generating {MATRIX_DIM_TB}x{MATRIX_DIM_TB} SINT8 matrices for testbench.")
 
-    # --- 1. 生成矩阵 A (规则变化的 SINT8 矩阵) ---
-    matrix_a_orig = np.zeros((MATRIX_DIM, MATRIX_DIM), dtype=DATA_TYPE_IN)
-    current_val = 0
-    for r in range(MATRIX_DIM):
-        for c in range(MATRIX_DIM):
-            matrix_a_orig[r, c] = current_val
-            current_val += 1
-            if current_val > 127: # SINT8 上溢处理
-                current_val = -128
+    # 定义零的比例
+    ZERO_PERCENTAGE = 0.35
+    total_elements = MATRIX_DIM_TB * MATRIX_DIM_TB
+    num_zeros = int(total_elements * ZERO_PERCENTAGE)
 
-    # --- 2. 生成矩阵 B (B[0,0]=1,其余为0) ---
-    matrix_b_orig = np.zeros((MATRIX_DIM, MATRIX_DIM), dtype=DATA_TYPE_IN)
-    matrix_b_orig[0, 0] = 1
-    matrix_b_orig[1, 0] = 2
+    # --- 1. 生成矩阵 A (随机 SINT8, 包含 35% 的 0) ---
+    matrix_a_orig = np.random.randint(-128, 128, size=(MATRIX_DIM_TB, MATRIX_DIM_TB), dtype=DATA_TYPE_IN)
+    # 随机选择 num_zeros 个索引将其设为 0
+    zero_indices_a = np.random.choice(total_elements, num_zeros, replace=False)
+    matrix_a_orig.ravel()[zero_indices_a] = 0 # 使用 ravel() 展平数组并设置元素
+    print("\nMatrix A (SINT8 with 35% zeros):")
+    print(matrix_a_orig)
 
-    # --- 转换为硬件布局 (按行主序写入整个矩阵) ---
-    # 硬件的读取逻辑是按瓦片进行的，但写入input_mem.csv时，
-    # 我们需要确保A的第一个瓦片A[0,0]的数据先写入，然后是A[0,1]的数据，等等。
-    # 这意味着我们需要先将整个A矩阵按瓦片顺序重组，然后再写入。
-    # 或者，更简单的方法是，硬件在读取时自行处理瓦片地址计算，
-    # 我们只需按全局行主序将A和B写入文件。
-    #
-    # 鉴于硬件的 `base_addr_a + (r_c_idx * NUM_TILES + k_idx) * WORDS_PER_TILE`
-    # 这种寻址方式，它期望的是矩阵A的不同瓦片在内存中是连续排列的。
-    # A_tile[r_tile_idx][c_tile_idx]
-    # 内存布局:
-    # A_tile[0][0]
-    # A_tile[0][1]
-    # ...
-    # A_tile[0][TILES_PER_ROW_COL-1]
-    # A_tile[1][0]
-    # ...
+    # --- 2. 生成矩阵 B (随机 SINT8, 包含 35% 的 0) ---
+    matrix_b_orig = np.random.randint(-128, 128, size=(MATRIX_DIM_TB, MATRIX_DIM_TB), dtype=DATA_TYPE_IN)
+    # 随机选择 num_zeros 个索引将其设为 0
+    zero_indices_b = np.random.choice(total_elements, num_zeros, replace=False)
+    matrix_b_orig.ravel()[zero_indices_b] = 0
+    print("\nMatrix B (SINT8 with 35% zeros):")
+    print(matrix_b_orig)
 
     all_hex_lines_a = []
-    for tile_row_idx in range(TILES_PER_ROW_COL):
-        for tile_col_idx in range(TILES_PER_ROW_COL):
-            start_r = tile_row_idx * TILE_DIM
-            end_r = start_r + TILE_DIM
-            start_c = tile_col_idx * TILE_DIM
-            end_c = start_c + TILE_DIM
-            
+    # 由于 MATRIX_DIM_TB == TILE_DIM_TB, TILES_PER_ROW_COL_TB = 1
+    # 循环只会迭代一次
+    for tile_row_global_idx in range(TILES_PER_ROW_COL_TB):
+        for tile_col_global_idx in range(TILES_PER_ROW_COL_TB):
+            start_r = tile_row_global_idx * TILE_DIM_TB
+            end_r = start_r + TILE_DIM_TB
+            start_c = tile_col_global_idx * TILE_DIM_TB
+            end_c = start_c + TILE_DIM_TB
             current_tile_a = matrix_a_orig[start_r:end_r, start_c:end_c]
-            all_hex_lines_a.extend(convert_matrix_to_tiled_hex_row_major(current_tile_a))
+            all_hex_lines_a.extend(convert_tile_to_hex_lines_row_major(current_tile_a))
 
     all_hex_lines_b = []
-    for tile_row_idx in range(TILES_PER_ROW_COL):
-        for tile_col_idx in range(TILES_PER_ROW_COL):
-            start_r = tile_row_idx * TILE_DIM
-            end_r = start_r + TILE_DIM
-            start_c = tile_col_idx * TILE_DIM
-            end_c = start_c + TILE_DIM
-
+    for tile_row_global_idx in range(TILES_PER_ROW_COL_TB):
+        for tile_col_global_idx in range(TILES_PER_ROW_COL_TB):
+            start_r = tile_row_global_idx * TILE_DIM_TB
+            end_r = start_r + TILE_DIM_TB
+            start_c = tile_col_global_idx * TILE_DIM_TB
+            end_c = start_c + TILE_DIM_TB
             current_tile_b = matrix_b_orig[start_r:end_r, start_c:end_c]
-            all_hex_lines_b.extend(convert_matrix_to_tiled_hex_row_major(current_tile_b))
-
+            all_hex_lines_b.extend(convert_tile_to_hex_lines_row_major(current_tile_b))
 
     output_file = "input_mem.csv"
     with open(output_file, "w") as f:
         print(f"\nWriting A matrix tiles to {output_file}...")
-        for line_idx, line in enumerate(all_hex_lines_a):
+        for line in all_hex_lines_a:
             f.write(f"{line}\n")
-            # if line_idx < 5 or line_idx > len(all_hex_lines_a) - 5 : # 打印开头和结尾几行A的数据
-            #     print(f"  A_line {line_idx}: {line}")
         print(f"Finished writing A. Wrote {len(all_hex_lines_a)} lines for A.")
 
         print(f"\nWriting B matrix tiles to {output_file}...")
-        for line_idx, line in enumerate(all_hex_lines_b):
+        for line in all_hex_lines_b:
             f.write(f"{line}\n")
-            # if line_idx < 5 or line_idx > len(all_hex_lines_b) - 5 : # 打印开头和结尾几行B的数据
-            #     print(f"  B_line {line_idx}: {line}")
         print(f"Finished writing B. Wrote {len(all_hex_lines_b)} lines for B.")
 
-
-    # --- 保存原始矩阵以供验证 ---
-    np.save('matrix_a.npy', matrix_a_orig)
-    np.save('matrix_b.npy', matrix_b_orig)
+    np.save('matrix_a.npy', matrix_a_orig) # 保存SINT8
+    np.save('matrix_b.npy', matrix_b_orig) # 保存SINT8
 
     print(f"\nGenerated {output_file}, matrix_a.npy, and matrix_b.npy successfully.")
 
-    # --- (可选) 计算并打印预期的C矩阵 (用于手动粗略检查) ---
-    matrix_a_float = matrix_a_orig.astype(np.float32) # 使用更高精度进行黄金结果计算
-    matrix_b_float = matrix_b_orig.astype(np.float32)
-    expected_c_float = np.dot(matrix_a_float, matrix_b_float)
+    # --- 计算预期的C矩阵 (精确SINT32) ---
+    matrix_a_calc = matrix_a_orig.astype(np.int64) # 使用int64以防中间累加溢出
+    matrix_b_calc = matrix_b_orig.astype(np.int64)
+    expected_c_exact_int64 = np.dot(matrix_a_calc, matrix_b_calc)
+    
+    # 检查SINT32范围，虽然对于16x16 SINT8输入，结果通常不会溢出SINT32
+    if np.any(expected_c_exact_int64 > 2**31 - 1) or np.any(expected_c_exact_int64 < -(2**31)):
+        print("Warning: Expected C matrix elements exceed SINT32 range during calculation!")
+    expected_c_sint32 = expected_c_exact_int64.astype(np.int32) # 硬件累加器是SINT32
+    np.save('matrix_c_expected_sint32.npy', expected_c_sint32)
 
-    print("\nExpected C matrix (float values, showing top-left 4x4 for reference):")
-    # np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True, formatter={'float': '{:8.1f}'.format})
-    print(expected_c_float[:4,:4])
-    # np.set_printoptions(threshold=1000, linewidth=75, suppress=False, formatter=None) # Reset
+    print("\nExpected C matrix (SINT32 values):")
+    print(expected_c_sint32)
 
 if __name__ == "__main__":
     main()

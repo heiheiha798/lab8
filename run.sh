@@ -8,7 +8,7 @@ DEFAULT_MATRIX_DIM=32 # 如果不提供参数，则使用此值
 MATRIX_DIM="${1:-${DEFAULT_MATRIX_DIM}}" # 从第一个命令行参数获取，如果未提供则使用默认值
 
 # 新增：默认线程数
-DEFAULT_NUM_THREADS=12 # 默认使用 12 个线程
+DEFAULT_NUM_THREADS=16 # 默认使用 12 个线程
 NUM_THREADS="${2:-${DEFAULT_NUM_THREADS}}" # 从第二个命令行参数获取线程数
 
 # 新增：设置 OpenMP 环境变量，这会告诉编译后的仿真程序在运行时使用多少线程
