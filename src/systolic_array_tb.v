@@ -307,4 +307,46 @@ module systolic_array_tb; // 模块名与文件名一致 (原为 systolic_array_
         $finish;
     end
 
+`ifdef ENABLE_SA_DEBUG
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            // Optional reset display
+        end else if (activate_pe_computation) begin // 当PE被激活时
+            // 显示一些关键的边界输入 valid 信号
+            $display("SA_DBG_INPUT @%0t: activate_pe_comp=%b | array_data_valid_in=%b (to bnd_regs) | a_valid_bnd[0][0]=%b, b_valid_bnd[0][0]=%b (after skew, to PE(0,0)) | start_new_pass_pulse=%b, clear_all_pulse=%b, cond_clear_level=%b",
+                     $time, activate_pe_computation, array_data_valid_in,
+                     a_valid_wires[0][0], b_valid_wires[0][0], // 实际进入PE阵列左上角的valid
+                     start_new_systolic_pass, // 来自 accelerator 的 s_compute_sa_entry_pulse_reg
+                     clear_all_pe_accumulators, // 来自 accelerator 的 s_compute_sa_entry_pulse_reg
+                     conditionally_clear_pe_sums_level); // 来自 accelerator 的 clear_pe_accum_for_new_cij
+
+            // 可以抽样几个PE的 result_valid 和 done_flag
+            if (SIZE >= 1) begin // 避免空阵列
+                $display("SA_DBG_PE_STATUS @%0t: PE(0,0) result_v=%b, done_flag=%b | PE(%1d,%1d) result_v=%b, done_flag=%b | all_pes_done_reduct=%b",
+                         $time,
+                         pe_result_valid_internal[0][0], pe_done_flags[0][0],
+                         SIZE-1, SIZE-1, pe_result_valid_internal[SIZE-1][SIZE-1], pe_done_flags[SIZE-1][SIZE-1],
+                         all_pes_in_tile_done_reduction);
+            end
+        end
+
+        // 监控 pe_done_flags 的清零
+        if (start_new_systolic_pass) begin
+            $display("SA_DBG_FLAGS_RESET @%0t: start_new_systolic_pass asserted. All pe_done_flags CLEARED.", $time);
+        end
+    end
+
+    // 如果想看pe_done_flags每一拍的状态，可以这样(信息量可能很大):
+    // `ifdef ENABLE_SA_DETAILED_FLAGS
+    // initial begin
+    //     // Optional: Dump all flags if needed, but it's a lot of data
+    //     // for (r_loop = 0; r_loop < SIZE; r_loop = r_loop + 1) begin
+    //     //     for (c_loop = 0; c_loop < SIZE; c_loop = c_loop + 1) begin
+    //     //         $monitor("SA_PE_FLAG_MON @%0t: pe_done_flags[%0d][%0d] = %b", $time, r_loop, c_loop, pe_done_flags[r_loop][c_loop]);
+    //     //     end
+    //     // end
+    // end
+    // `endif
+`endif
+
 endmodule

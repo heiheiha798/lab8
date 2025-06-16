@@ -1,0 +1,3 @@
+iverilog -o tb_converter_test sint8_to_bf16_converter.v tb_sint8_to_bf16_converter.v
+
+vvp tb_converter_test

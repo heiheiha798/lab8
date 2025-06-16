@@ -1,428 +1,465 @@
-VCD info: dumpfile wave.vcd opened for output.
-T=  30.00 ns: --- Sending comp_enb pulse ---
-T=  40.00 ns: Waiting for 'done' signal from accelerator...
-PE_DBG[0][0] @2605.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=32)
-PE_DBG[0][1] @2605.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=32)
-PE_DBG[0][2] @2605.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=32)
-PE_DBG[0][3] @2605.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=32)
-PE_DBG[31][31] @2605.00 ns: CLEAR_ACC. Acc/mul/flags/MAC_count reset. DoneLatch reset. (MAC_TGT=32)
-PE_DBG_ACCUM[0][0] @2635.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/32 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_ACCUM[0][0] @2645.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/32 | a_R=c080(v1) b_R=4000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=c100 add_out(new_acc)=8000
-PE_DBG_ACCUM[0][1] @2645.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/32 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=8000
-PE_DBG_ACCUM[0][2] @2655.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/32 | a_R=c000(v1) b_R=c040(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=40c0 add_out(new_acc)=0000
-PE_DBG_ACCUM[0][1] @2655.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/32 | a_R=c080(v1) b_R=c000(v1) | mul_R(old)=8000(v1) acc_R(old)=8000 | mul_out(new_mulR)=4100 add_out(new_acc)=8000
-PE_DBG_ACCUM[0][0] @2655.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=c100(v1) acc_R(old)=8000 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2665.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/32 | a_R=0000(v1) b_R=c0c0(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2665.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=4100(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][2] @2665.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=40c0(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=40c0
-PE_DBG_ACCUM[0][3] @2665.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/32 | a_R=c000(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=4080 add_out(new_acc)=0000
-PE_DBG_ACCUM[0][3] @2675.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=4080(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=4080
-PE_DBG_ACCUM[0][2] @2675.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=40c0 | mul_out(new_mulR)=0000 add_out(new_acc)=40c0
-PE_DBG_ACCUM[0][1] @2675.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4100 | mul_out(new_mulR)=0000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][0] @2675.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2685.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2685.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/32 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=0000(v1) acc_R(old)=4100 | mul_out(new_mulR)=8000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][2] @2685.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=40c0 | mul_out(new_mulR)=0000 add_out(new_acc)=40c0
-PE_DBG_ACCUM[0][3] @2685.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/32 | a_R=0000(v1) b_R=c120(v1) | mul_R(old)=8000(v1) acc_R(old)=4080 | mul_out(new_mulR)=8000 add_out(new_acc)=4080
-PE_DBG_ACCUM[0][3] @2695.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/32 | a_R=0000(v1) b_R=4110(v1) | mul_R(old)=8000(v1) acc_R(old)=4080 | mul_out(new_mulR)=0000 add_out(new_acc)=4080
-PE_DBG_ACCUM[0][2] @2695.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=40c0 | mul_out(new_mulR)=0000 add_out(new_acc)=40c0
-PE_DBG_ACCUM[0][1] @2695.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4100 | mul_out(new_mulR)=8000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][0] @2695.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2705.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2705.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4100 | mul_out(new_mulR)=8000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][2] @2705.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/32 | a_R=c110(v1) b_R=c080(v1) | mul_R(old)=0000(v1) acc_R(old)=40c0 | mul_out(new_mulR)=4210 add_out(new_acc)=40c0
-PE_DBG_ACCUM[0][3] @2705.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4080 | mul_out(new_mulR)=0000 add_out(new_acc)=4080
-PE_DBG_ACCUM[0][3] @2715.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/32 | a_R=c110(v1) b_R=bf80(v1) | mul_R(old)=0000(v1) acc_R(old)=4080 | mul_out(new_mulR)=4110 add_out(new_acc)=4080
-PE_DBG_ACCUM[0][2] @2715.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=4210(v1) acc_R(old)=40c0 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2715.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/32 | a_R=0000(v1) b_R=4100(v1) | mul_R(old)=8000(v1) acc_R(old)=4100 | mul_out(new_mulR)=0000 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][0] @2715.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/32 | a_R=c0c0(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=4100 | mul_out(new_mulR)=4140 add_out(new_acc)=4100
-PE_DBG_ACCUM[0][2] @2725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2725.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/32 | a_R=c0c0(v1) b_R=c0c0(v1) | mul_R(old)=4110(v1) acc_R(old)=4080 | mul_out(new_mulR)=4210 add_out(new_acc)=4150
-PE_DBG_ACCUM[0][3] @2735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=4210(v1) acc_R(old)=4150 | mul_out(new_mulR)=0000 add_out(new_acc)=4244
-PE_DBG_ACCUM[0][2] @2735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=4140(v1) acc_R(old)=4100 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2735.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/32 | a_R=c0e0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/32 | a_R=c0e0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2745.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/32 | a_R=c0c0(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4244 | mul_out(new_mulR)=8000 add_out(new_acc)=4244
-PE_DBG_ACCUM[0][3] @2755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/32 | a_R=c110(v1) b_R=4100(v1) | mul_R(old)=8000(v1) acc_R(old)=4244 | mul_out(new_mulR)=c290 add_out(new_acc)=4244
-PE_DBG_ACCUM[0][2] @2755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/32 | a_R=c0e0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2755.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/32 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=8000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=0000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2765.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/32 | a_R=c0e0(v1) b_R=0000(v1) | mul_R(old)=c290(v1) acc_R(old)=4244 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/32 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=0000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2775.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/32 | a_R=0000(v1) b_R=4040(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=0000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2785.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/32 | a_R=0000(v1) b_R=c0c0(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=0000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2795.00 ns: En=1 DoneLatch=0| MACsDone(cur)=16, MACsDone(next_calc)=17/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=17, MACsDone(next_calc)=18/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=16, MACsDone(next_calc)=17/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=0000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/32 | a_R=0000(v1) b_R=c080(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2805.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=16, MACsDone(next_calc)=17/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=17, MACsDone(next_calc)=18/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=0000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2815.00 ns: En=1 DoneLatch=0| MACsDone(cur)=18, MACsDone(next_calc)=19/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=0000 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][0] @2825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=19, MACsDone(next_calc)=20/32 | a_R=c080(v1) b_R=40e0(v1) | mul_R(old)=0000(v1) acc_R(old)=c100 | mul_out(new_mulR)=c1e0 add_out(new_acc)=c100
-PE_DBG_ACCUM[0][1] @2825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=18, MACsDone(next_calc)=19/32 | a_R=0000(v1) b_R=bf80(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=17, MACsDone(next_calc)=18/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2825.00 ns: En=1 DoneLatch=0| MACsDone(cur)=16, MACsDone(next_calc)=17/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=17, MACsDone(next_calc)=18/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=18, MACsDone(next_calc)=19/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=8000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=19, MACsDone(next_calc)=20/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=8000 add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][0] @2835.00 ns: En=1 DoneLatch=0| MACsDone(cur)=20, MACsDone(next_calc)=21/32 | a_R=40a0(v1) b_R=c040(v1) | mul_R(old)=c1e0(v1) acc_R(old)=c100 | mul_out(new_mulR)=c170 add_out(new_acc)=c210
-PE_DBG_ACCUM[0][0] @2845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=21, MACsDone(next_calc)=22/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=c170(v1) acc_R(old)=c210 | mul_out(new_mulR)=0000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][1] @2845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=20, MACsDone(next_calc)=21/32 | a_R=40a0(v1) b_R=c0e0(v1) | mul_R(old)=8000(v1) acc_R(old)=41a0 | mul_out(new_mulR)=c20c add_out(new_acc)=41a0
-PE_DBG_ACCUM[0][2] @2845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=19, MACsDone(next_calc)=20/32 | a_R=c080(v1) b_R=c000(v1) | mul_R(old)=8000(v1) acc_R(old)=4228 | mul_out(new_mulR)=4100 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][3] @2845.00 ns: En=1 DoneLatch=0| MACsDone(cur)=18, MACsDone(next_calc)=19/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=19, MACsDone(next_calc)=20/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=20, MACsDone(next_calc)=21/32 | a_R=40a0(v1) b_R=0000(v1) | mul_R(old)=4100(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][1] @2855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=21, MACsDone(next_calc)=22/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=c20c(v1) acc_R(old)=41a0 | mul_out(new_mulR)=0000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][0] @2855.00 ns: En=1 DoneLatch=0| MACsDone(cur)=22, MACsDone(next_calc)=23/32 | a_R=0000(v1) b_R=4080(v1) | mul_R(old)=0000(v1) acc_R(old)=c24c | mul_out(new_mulR)=0000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][0] @2865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=23, MACsDone(next_calc)=24/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c24c | mul_out(new_mulR)=0000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][1] @2865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=22, MACsDone(next_calc)=23/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c170 | mul_out(new_mulR)=0000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][2] @2865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=21, MACsDone(next_calc)=22/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4248 | mul_out(new_mulR)=0000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][3] @2865.00 ns: En=1 DoneLatch=0| MACsDone(cur)=20, MACsDone(next_calc)=21/32 | a_R=40a0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=21, MACsDone(next_calc)=22/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=22, MACsDone(next_calc)=23/32 | a_R=0000(v1) b_R=c120(v1) | mul_R(old)=0000(v1) acc_R(old)=4248 | mul_out(new_mulR)=8000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][1] @2875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=23, MACsDone(next_calc)=24/32 | a_R=0000(v1) b_R=c120(v1) | mul_R(old)=0000(v1) acc_R(old)=c170 | mul_out(new_mulR)=8000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][0] @2875.00 ns: En=1 DoneLatch=0| MACsDone(cur)=24, MACsDone(next_calc)=25/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c24c | mul_out(new_mulR)=8000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][0] @2885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=25, MACsDone(next_calc)=26/32 | a_R=0000(v1) b_R=40a0(v1) | mul_R(old)=8000(v1) acc_R(old)=c24c | mul_out(new_mulR)=0000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][1] @2885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=24, MACsDone(next_calc)=25/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c170 | mul_out(new_mulR)=8000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][2] @2885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=23, MACsDone(next_calc)=24/32 | a_R=0000(v1) b_R=40c0(v1) | mul_R(old)=8000(v1) acc_R(old)=4248 | mul_out(new_mulR)=0000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][3] @2885.00 ns: En=1 DoneLatch=0| MACsDone(cur)=22, MACsDone(next_calc)=23/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2895.00 ns: En=1 DoneLatch=0| MACsDone(cur)=23, MACsDone(next_calc)=24/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2895.00 ns: En=1 DoneLatch=0| MACsDone(cur)=24, MACsDone(next_calc)=25/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4248 | mul_out(new_mulR)=8000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][1] @2895.00 ns: En=1 DoneLatch=0| MACsDone(cur)=25, MACsDone(next_calc)=26/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c170 | mul_out(new_mulR)=0000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][0] @2895.00 ns: En=1 DoneLatch=0| MACsDone(cur)=26, MACsDone(next_calc)=27/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c24c | mul_out(new_mulR)=0000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][0] @2905.00 ns: En=1 DoneLatch=0| MACsDone(cur)=27, MACsDone(next_calc)=28/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=0000(v1) acc_R(old)=c24c | mul_out(new_mulR)=8000 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][1] @2905.00 ns: En=1 DoneLatch=0| MACsDone(cur)=26, MACsDone(next_calc)=27/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c170 | mul_out(new_mulR)=0000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][2] @2905.00 ns: En=1 DoneLatch=0| MACsDone(cur)=25, MACsDone(next_calc)=26/32 | a_R=0000(v1) b_R=c100(v1) | mul_R(old)=8000(v1) acc_R(old)=4248 | mul_out(new_mulR)=8000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][3] @2905.00 ns: En=1 DoneLatch=0| MACsDone(cur)=24, MACsDone(next_calc)=25/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2915.00 ns: En=1 DoneLatch=0| MACsDone(cur)=25, MACsDone(next_calc)=26/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2915.00 ns: En=1 DoneLatch=0| MACsDone(cur)=26, MACsDone(next_calc)=27/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=4248 | mul_out(new_mulR)=0000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][1] @2915.00 ns: En=1 DoneLatch=0| MACsDone(cur)=27, MACsDone(next_calc)=28/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c170 | mul_out(new_mulR)=0000 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][0] @2915.00 ns: En=1 DoneLatch=0| MACsDone(cur)=28, MACsDone(next_calc)=29/32 | a_R=c0a0(v1) b_R=c120(v1) | mul_R(old)=8000(v1) acc_R(old)=c24c | mul_out(new_mulR)=4248 add_out(new_acc)=c24c
-PE_DBG_ACCUM[0][0] @2925.00 ns: En=1 DoneLatch=0| MACsDone(cur)=29, MACsDone(next_calc)=30/32 | a_R=c000(v1) b_R=c0a0(v1) | mul_R(old)=4248(v1) acc_R(old)=c24c | mul_out(new_mulR)=4120 add_out(new_acc)=bf80
-PE_DBG_ACCUM[0][1] @2925.00 ns: En=1 DoneLatch=0| MACsDone(cur)=28, MACsDone(next_calc)=29/32 | a_R=c0a0(v1) b_R=c100(v1) | mul_R(old)=0000(v1) acc_R(old)=c170 | mul_out(new_mulR)=4220 add_out(new_acc)=c170
-PE_DBG_ACCUM[0][2] @2925.00 ns: En=1 DoneLatch=0| MACsDone(cur)=27, MACsDone(next_calc)=28/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4248 | mul_out(new_mulR)=0000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][3] @2925.00 ns: En=1 DoneLatch=0| MACsDone(cur)=26, MACsDone(next_calc)=27/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2935.00 ns: En=1 DoneLatch=0| MACsDone(cur)=27, MACsDone(next_calc)=28/32 | a_R=0000(v1) b_R=c080(v1) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2935.00 ns: En=1 DoneLatch=0| MACsDone(cur)=28, MACsDone(next_calc)=29/32 | a_R=c0a0(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=4248 | mul_out(new_mulR)=8000 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][1] @2935.00 ns: En=1 DoneLatch=0| MACsDone(cur)=29, MACsDone(next_calc)=30/32 | a_R=c000(v1) b_R=c110(v1) | mul_R(old)=4220(v1) acc_R(old)=c170 | mul_out(new_mulR)=4190 add_out(new_acc)=41c8
-PE_DBG_ACCUM[0][0] @2935.00 ns: En=1 DoneLatch=0| MACsDone(cur)=30, MACsDone(next_calc)=31/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=4120(v1) acc_R(old)=bf80 | mul_out(new_mulR)=8000 add_out(new_acc)=4110
-PE_DBG_ACCUM[0][0] @2945.00 ns: En=1 DoneLatch=0| MACsDone(cur)=31, MACsDone(next_calc)=32/32 | a_R=0000(v0) b_R=c000(v0) | mul_R(old)=8000(v1) acc_R(old)=4110 | mul_out(new_mulR)=8000 add_out(new_acc)=4110
-PE_DBG_VALID[0][0] @2945.00 ns: >>> MAC_COUNT_TARGET (32) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x4110 <<<
-PE_DBG_ACCUM[0][1] @2945.00 ns: En=1 DoneLatch=0| MACsDone(cur)=30, MACsDone(next_calc)=31/32 | a_R=0000(v1) b_R=c0c0(v1) | mul_R(old)=4190(v1) acc_R(old)=41c8 | mul_out(new_mulR)=8000 add_out(new_acc)=422c
-PE_DBG_ACCUM[0][2] @2945.00 ns: En=1 DoneLatch=0| MACsDone(cur)=29, MACsDone(next_calc)=30/32 | a_R=c000(v1) b_R=4080(v1) | mul_R(old)=8000(v1) acc_R(old)=4248 | mul_out(new_mulR)=c100 add_out(new_acc)=4248
-PE_DBG_ACCUM[0][3] @2945.00 ns: En=1 DoneLatch=0| MACsDone(cur)=28, MACsDone(next_calc)=29/32 | a_R=c0a0(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2955.00 ns: En=1 DoneLatch=0| MACsDone(cur)=29, MACsDone(next_calc)=30/32 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=8000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][2] @2955.00 ns: En=1 DoneLatch=0| MACsDone(cur)=30, MACsDone(next_calc)=31/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=c100(v1) acc_R(old)=4248 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_ACCUM[0][1] @2955.00 ns: En=1 DoneLatch=0| MACsDone(cur)=31, MACsDone(next_calc)=32/32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(old)=8000(v1) acc_R(old)=422c | mul_out(new_mulR)=8000 add_out(new_acc)=422c
-PE_DBG_VALID[0][1] @2955.00 ns: >>> MAC_COUNT_TARGET (32) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x422c <<<
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @2955.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @2965.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @2965.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_ACCUM[0][2] @2965.00 ns: En=1 DoneLatch=0| MACsDone(cur)=31, MACsDone(next_calc)=32/32 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=4228 | mul_out(new_mulR)=0000 add_out(new_acc)=4228
-PE_DBG_VALID[0][2] @2965.00 ns: >>> MAC_COUNT_TARGET (32) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x4228 <<<
-PE_DBG_ACCUM[0][3] @2965.00 ns: En=1 DoneLatch=0| MACsDone(cur)=30, MACsDone(next_calc)=31/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_ACCUM[0][3] @2975.00 ns: En=1 DoneLatch=0| MACsDone(cur)=31, MACsDone(next_calc)=32/32 | a_R=0000(v0) b_R=0000(v0) | mul_R(old)=0000(v1) acc_R(old)=c1b8 | mul_out(new_mulR)=0000 add_out(new_acc)=c1b8
-PE_DBG_VALID[0][3] @2975.00 ns: >>> MAC_COUNT_TARGET (32) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0xc1b8 <<<
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @2975.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @2975.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @2975.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @2985.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @2985.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @2985.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @2985.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @2995.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @2995.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @2995.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @2995.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3005.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3005.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3005.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3005.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3015.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3015.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3015.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3015.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3025.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3025.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3025.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3025.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3035.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3035.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3035.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3035.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3045.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3045.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3045.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3045.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3055.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3055.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3055.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3055.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3065.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3065.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3065.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3065.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3075.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3075.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3075.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3075.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3085.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3085.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3085.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3085.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3095.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3095.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3095.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3095.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3105.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3105.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3105.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3105.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3115.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3115.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3115.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3115.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3125.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3125.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3125.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3125.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3135.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3135.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3135.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3135.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3145.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3145.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3145.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3145.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3155.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3155.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3155.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3155.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3165.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3165.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3165.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3165.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3175.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3175.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3175.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3175.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3185.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3185.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3185.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3185.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3195.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3195.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3195.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3195.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3205.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3205.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3205.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3205.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3215.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3215.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3215.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3215.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3225.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3225.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3225.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3225.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3235.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3235.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3235.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3235.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3245.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3245.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3245.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3245.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3255.00 ns: En=1 DoneLatch=0| MACsDone(cur)=0, MACsDone(next_calc)=1/32 | a_R=c040(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3255.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3255.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3255.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3255.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3265.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3265.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3265.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3265.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3265.00 ns: En=1 DoneLatch=0| MACsDone(cur)=1, MACsDone(next_calc)=2/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
-PE_DBG_ACCUM[31][31] @3275.00 ns: En=1 DoneLatch=0| MACsDone(cur)=2, MACsDone(next_calc)=3/32 | a_R=4100(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3275.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3275.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3275.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3275.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3285.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3285.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3285.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3285.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3285.00 ns: En=1 DoneLatch=0| MACsDone(cur)=3, MACsDone(next_calc)=4/32 | a_R=0000(v1) b_R=c040(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_ACCUM[31][31] @3295.00 ns: En=1 DoneLatch=0| MACsDone(cur)=4, MACsDone(next_calc)=5/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3295.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3295.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3295.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3295.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3305.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3305.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3305.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3305.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3305.00 ns: En=1 DoneLatch=0| MACsDone(cur)=5, MACsDone(next_calc)=6/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
-PE_DBG_ACCUM[31][31] @3315.00 ns: En=1 DoneLatch=0| MACsDone(cur)=6, MACsDone(next_calc)=7/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=0000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3315.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3315.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3315.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3315.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3325.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3325.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3325.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3325.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3325.00 ns: En=1 DoneLatch=0| MACsDone(cur)=7, MACsDone(next_calc)=8/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_ACCUM[31][31] @3335.00 ns: En=1 DoneLatch=0| MACsDone(cur)=8, MACsDone(next_calc)=9/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3335.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3335.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3335.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3335.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3345.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3345.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3345.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3345.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3345.00 ns: En=1 DoneLatch=0| MACsDone(cur)=9, MACsDone(next_calc)=10/32 | a_R=0000(v1) b_R=c0e0(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_ACCUM[31][31] @3355.00 ns: En=1 DoneLatch=0| MACsDone(cur)=10, MACsDone(next_calc)=11/32 | a_R=c000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=8000 add_out(new_acc)=8000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3355.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3355.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3355.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3355.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3365.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3365.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3365.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3365.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3365.00 ns: En=1 DoneLatch=0| MACsDone(cur)=11, MACsDone(next_calc)=12/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=8000 | mul_out(new_mulR)=0000 add_out(new_acc)=8000
-PE_DBG_ACCUM[31][31] @3375.00 ns: En=1 DoneLatch=0| MACsDone(cur)=12, MACsDone(next_calc)=13/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=8000 | mul_out(new_mulR)=8000 add_out(new_acc)=0000
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3375.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3375.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3375.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3375.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3385.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3385.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3385.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3385.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3385.00 ns: En=1 DoneLatch=0| MACsDone(cur)=13, MACsDone(next_calc)=14/32 | a_R=40c0(v1) b_R=c040(v1) | mul_R(old)=8000(v1) acc_R(old)=0000 | mul_out(new_mulR)=c190 add_out(new_acc)=8000
-PE_DBG_ACCUM[31][31] @3395.00 ns: En=1 DoneLatch=0| MACsDone(cur)=14, MACsDone(next_calc)=15/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=c190(v1) acc_R(old)=8000 | mul_out(new_mulR)=8000 add_out(new_acc)=c190
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3395.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3395.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3395.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3395.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3405.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3405.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3405.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3405.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3405.00 ns: En=1 DoneLatch=0| MACsDone(cur)=15, MACsDone(next_calc)=16/32 | a_R=4040(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c190 | mul_out(new_mulR)=0000 add_out(new_acc)=c190
-PE_DBG_ACCUM[31][31] @3415.00 ns: En=1 DoneLatch=0| MACsDone(cur)=16, MACsDone(next_calc)=17/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c190 | mul_out(new_mulR)=0000 add_out(new_acc)=c190
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3415.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3415.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3415.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3415.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3425.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3425.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3425.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3425.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3425.00 ns: En=1 DoneLatch=0| MACsDone(cur)=17, MACsDone(next_calc)=18/32 | a_R=0000(v1) b_R=c0c0(v1) | mul_R(old)=0000(v1) acc_R(old)=c190 | mul_out(new_mulR)=8000 add_out(new_acc)=c190
-PE_DBG_ACCUM[31][31] @3435.00 ns: En=1 DoneLatch=0| MACsDone(cur)=18, MACsDone(next_calc)=19/32 | a_R=c110(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c190 | mul_out(new_mulR)=8000 add_out(new_acc)=c190
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3435.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3435.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3435.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3435.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3445.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3445.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3445.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3445.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3445.00 ns: En=1 DoneLatch=0| MACsDone(cur)=19, MACsDone(next_calc)=20/32 | a_R=0000(v1) b_R=4000(v1) | mul_R(old)=8000(v1) acc_R(old)=c190 | mul_out(new_mulR)=0000 add_out(new_acc)=c190
-PE_DBG_ACCUM[31][31] @3455.00 ns: En=1 DoneLatch=0| MACsDone(cur)=20, MACsDone(next_calc)=21/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c190 | mul_out(new_mulR)=8000 add_out(new_acc)=c190
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3455.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3455.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3455.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3455.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3465.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3465.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3465.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3465.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3465.00 ns: En=1 DoneLatch=0| MACsDone(cur)=21, MACsDone(next_calc)=22/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c190 | mul_out(new_mulR)=0000 add_out(new_acc)=c190
-PE_DBG_ACCUM[31][31] @3475.00 ns: En=1 DoneLatch=0| MACsDone(cur)=22, MACsDone(next_calc)=23/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c190 | mul_out(new_mulR)=0000 add_out(new_acc)=c190
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3475.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3475.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3475.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3475.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3485.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3485.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3485.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3485.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3485.00 ns: En=1 DoneLatch=0| MACsDone(cur)=23, MACsDone(next_calc)=24/32 | a_R=c100(v1) b_R=4080(v1) | mul_R(old)=0000(v1) acc_R(old)=c190 | mul_out(new_mulR)=c200 add_out(new_acc)=c190
-PE_DBG_ACCUM[31][31] @3495.00 ns: En=1 DoneLatch=0| MACsDone(cur)=24, MACsDone(next_calc)=25/32 | a_R=c080(v1) b_R=0000(v1) | mul_R(old)=c200(v1) acc_R(old)=c190 | mul_out(new_mulR)=8000 add_out(new_acc)=c248
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3495.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3495.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3495.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3495.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3505.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3505.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3505.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3505.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3505.00 ns: En=1 DoneLatch=0| MACsDone(cur)=25, MACsDone(next_calc)=26/32 | a_R=0000(v1) b_R=c000(v1) | mul_R(old)=8000(v1) acc_R(old)=c248 | mul_out(new_mulR)=8000 add_out(new_acc)=c248
-PE_DBG_ACCUM[31][31] @3515.00 ns: En=1 DoneLatch=0| MACsDone(cur)=26, MACsDone(next_calc)=27/32 | a_R=4080(v1) b_R=0000(v1) | mul_R(old)=8000(v1) acc_R(old)=c248 | mul_out(new_mulR)=0000 add_out(new_acc)=c248
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3515.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3515.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3515.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3515.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3525.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3525.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3525.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3525.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3525.00 ns: En=1 DoneLatch=0| MACsDone(cur)=27, MACsDone(next_calc)=28/32 | a_R=0000(v1) b_R=0000(v1) | mul_R(old)=0000(v1) acc_R(old)=c248 | mul_out(new_mulR)=0000 add_out(new_acc)=c248
-PE_DBG_ACCUM[31][31] @3535.00 ns: En=1 DoneLatch=0| MACsDone(cur)=28, MACsDone(next_calc)=29/32 | a_R=c110(v1) b_R=c0e0(v1) | mul_R(old)=0000(v1) acc_R(old)=c248 | mul_out(new_mulR)=427c add_out(new_acc)=c248
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3535.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3535.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3535.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3535.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3545.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3545.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3545.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3545.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3545.00 ns: En=1 DoneLatch=0| MACsDone(cur)=29, MACsDone(next_calc)=30/32 | a_R=3f80(v1) b_R=c080(v1) | mul_R(old)=427c(v1) acc_R(old)=c248 | mul_out(new_mulR)=c080 add_out(new_acc)=4150
-PE_DBG_ACCUM[31][31] @3555.00 ns: En=1 DoneLatch=0| MACsDone(cur)=30, MACsDone(next_calc)=31/32 | a_R=0000(v1) b_R=4110(v1) | mul_R(old)=c080(v1) acc_R(old)=4150 | mul_out(new_mulR)=0000 add_out(new_acc)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3555.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3555.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3555.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3555.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3565.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3565.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3565.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3565.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_ACCUM[31][31] @3565.00 ns: En=1 DoneLatch=0| MACsDone(cur)=31, MACsDone(next_calc)=32/32 | a_R=0000(v0) b_R=4110(v0) | mul_R(old)=0000(v1) acc_R(old)=4110 | mul_out(new_mulR)=0000 add_out(new_acc)=4110
-PE_DBG_VALID[31][31] @3565.00 ns: >>> MAC_COUNT_TARGET (32) Reached. DoneLatch_SET. AccVal NOW FROZEN at 0x4110 <<<
-PE_DBG_PAUSED_ACC_FROZEN[31][31] @3575.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=0000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3575.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3575.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3575.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3575.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][0] @3585.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=8000 add_out(hypo)=4110
-PE_DBG_PAUSED_ACC_FROZEN[0][1] @3585.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=c0c0(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x422c | mul_out(new_mulR)=8000 add_out(hypo)=422c
-PE_DBG_PAUSED_ACC_FROZEN[0][2] @3585.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4228 | mul_out(new_mulR)=0000 add_out(hypo)=4228
-PE_DBG_PAUSED_ACC_FROZEN[0][3] @3585.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=0000(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0xc1b8 | mul_out(new_mulR)=0000 add_out(hypo)=c1b8
-PE_DBG_PAUSED_ACC_FROZEN[31][31] @3585.00 ns: DoneLatch=1| MACsDone=32 | a_R=0000(v0) b_R=4110(v0) | mul_R(FROZEN_INPUT)=0000(v0) acc_R(FROZEN)=0x4110 | mul_out(new_mulR)=0000 add_out(hypo)=4110
-T=6465.00 ns: Accelerator 'done' signal received. Computation complete.
-T=6485.00 ns: Writing accelerator results to result_mem.csv ...
-T=6485.00 ns: Results written. Simulation finished.
+### Compiling Verilog with Verilator using 16 threads...
+# 新增：-O3 优化, --threads 16 开启多线程编译
+verilator -Wno-fatal -Wall -cc --timing --trace -O3 --threads 16 -Isrc testbench_top.v accelerator.v src/sint8_to_bf16_converter.v src/systolic_array.v src/pe.v src/bfloat16_multiplier.v src/bfloat16_adder.v mem.v --exe sim_main.cpp
+%Warning-EOFNEWLINE: accelerator.v:752:10: Missing newline at end of file (POSIX 3.206).
+                                         : ... Suggest add newline.
+  752 | endmodule
+      |          ^
+                     ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.037
+                     ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
+%Warning-EOFNEWLINE: src/sint8_to_bf16_converter.v:41:10: Missing newline at end of file (POSIX 3.206).
+                                                        : ... Suggest add newline.
+   41 | endmodule
+      |          ^
+%Warning-EOFNEWLINE: src/systolic_array.v:398:10: Missing newline at end of file (POSIX 3.206).
+                                                : ... Suggest add newline.
+  398 | endmodule
+      |          ^
+%Warning-EOFNEWLINE: src/pe.v:226:10: Missing newline at end of file (POSIX 3.206).
+                                    : ... Suggest add newline.
+  226 | endmodule
+      |          ^
+%Warning-EOFNEWLINE: src/bfloat16_multiplier.v:110:10: Missing newline at end of file (POSIX 3.206).
+                                                     : ... Suggest add newline.
+  110 | endmodule
+      |          ^
+%Warning-EOFNEWLINE: src/bfloat16_adder.v:175:10: Missing newline at end of file (POSIX 3.206).
+                                                : ... Suggest add newline.
+  175 | endmodule
+      |          ^
+%Warning-EOFNEWLINE: mem.v:67:10: Missing newline at end of file (POSIX 3.206).
+                                : ... Suggest add newline.
+   67 | endmodule
+      |          ^
+%Warning-PINCONNECTEMPTY: src/pe.v:73:10: Instance pin connected by name with empty reference: 'is_zero'
+   73 |         .is_zero ()
+      |          ^~~~~~~
+                          ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.037
+                          ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
+%Warning-PINCONNECTEMPTY: src/pe.v:82:10: Instance pin connected by name with empty reference: 'is_zero'
+   82 |         .is_zero ()
+      |          ^~~~~~~
+%Warning-DECLFILENAME: mem.v:6:8: Filename 'mem' does not match MODULE name: 'ram'
+    6 | module ram #
+      |        ^~~
+                       ... For warning description see https://verilator.org/warn/DECLFILENAME?v=5.037
+                       ... Use "/* verilator lint_off DECLFILENAME */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: src/bfloat16_adder.v:106:64: Operator SUB expects 8 bits on the RHS, but RHS's VARREF 'lead_zeros_count_val_w' generates 4 bits.
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
+  106 |                     res_exp_biased_calc_reg = exp_large_biased - lead_zeros_count_val_w;
+      |                                                                ^
+                      ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.037
+                      ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: src/bfloat16_adder.v:101:47: Operator LTE expects 8 bits on the RHS, but RHS's VARREF 'lead_zeros_count_val_w' generates 4 bits.
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
+  101 |                 end else if (exp_large_biased <= lead_zeros_count_val_w) begin 
+      |                                               ^~
+%Warning-WIDTHEXPAND: src/systolic_array.v:203:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+  203 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
+      |                                                             ^
+%Warning-WIDTHEXPAND: src/systolic_array.v:216:61: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'select_output_row_idx' generates 4 bits.
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+  216 |         if (enable_tile_row_output && select_output_row_idx < SIZE) begin
+      |                                                             ^
+%Warning-WIDTHEXPAND: src/sint8_to_bf16_converter.v:28:76: Operator ADD expects 32 or 8 bits on the LHS, but LHS's VARREF 'msb_pos' generates 3 bits.
+                                                         : ... note: In instance 'testbench_top.u_accelerator.conv_gen[7].u_sint8_to_bf16'
+   28 |     assign bf16_exp_biased = (abs_val_unsigned == 7'b0) ? 8'h00 : (msb_pos + 127);
+      |                                                                            ^
+%Warning-WIDTHTRUNC: accelerator.v:151:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '152'h535f494e49545f4b5f4c5f50455f5345545550' generates 152 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  151 |             S_INIT_K_LOOP_PE_SETUP:            fsm_state_to_string = "S_INIT_K_L_PE_SETUP";  
+      |                                                                    ^
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.037
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHTRUNC: accelerator.v:153:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f4c4f41445f415f52414d5f524551' generates 128 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  153 |             S_LOAD_A_TILE_RAM_READ_REQ:        fsm_state_to_string = "S_LOAD_A_RAM_REQ";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:154:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f415f52414d5f57414954' generates 136 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  154 |             S_LOAD_A_TILE_RAM_READ_WAIT:       fsm_state_to_string = "S_LOAD_A_RAM_WAIT";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:155:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '144'h535f4c4f41445f415f52414d5f5741495432' generates 144 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  155 |             S_LOAD_A_TILE_RAM_READ_WAIT2:      fsm_state_to_string = "S_LOAD_A_RAM_WAIT2";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:156:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f415f434f4e565f535452' generates 136 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  156 |             S_LOAD_A_TILE_CONVERT_STORE:       fsm_state_to_string = "S_LOAD_A_CONV_STR";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:158:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f4c4f41445f425f52414d5f524551' generates 128 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  158 |             S_LOAD_B_TILE_RAM_READ_REQ:        fsm_state_to_string = "S_LOAD_B_RAM_REQ";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:159:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f425f52414d5f57414954' generates 136 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  159 |             S_LOAD_B_TILE_RAM_READ_WAIT:       fsm_state_to_string = "S_LOAD_B_RAM_WAIT";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:160:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '144'h535f4c4f41445f425f52414d5f5741495432' generates 144 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  160 |             S_LOAD_B_TILE_RAM_READ_WAIT2:      fsm_state_to_string = "S_LOAD_B_RAM_WAIT2";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:161:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '136'h535f4c4f41445f425f434f4e565f535452' generates 136 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  161 |             S_LOAD_B_TILE_CONVERT_STORE:       fsm_state_to_string = "S_LOAD_B_CONV_STR";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:167:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5345545550' generates 168 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  167 |             S_STORE_C_TILE_SA_READ_SETUP:      fsm_state_to_string = "S_STORE_C_SA_RD_SETUP";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:168:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '168'h535f53544f52455f435f53415f52445f5741495456' generates 168 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  168 |             S_STORE_C_TILE_SA_READ_WAIT_VALID: fsm_state_to_string = "S_STORE_C_SA_RD_WAITV";
+      |                                                                    ^
+%Warning-WIDTHTRUNC: accelerator.v:169:68: Operator ASSIGN expects 120 bits on the Assign RHS, but Assign RHS's CONST '128'h535f53544f52455f435f52414d5f5752' generates 128 bits.
+                                         : ... note: In instance 'testbench_top.u_accelerator'
+  169 |             S_STORE_C_TILE_RAM_WRITE:          fsm_state_to_string = "S_STORE_C_RAM_WR";
+      |                                                                    ^
+%Warning-WIDTHEXPAND: accelerator.v:482:100: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  482 |                 current_ram_addr_next = base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE;
+      |                                                                                                    ^
+%Warning-WIDTHEXPAND: accelerator.v:493:105: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'k_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  493 |                     current_ram_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                         ^
+%Warning-WIDTHEXPAND: accelerator.v:493:142: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  493 |                     current_ram_addr_next = (base_addr_a + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + k_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                                                              ^
+%Warning-WIDTHEXPAND: accelerator.v:490:54: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  490 |                 end else if (ram_tile_word_count_reg < WORDS_PER_SINT8_TILE) begin
+      |                                                      ^
+%Warning-WIDTHEXPAND: accelerator.v:520:50: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_next' generates 6 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  520 |                     if (ram_tile_word_count_next == WORDS_PER_SINT8_TILE) begin
+      |                                                  ^~
+%Warning-WIDTHEXPAND: accelerator.v:531:98: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  531 |                 current_ram_addr_next = base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE;
+      |                                                                                                  ^
+%Warning-WIDTHEXPAND: accelerator.v:542:103: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  542 |                     current_ram_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                       ^
+%Warning-WIDTHEXPAND: accelerator.v:542:142: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  542 |                     current_ram_addr_next = (base_addr_b + (k_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT8_TILE) + ram_tile_word_count_reg;
+      |                                                                                                                                              ^
+%Warning-WIDTHEXPAND: accelerator.v:539:54: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  539 |                 end else if (ram_tile_word_count_reg < WORDS_PER_SINT8_TILE) begin
+      |                                                      ^
+%Warning-WIDTHEXPAND: accelerator.v:569:50: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'ram_tile_word_count_next' generates 6 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  569 |                     if (ram_tile_word_count_next == WORDS_PER_SINT8_TILE) begin
+      |                                                  ^~
+%Warning-WIDTHEXPAND: accelerator.v:602:31: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'k_idx_reg' generates 3 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  602 |                 if (k_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin  
+      |                               ^~
+%Warning-WIDTHEXPAND: accelerator.v:614:100: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  614 |                 current_ram_addr_next = base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE;
+      |                                                                                                    ^
+%Warning-WIDTHEXPAND: accelerator.v:657:101: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  657 |                 current_ram_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE) + ram_tile_word_count_reg; 
+      |                                                                                                     ^
+%Warning-WIDTHEXPAND: accelerator.v:657:139: Operator ADD expects 32 or 17 bits on the RHS, but RHS's VARREF 'ram_tile_word_count_reg' generates 6 bits.
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  657 |                 current_ram_addr_next = (base_addr_c + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_BF16_TILE) + ram_tile_word_count_reg; 
+      |                                                                                                                                           ^
+%Warning-WIDTHEXPAND: accelerator.v:671:58: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'c_store_word_in_row_idx_reg' generates 2 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  671 |                 end else if (c_store_word_in_row_idx_reg == NUM_PACKED_WORDS_PER_SA_ROW - 1) begin 
+      |                                                          ^~
+%Warning-WIDTHEXPAND: accelerator.v:684:37: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'r_c_idx_reg' generates 3 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  684 |                     if (r_c_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin
+      |                                     ^~
+%Warning-WIDTHEXPAND: accelerator.v:682:33: Operator EQ expects 32 or 8 bits on the LHS, but LHS's VARREF 'c_c_idx_reg' generates 3 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  682 |                 if (c_c_idx_reg == SAFE_TILES_PER_ROW_COL_GLOBAL - 1) begin
+      |                                 ^~
+%Warning-WIDTHEXPAND: accelerator.v:720:70: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'sa_feed_cycle_idx_reg' generates 5 bits.
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+  720 |                     a_tile_buffer_bf16[i_extract * TILE_DIM_SYSTOLIC + sa_feed_cycle_idx_reg];
+      |                                                                      ^
+%Warning-WIDTHEXPAND: testbench_top.v:128:76: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'BASE_ADDR_C_TB' generates 17 bits.
+                                            : ... note: In instance 'testbench_top'
+  128 |                 $fdisplay(output_file_desc, "%h", u_ram.mem[BASE_ADDR_C_TB + i_loop]);
+      |                                                                            ^
+%Warning-UNUSEDPARAM: testbench_top.v:16:16: Parameter is not used: 'SINT8_PER_RAM_WORD_TB'
+                                           : ... note: In instance 'testbench_top'
+   16 |     localparam SINT8_PER_RAM_WORD_TB = RAM_DATA_WIDTH_TB / SINT8_BITS_TB;
+      |                ^~~~~~~~~~~~~~~~~~~~~
+                      ... For warning description see https://verilator.org/warn/UNUSEDPARAM?v=5.037
+                      ... Use "/* verilator lint_off UNUSEDPARAM */" and lint_on around source to disable this message.
+%Warning-UNUSEDSIGNAL: accelerator.v:69:34: Signal is not used: 'sa_array_a_out_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   69 |     wire [SAFE_SA_BUS_WIDTH-1:0] sa_array_a_out_wire;
+      |                                  ^~~~~~~~~~~~~~~~~~~
+                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.037
+                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
+%Warning-UNUSEDSIGNAL: accelerator.v:70:34: Signal is not used: 'sa_array_b_out_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   70 |     wire [SAFE_SA_BUS_WIDTH-1:0] sa_array_b_out_wire;
+      |                                  ^~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:74:10: Signal is not used: 'sa_array_a_data_valid_out_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   74 |     wire sa_array_a_data_valid_out_wire;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:75:10: Signal is not used: 'sa_array_b_data_valid_out_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   75 |     wire sa_array_b_data_valid_out_wire;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:78:10: Signal is not used: 'sa_tile_had_nan_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   78 |     wire sa_tile_had_nan_wire;
+      |          ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:79:10: Signal is not used: 'sa_tile_had_inf_wire'
+                                          : ... note: In instance 'testbench_top.u_accelerator'
+   79 |     wire sa_tile_had_inf_wire;
+      |          ^~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:176:17: Signal is not used: 'prev_start_computation_dbg'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  176 |     reg         prev_start_computation_dbg;
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:177:17: Signal is not used: 'prev_current_state_reg_dbg'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  177 |     reg [5:0]   prev_current_state_reg_dbg;
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:178:17: Signal is not used: 'prev_sa_tile_all_pes_done_one_pass_wire_dbg'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  178 |     reg         prev_sa_tile_all_pes_done_one_pass_wire_dbg;
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:179:17: Signal is not used: 'prev_sa_tile_row_result_valid_wire_dbg'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  179 |     reg         prev_sa_tile_row_result_valid_wire_dbg;
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:180:30: Signal is not used: 'prev_ram_read_data_d1_reg_dbg'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  180 |     reg [RAM_DATA_WIDTH-1:0] prev_ram_read_data_d1_reg_dbg;
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:233:13: Signal is not driven, nor used: 'r_disp_a_gen'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  233 |     integer r_disp_a_gen, c_disp_a_gen;
+      |             ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:233:27: Signal is not driven, nor used: 'c_disp_a_gen'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  233 |     integer r_disp_a_gen, c_disp_a_gen;
+      |                           ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:234:13: Signal is not driven, nor used: 'r_disp_a'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  234 |     integer r_disp_a, r_disp_b;
+      |             ^~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:234:23: Signal is not driven, nor used: 'r_disp_b'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  234 |     integer r_disp_a, r_disp_b;
+      |                       ^~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:235:13: Signal is not driven, nor used: 'r_disp_b_gen'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  235 |     integer r_disp_b_gen, c_disp_b_gen;
+      |             ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:235:27: Signal is not driven, nor used: 'c_disp_b_gen'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  235 |     integer r_disp_b_gen, c_disp_b_gen;
+      |                           ^~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:236:13: Signal is not driven, nor used: 'conv_idx_a'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  236 |     integer conv_idx_a, conv_idx_b;
+      |             ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:236:25: Signal is not driven, nor used: 'conv_idx_b'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  236 |     integer conv_idx_a, conv_idx_b;
+      |                         ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: accelerator.v:237:13: Signal is not driven, nor used: 'r_debug_print'
+                                           : ... note: In instance 'testbench_top.u_accelerator'
+  237 |     integer r_debug_print;
+      |             ^~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:26:16: Signal is not used: 'accelerator_is_computing'
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   26 |     input wire accelerator_is_computing,
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:66:9: Signal is not used: 'prev_pe00_done_flag_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   66 |     reg prev_pe00_done_flag_dbg;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:67:9: Signal is not used: 'prev_pe01_done_flag_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   67 |     reg prev_pe01_done_flag_dbg;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:68:9: Signal is not used: 'prev_pe10_done_flag_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   68 |     reg prev_pe10_done_flag_dbg;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:69:9: Signal is not used: 'prev_peLL_done_flag_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   69 |     reg prev_peLL_done_flag_dbg; 
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:70:9: Signal is not used: 'prev_all_done_reduction_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   70 |     reg prev_all_done_reduction_dbg;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:71:9: Signal is not used: 'prev_start_new_systolic_pass_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   71 |     reg prev_start_new_systolic_pass_dbg;  
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/systolic_array.v:72:9: Signal is not used: 'prev_activate_pe_computation_dbg'
+                                                : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array'
+   72 |     reg prev_activate_pe_computation_dbg;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: src/pe.v:6:23: Parameter is not used: 'PE_ROW_ID'
+                                   : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+    6 |     parameter integer PE_ROW_ID = -1,
+      |                       ^~~~~~~~~
+%Warning-UNUSEDPARAM: src/pe.v:7:23: Parameter is not used: 'PE_COL_ID'
+                                   : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+    7 |     parameter integer PE_COL_ID = -1
+      |                       ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/pe.v:41:9: Signal is not used: 'acc_sign_if_inf_reg'
+                                    : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+   41 |     reg acc_sign_if_inf_reg;
+      |         ^~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/pe.v:54:27: Signal is not used: 'mul_output_is_nan'
+                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+   54 |     wire                  mul_output_is_nan;
+      |                           ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/pe.v:55:27: Signal is not used: 'mul_output_is_inf'
+                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+   55 |     wire                  mul_output_is_inf;
+      |                           ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/pe.v:63:10: Signal is not used: 'k_is_0_related_pass_for_strobe'
+                                     : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[0].pe_col[0].u_pe_inst'
+   63 |     wire k_is_0_related_pass_for_strobe;
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:50:24: Bits of signal are not used: 'exp_sum_biased_prenorm_s12'[11:10]
+                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
+   50 |     wire signed [11:0] exp_sum_biased_prenorm_s12;
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:58:17: Bits of signal are not used: 'mant_norm_shifted'[15,6:0]
+                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
+   58 |     wire [15:0] mant_norm_shifted = needs_norm_shift ? (mant_prod >> 1) : mant_prod;
+      |                 ^~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/bfloat16_multiplier.v:60:24: Bits of signal are not used: 'final_exp_biased_calc_intermediate_s11'[10]
+                                                      : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_mul'
+   60 |     wire signed [10:0] final_exp_biased_calc_intermediate_s11; 
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: src/bfloat16_adder.v:79:17: Bits of signal are not used: 'mant_sub_shifted_norm_w'[11:10,2:0]
+                                                 : ... note: In instance 'testbench_top.u_accelerator.u_systolic_array.pe_row[15].pe_col[15].u_pe_inst.u_bf16_add'
+   79 |     wire [11:0] mant_sub_shifted_norm_w = mant_sum_abs_val_w << lead_zeros_count_val_w;
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~
+%Warning-BLKSEQ: accelerator.v:297:36: Blocking assignment '=' in sequential logic process
+                                     : ... Suggest using delayed assignment '<='
+  297 |                 base_idx_in_buffer = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
+      |                                    ^
+                 ... For warning description see https://verilator.org/warn/BLKSEQ?v=5.037
+                 ... Use "/* verilator lint_off BLKSEQ */" and lint_on around source to disable this message.
+%Warning-BLKSEQ: accelerator.v:326:38: Blocking assignment '=' in sequential logic process
+                                     : ... Suggest using delayed assignment '<='
+  326 |                 base_idx_in_buffer_b = ram_tile_word_count_reg * SINT8_PER_RAM_WORD;
+      |                                      ^
+%Warning-BLKSEQ: mem.v:34:28: Blocking assignment '=' in sequential logic process
+                            : ... Suggest using delayed assignment '<='
+   34 |         address_clk_sample = address;
+      |                            ^
+- V e r i l a t i o n   R e p o r t: Verilator 5.037 devel rev v5.036-140-g47f5a6a52
+- Verilator: Built from 0.528 MB sources in 9 modules, into 67.566 MB in 55 C++ files needing 0.001 MB
+- Verilator: Walltime 6.120 s (elab=0.076, cvt=5.343, bld=0.000); cpu 6.799 s on 1 threads; alloced 358.730 MB
+### Compiling C++ simulation executable in obj_dir with OpenMP support...
+# 新增：为 C++ 编译器和链接器添加 -fopenmp 标志以启用多线程运行时支持
+make -C obj_dir -f Vtestbench_top.mk \
+	VM_CPPFLAGS="-I/home/admin_linux/miniconda3/envs/hw/share/verilator/include -I/home/admin_linux/miniconda3/envs/hw/share/verilator/include/vltstd -fopenmp" \
+	VM_LDFLAGS="-fopenmp" \
+	Vtestbench_top
+make[1]: Entering directory '/home/admin_linux/lab8/obj_dir'
+g++  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -Os  -c -o sim_main.o ../sim_main.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_vcd_c.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_vcd_c.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_timing.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_timing.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -c -o verilated_threads.o /home/admin_linux/local/verilator-git/share/verilator/include/verilated_threads.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.fast.gch
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top.o Vtestbench_top.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0.o Vtestbench_top___024root__DepSet_h51ad8fb1__0.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0.o Vtestbench_top___024root__DepSet_h7d2e4495__0.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1.o Vtestbench_top___024root__DepSet_h7d2e4495__1.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__2.o Vtestbench_top___024root__DepSet_h7d2e4495__2.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__3.o Vtestbench_top___024root__DepSet_h7d2e4495__3.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__4.o Vtestbench_top___024root__DepSet_h7d2e4495__4.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__5.o Vtestbench_top___024root__DepSet_h7d2e4495__5.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__6.o Vtestbench_top___024root__DepSet_h7d2e4495__6.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__7.o Vtestbench_top___024root__DepSet_h7d2e4495__7.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__8.o Vtestbench_top___024root__DepSet_h7d2e4495__8.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__9.o Vtestbench_top___024root__DepSet_h7d2e4495__9.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__10.o Vtestbench_top___024root__DepSet_h7d2e4495__10.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__11.o Vtestbench_top___024root__DepSet_h7d2e4495__11.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__12.o Vtestbench_top___024root__DepSet_h7d2e4495__12.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__13.o Vtestbench_top___024root__DepSet_h7d2e4495__13.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__14.o Vtestbench_top___024root__DepSet_h7d2e4495__14.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__15.o Vtestbench_top___024root__DepSet_h7d2e4495__15.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__16.o Vtestbench_top___024root__DepSet_h7d2e4495__16.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__17.o Vtestbench_top___024root__DepSet_h7d2e4495__17.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__18.o Vtestbench_top___024root__DepSet_h7d2e4495__18.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top___024root__DepSet_h7d2e4495__19.o Vtestbench_top___024root__DepSet_h7d2e4495__19.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__0.o Vtestbench_top__Trace__0.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__1.o Vtestbench_top__Trace__1.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__2.o Vtestbench_top__Trace__2.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__3.o Vtestbench_top__Trace__3.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__4.o Vtestbench_top__Trace__4.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__5.o Vtestbench_top__Trace__5.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__6.o Vtestbench_top__Trace__6.cpp
+g++ -Os  -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.fast -c -o Vtestbench_top__Trace__7.o Vtestbench_top__Trace__7.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -x c++-header Vtestbench_top__pch.h -o Vtestbench_top__pch.h.slow.gch
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__ConstPool_0.o Vtestbench_top__ConstPool_0.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__Slow.o Vtestbench_top___024root__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.o Vtestbench_top___024root__DepSet_h51ad8fb1__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__1__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__2__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__2__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__3__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__3__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__4__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__4__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__5__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__5__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__6__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__6__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__7__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__7__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__8__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__8__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__9__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__9__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__10__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__10__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top___024root__DepSet_h7d2e4495__11__Slow.o Vtestbench_top___024root__DepSet_h7d2e4495__11__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Syms.o Vtestbench_top__Syms.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__0__Slow.o Vtestbench_top__Trace__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__TraceDecls__0__Slow.o Vtestbench_top__TraceDecls__0__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__1__Slow.o Vtestbench_top__Trace__1__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__2__Slow.o Vtestbench_top__Trace__2__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__3__Slow.o Vtestbench_top__Trace__3__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__4__Slow.o Vtestbench_top__Trace__4__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__5__Slow.o Vtestbench_top__Trace__5__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__6__Slow.o Vtestbench_top__Trace__6__Slow.cpp
+g++   -I.  -MMD -I/home/admin_linux/local/verilator-git/share/verilator/include -I/home/admin_linux/local/verilator-git/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -fcoroutines -include Vtestbench_top__pch.h.slow -c -o Vtestbench_top__Trace__7__Slow.o Vtestbench_top__Trace__7__Slow.cpp
+echo "" > Vtestbench_top__ALL.verilator_deplist.tmp
+g++    sim_main.o verilated.o verilated_vcd_c.o verilated_timing.o verilated_threads.o Vtestbench_top__ALL.a    -pthread -lpthread -latomic   -o Vtestbench_top
+rm Vtestbench_top__ALL.verilator_deplist.tmp
+make[1]: Leaving directory '/home/admin_linux/lab8/obj_dir'
+### Generating input_mem.csv...
+python3 InputGen.py
+Generating 128x128 specific SINT8 matrices.
+
+Writing A matrix tiles to input_mem.csv...
+Finished writing A. Wrote 2048 lines for A.
+
+Writing B matrix tiles to input_mem.csv...
+Finished writing B. Wrote 2048 lines for B.
+
+Generated input_mem.csv, matrix_a.npy, and matrix_b.npy successfully.
+
+Expected C matrix (float values, showing top-left 4x4 for reference):
+[[   2.    0.    0.    0.]
+ [-382.    0.    0.    0.]
+ [   2.    0.    0.    0.]
+ [-382.    0.    0.    0.]]
+### Running simulation...
+./obj_dir/Vtestbench_top
+- testbench_top.v:135: Verilog $finish
+### Simulation finished. result_mem.csv should be in the current directory.
