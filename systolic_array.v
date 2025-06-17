@@ -27,7 +27,6 @@ module systolic_array #(
     output wire                               tile_row_result_valid,   // Valid for tile_row_result_out
     output wire                               tile_all_pes_done_one_pass, // High when all PEs have completed one pass (MAC_COUNT_TARGET ops)
 
-    // input wire accelerator_is_computing, // Example of other control signals (keep if used)
     input wire start_new_systolic_pass       // Signal to reset PE done flags for a new computation pass
 );
 
@@ -60,7 +59,6 @@ module systolic_array #(
     reg pe_done_flags [SIZE-1:0][SIZE-1:0];
     reg selected_row_all_pes_done;      // True if all PEs in the selected output row are done
     reg all_pes_in_tile_done_reduction; // True if all PEs in the entire tile are done
-
 
     // --- 1. Input Data and Valid Skewing Logic ---
     always @(posedge clk or negedge rst_n) begin

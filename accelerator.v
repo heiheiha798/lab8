@@ -8,7 +8,6 @@ module accelerator #(
     parameter SINT8_BITS        = 8,
     parameter PE_ACCUM_BITS     = 32,
     parameter LOGIC_ADDR_WIDTH  = 18,   // For Main Memory addressing
-
     // Calculate words needed in Tile SRAM (assuming SINT8 elements)
     localparam TILE_SRAM_TOTAL_BITS  = (TILE_DIM_SYSTOLIC * TILE_DIM_SYSTOLIC * SINT8_BITS),
     localparam TILE_SRAM_WORDS_CALC  = (TILE_SRAM_TOTAL_BITS == 0 || RAM_DATA_WIDTH == 0) ? 1 : (TILE_SRAM_TOTAL_BITS + RAM_DATA_WIDTH - 1) / RAM_DATA_WIDTH, // Ceiling division
@@ -19,7 +18,6 @@ module accelerator #(
 ) (
     input wire clk,
     input wire rst_n,
-
     input wire start_computation,
     output reg computation_done,
 
@@ -49,7 +47,6 @@ module accelerator #(
     output reg [RAM_DATA_WIDTH-1:0]          tile_b_sram_wdata_o,
     input wire  [RAM_DATA_WIDTH-1:0]          tile_b_sram_rdata_i
 );
-
     // --- Derived Parameters ---
     localparam SINT8_PER_RAM_WORD = (SINT8_BITS == 0) ? 1 : RAM_DATA_WIDTH / SINT8_BITS; // Avoid div by zero if SINT8_BITS is 0
     localparam SINT32_PER_RAM_WORD = (PE_ACCUM_BITS == 0) ? 1 : RAM_DATA_WIDTH / PE_ACCUM_BITS;
@@ -63,8 +60,8 @@ module accelerator #(
     localparam WORDS_PER_SINT32_MM_TILE = (WORDS_PER_SINT32_MM_TILE_CALC == 0 && (TILE_DIM_SYSTOLIC*TILE_DIM_SYSTOLIC*PE_ACCUM_BITS) > 0) ? 1 : WORDS_PER_SINT32_MM_TILE_CALC;
 
     localparam MM_TILE_WORD_COUNT_WIDTH = (WORDS_PER_SINT8_MM_TILE > WORDS_PER_SINT32_MM_TILE) ?
-                                          ((WORDS_PER_SINT8_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT8_MM_TILE)) :
-                                          ((WORDS_PER_SINT32_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT32_MM_TILE));
+                                        ((WORDS_PER_SINT8_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT8_MM_TILE)) :
+                                        ((WORDS_PER_SINT32_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT32_MM_TILE));
 
 
     localparam TILE_AREA = TILE_DIM_SYSTOLIC * TILE_DIM_SYSTOLIC;
@@ -331,38 +328,25 @@ module accelerator #(
 
             // --- Latch data from Main Memory ---
             if (mm_ready_i && mm_cs_o && !mm_we_o) begin
-                $display("[%0t MM_LATCH_DBG CYC:%0d] State: %s. MM_READ_READY! mm_addr_o=%h, mm_rdata_i=%h. WILL_LATCH to latched_mm_rdata_r.",
-                         $time, cycle_count, fsm_state_to_string(current_state_reg), mm_addr_o, mm_rdata_i);
                 latched_mm_rdata_r <= mm_rdata_i;
-            end else if (mm_ready_i && mm_cs_o && mm_we_o) begin
-                 $display("[%0t MM_LATCH_DBG CYC:%0d] State: %s. MM_WRITE_READY! mm_addr_o=%h, mm_wdata_o=%h.",
-                         $time, cycle_count, fsm_state_to_string(current_state_reg), mm_addr_o, mm_wdata_o);
-            end
+            end 
 
             // --- Latch data from Tile A SRAM ---
-            // Latch happens in S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS state (which was S_SA_FEED_CYCLE_A_READ_WAIT1 in previous cycle)
             if (current_state_reg == S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS && tile_a_sram_cs_o && !tile_a_sram_we_o) begin
-                $display("[%0t LATCH_A_DEBUG CYC:%0d] In A_LATCH_PROC. tile_a_sram_rdata_i = %h. WILL_LATCH_TO latched_tile_a_sram_rdata_r. (CS_A=%b, WE_A=%b, Addr_A=%h)",
-                         $time, cycle_count, tile_a_sram_rdata_i, tile_a_sram_cs_o, tile_a_sram_we_o, tile_a_sram_addr_o);
                 latched_tile_a_sram_rdata_r <= tile_a_sram_rdata_i;
             end
 
             // --- Latch data from Tile B SRAM ---
             if (current_state_reg == S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS && tile_b_sram_cs_o && !tile_b_sram_we_o) begin
-                $display("[%0t LATCH_B_DEBUG CYC:%0d] In B_LATCH_PROC. tile_b_sram_rdata_i = %h. WILL_LATCH_TO latched_tile_b_sram_rdata_r. (CS_B=%b, WE_B=%b, Addr_B=%h)",
-                         $time, cycle_count, tile_b_sram_rdata_i, tile_b_sram_cs_o, tile_b_sram_we_o, tile_b_sram_addr_o);
                 latched_tile_b_sram_rdata_r <= tile_b_sram_rdata_i;
             end
 
             // --- Unpack data for Tile A column (triggered by do_unpack_a_pulse_r) ---
             if (do_unpack_a_pulse_r) begin // This pulse is set in _LATCH_AND_PROCESS, so unpack happens one cycle later
                 if (a_element_idx_for_unpack_r < TILE_DIM_SYSTOLIC && SINT8_PER_RAM_WORD > 0) begin
-                     if (sint8_offset_in_word_a_for_unpack_r < SINT8_PER_RAM_WORD) begin
-                        $display("    UNPACK_A_DEBUG CYC:%0d: Setting temp_a_col_for_sa[%2d] from latched_A_rdata=%h with offset_A=%d (val=%h)",
-                            cycle_count, a_element_idx_for_unpack_r, latched_tile_a_sram_rdata_r, sint8_offset_in_word_a_for_unpack_r,
-                            latched_tile_a_sram_rdata_r[(sint8_offset_in_word_a_for_unpack_r * SINT8_BITS) +: SINT8_BITS]);
+                    if (sint8_offset_in_word_a_for_unpack_r < SINT8_PER_RAM_WORD) begin
                         temp_a_col_for_sa[a_element_idx_for_unpack_r] <= latched_tile_a_sram_rdata_r[(sint8_offset_in_word_a_for_unpack_r * SINT8_BITS) +: SINT8_BITS];
-                     end
+                    end
                 end
             end
 
@@ -372,37 +356,16 @@ module accelerator #(
                     for (i = 0; i < SINT8_PER_RAM_WORD; i = i + 1) begin
                         if (b_sram_word_idx_for_unpack_r == 0) begin // First word of the B row data
                             if (i < TILE_DIM_SYSTOLIC) begin // Ensure within bounds of temp_b_row_for_sa
-                                $display("    UNPACK_B_DEBUG CYC:%0d: Setting temp_b_row_for_sa[%2d] (word_idx_unpack=%d, offset=%d) from latched_B_rdata=%h. Val=%h",
-                                    cycle_count, i, b_sram_word_idx_for_unpack_r, i, latched_tile_b_sram_rdata_r, latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS]);
                                 temp_b_row_for_sa[i] <= latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS];
                             end
                         end else begin // Second word of the B row data (if TILE_DIM > SINT8_PER_RAM_WORD)
                             if ((i + SINT8_PER_RAM_WORD) < TILE_DIM_SYSTOLIC) begin
-                                $display("    UNPACK_B_DEBUG CYC:%0d: Setting temp_b_row_for_sa[%2d] (word_idx_unpack=%d, offset=%d) from latched_B_rdata=%h. Val=%h",
-                                    cycle_count, (i + SINT8_PER_RAM_WORD), b_sram_word_idx_for_unpack_r, i, latched_tile_b_sram_rdata_r, latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS]);
                                 temp_b_row_for_sa[i + SINT8_PER_RAM_WORD] <= latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS];
                             end
                         end
                     end
                 end
             end
-
-            // Display states and important signals
-            $display("[%0t ACCEL_DBG CYC:%0d] State: %s (Next: %s)", $time, cycle_count, fsm_state_to_string(current_state_reg), fsm_state_to_string(next_state_reg));
-             if (current_state_reg == S_SA_FEED_CYCLE_A_READ_REQ || current_state_reg == S_SA_FEED_CYCLE_A_READ_WAIT1 || current_state_reg == S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS ) begin
-                $display("  TileA_SRAM: Addr_o=%h CS=%b WE=%b | A_elem_idx_r=%2d | UnpackPulseA_r=%b IdxUnpackA_r=%2d OffsetUnpackA_r=%d | latched_A_rdata_r=%h | temp_A_filled_r=%b",
-                    tile_a_sram_addr_o, tile_a_sram_cs_o, tile_a_sram_we_o,
-                    sa_feed_a_col_element_idx_r,
-                    do_unpack_a_pulse_r, a_element_idx_for_unpack_r, sint8_offset_in_word_a_for_unpack_r,
-                    latched_tile_a_sram_rdata_r, temp_a_col_filled_r);
-            end
-            // Similar display for B if needed
-            if (current_state_reg == S_SA_FEED_CYCLE_EXEC) begin
-                 $display("  SA_EXECUTING CYC:%0d: SA_Pass_Count:%2d ValidIn:%b SA_Done:%b A_bus[7:0]=%h B_bus[7:0]=%h",
-                    cycle_count, sa_feed_total_cycles_count_reg, sa_array_data_valid_in_wire_systolic, sa_tile_all_pes_done_one_pass_wire,
-                    sa_array_a_in_wire_systolic[SINT8_BITS-1:0], sa_array_b_in_wire_systolic[SINT8_BITS-1:0]);
-            end
-
         end
     end
 
@@ -561,7 +524,6 @@ module accelerator #(
                     if (temp_a_col_filled_r) begin // If A column is also ready
                         next_state_reg = S_SA_PRE_EXEC_CHECK;
                     end else begin // Should not happen if A fills first or concurrently
-                        $display("[%0t ACCEL_WARN CYC:%0d] In B_LATCH (all words done), but A_col not filled! Goto PRE_EXEC_CHECK.", $time, cycle_count);
                         next_state_reg = S_SA_PRE_EXEC_CHECK; // Still go to check
                     end
                 end else begin
@@ -607,8 +569,6 @@ module accelerator #(
                 sa_enable_output_next = 1'b1; 
                 sa_select_row_next = sa_select_row_reg; 
                 if (sa_tile_row_result_valid_wire) begin
-                    $display("[%0t ACCEL_C_READ CYC:%0d] Row %d valid from SA. SA_Result_Bus = %h",
-                             $time, cycle_count, sa_select_row_reg, sa_tile_row_result_out_wire);
                     next_state_reg = S_STORE_C_MM_WRITE_REQ;
                 end else begin
                     next_state_reg = S_STORE_C_TILE_SA_READ_WAIT_VALID;
@@ -618,9 +578,6 @@ module accelerator #(
                 sa_activate_comp_next = 1'b0;
                 sa_enable_output_next = 1'b1; 
                 sa_select_row_next = sa_select_row_reg; 
-
-                $display("[%0t ACCEL_PACK_INPUTS CYC:%0d] State:WRITE_REQ. SA_Enable_Reg=%b, SA_Select_Reg=%d, SA_Result_Bus_RAW=%h, c_store_word_idx=%d",
-                         $time, cycle_count, sa_enable_output_reg, sa_select_row_reg, sa_tile_row_result_out_wire, c_store_word_in_row_idx_reg);
 
                 if (SINT32_PER_RAM_WORD > 0) begin
                     for (i_pack_local_debug=0; i_pack_local_debug < SINT32_PER_RAM_WORD; i_pack_local_debug=i_pack_local_debug+1) begin
@@ -632,15 +589,7 @@ module accelerator #(
                     end
                 end
                 // --- END TEMPORARY: Packing logic ---
-
-                $display("[%0t ACCEL_MM_WDATA_PREP CYC:%0d] State:WRITE_REQ. BEFORE assignment to mm_wdata_o_next_comb, packed_c_word_comb = %h",
-                         $time, cycle_count, packed_c_word_comb);
-
                 mm_wdata_o_next_comb = packed_c_word_comb;
-
-                $display("[%0t ACCEL_MM_WDATA_PREP CYC:%0d] State:WRITE_REQ. AFTER assignment, mm_wdata_o_next_comb = %h",
-                         $time, cycle_count, mm_wdata_o_next_comb);
-                
                 mm_cs_o_next_comb = 1'b1;
                 mm_we_o_next_comb = 1'b1; // Write
                 mm_addr_o_next_comb = (base_addr_c_mm + (r_c_idx_reg * SAFE_TILES_PER_ROW_COL_GLOBAL + c_c_idx_reg) * WORDS_PER_SINT32_MM_TILE) + mm_word_count_reg;
@@ -651,19 +600,6 @@ module accelerator #(
             S_FINISH: begin sa_activate_comp_next = 1'b0; computation_done_next_comb = 1'b1; next_state_reg = S_IDLE; end
             default: begin sa_activate_comp_next = 1'b0; next_state_reg = S_IDLE; end
         endcase
-
-        if (current_state_reg == S_STORE_C_MM_WRITE_REQ || current_state_reg == S_STORE_C_TILE_SA_READ_WAIT_VALID) begin
-            if (SINT32_PER_RAM_WORD > 0) begin
-                integer i_pack;
-                for (i_pack=0; i_pack < SINT32_PER_RAM_WORD; i_pack=i_pack+1) begin
-                    if((c_store_word_in_row_idx_reg * SINT32_PER_RAM_WORD + i_pack) < TILE_DIM_SYSTOLIC) begin
-                        packed_c_word_comb[(i_pack*PE_ACCUM_BITS)+:PE_ACCUM_BITS] = sa_tile_row_result_out_wire[((c_store_word_in_row_idx_reg * SINT32_PER_RAM_WORD + i_pack)*PE_ACCUM_BITS)+:PE_ACCUM_BITS];
-                    end else begin
-                        packed_c_word_comb[(i_pack*PE_ACCUM_BITS)+:PE_ACCUM_BITS] = {PE_ACCUM_BITS{1'b0}};
-                    end
-                end
-            end
-        end
     end
 
     genvar i_feed;
