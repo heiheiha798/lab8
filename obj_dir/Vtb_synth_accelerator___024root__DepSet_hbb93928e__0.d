@@ -1,3 +1,0 @@
-Vtb_synth_accelerator___024root__DepSet_hbb93928e__0.o: \
- Vtb_synth_accelerator___024root__DepSet_hbb93928e__0.cpp \
- Vtb_synth_accelerator__pch.h Vtb_synth_accelerator___024root.h
