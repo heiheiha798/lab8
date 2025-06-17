@@ -1,40 +1,50 @@
-# Makefile for Verilator Simulation
+# Makefile for Verilator Simulation (for tb_synth_accelerator - NO VCD TRACE)
 
 # --- Variables ---
-# 新增：线程数变量，可以从命令行覆盖 (e.g., make NUM_THREADS=8)
-NUM_THREADS ?= 12
+NUM_THREADS ?= 12 # 根据服务器 nproc 输出设置
+VERILOG_SOURCES = tb_synth_accelerator.v accelerator.v systolic_array.v pe.v
 
-VERILOG_SOURCES = testbench_top.v accelerator.v systolic_array.v pe.v ram_controller_behavioral.v
-TARGET_NAME = Vtestbench_top
-CPP_WRAPPER = sim_main.cpp
+TARGET_MODULE = tb_synth_accelerator
+EXECUTABLE_NAME = V$(TARGET_MODULE)
+CPP_WRAPPER = sim_main_synth.cpp
+
 PYTHON = python3
-VERILATOR_ROOT_PATH = /home/admin_linux/miniconda3/envs/hw/share/verilator
+INPUT_GEN_SCRIPT = InputGen.py
+CHECK_RESULT_SCRIPT = CheckResult.py
+
+VERILATOR_ROOT := /usr/share/verilator
+
+# Check if VERILATOR_ROOT seems valid by checking for verilated.h
+ifeq ("$(wildcard $(VERILATOR_ROOT)/include/verilated.h)","")
+    $(warning Cannot find verilated.h in $(VERILATOR_ROOT)/include. Check VERILATOR_ROOT path.)
+endif
 
 # --- Default Target ---
 all: run
 
 # --- Main Targets ---
-compile:
-	@echo "### Compiling Verilog with Verilator using $(NUM_THREADS) threads..."
-	# 新增：-O3 优化, --threads $(NUM_THREADS) 开启多线程编译
-	verilator -Wno-fatal -Wall -cc --timing -O3 --threads $(NUM_THREADS) -Isrc $(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
-	
-	@echo "### Compiling C++ simulation executable in obj_dir with OpenMP support..."
-	# 新增：为 C++ 编译器和链接器添加 -fopenmp 标志以启用多线程运行时支持
-	$(MAKE) -C obj_dir -f $(TARGET_NAME).mk \
-		VM_CPPFLAGS="-I$(VERILATOR_ROOT_PATH)/include -I$(VERILATOR_ROOT_PATH)/include/vltstd -fopenmp" \
-		VM_LDFLAGS="-fopenmp" \
-		$(TARGET_NAME)
+compile_verilog: $(VERILOG_SOURCES) $(CPP_WRAPPER)
+	@echo "### Verilating Verilog sources with $(NUM_THREADS) threads..."
+	verilator -Wno-fatal -Wall --top-module $(TARGET_MODULE) \
+		-cc --timing -O3 --threads $(NUM_THREADS) \
+		$(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
+
+compile_cpp: compile_verilog
+	@echo "### Compiling C++ simulation executable in obj_dir..."
+	$(MAKE) -C obj_dir -f $(EXECUTABLE_NAME).mk $(EXECUTABLE_NAME)
+
+compile: compile_cpp
 
 run: compile generate_input
-	@echo "### Running simulation..."
-	./obj_dir/$(TARGET_NAME)
-	@echo "### Simulation finished. result_mem.csv should be in the current directory."
+	@echo "### Running simulation: ./obj_dir/$(EXECUTABLE_NAME)"
+	./obj_dir/$(EXECUTABLE_NAME)
+	@echo "### Simulation finished. result_mem_tb.csv should be in the current directory."
+	@echo "### Comparing results..."
+	$(PYTHON) $(CHECK_RESULT_SCRIPT)
 
-# --- Utility Targets ---
 generate_input:
-	@echo "### Generating input_mem.csv..."
-	$(PYTHON) InputGen.py
+	@echo "### Generating input_mem.csv for simulation..."
+	$(PYTHON) $(INPUT_GEN_SCRIPT)
 
 check_result:
 	@echo "### Checking result..."
@@ -42,6 +52,9 @@ check_result:
 
 clean:
 	@echo "### Cleaning up generated files..."
-	rm -rf obj_dir wave.vcd result_mem.csv input_mem.csv in.npy __pycache__ V$(TARGET_NAME)
+	rm -rf obj_dir
+	rm -f result_mem_tb.csv input_mem.csv
+	rm -f matrix_a.npy matrix_b.npy matrix_c_expected_sint32.npy
+	rm -rf __pycache__
 
-.PHONY: all compile run generate_input check_result clean
+.PHONY: all compile_verilog compile_cpp compile run generate_input clean

@@ -4,7 +4,7 @@ import math # For exp
 import random # 导入 random 模块
 
 # --- Testbench 参数 (与 testbench_top.v 匹配) ---
-MATRIX_DIM_TB = 512
+MATRIX_DIM_TB = 32
 TILE_DIM_TB = 16
 RAM_DATA_WIDTH_TB = 64
 SINT8_BITS_TB = 8
@@ -54,16 +54,12 @@ def main():
     # 随机选择 num_zeros 个索引将其设为 0
     zero_indices_a = np.random.choice(total_elements, num_zeros, replace=False)
     matrix_a_orig.ravel()[zero_indices_a] = 0 # 使用 ravel() 展平数组并设置元素
-    print("\nMatrix A (SINT8 with 35% zeros):")
-    print(matrix_a_orig)
 
     # --- 2. 生成矩阵 B (随机 SINT8, 包含 35% 的 0) ---
     matrix_b_orig = np.random.randint(-128, 128, size=(MATRIX_DIM_TB, MATRIX_DIM_TB), dtype=DATA_TYPE_IN)
     # 随机选择 num_zeros 个索引将其设为 0
     zero_indices_b = np.random.choice(total_elements, num_zeros, replace=False)
     matrix_b_orig.ravel()[zero_indices_b] = 0
-    print("\nMatrix B (SINT8 with 35% zeros):")
-    print(matrix_b_orig)
 
     all_hex_lines_a = []
     # 由于 MATRIX_DIM_TB == TILE_DIM_TB, TILES_PER_ROW_COL_TB = 1
@@ -92,17 +88,13 @@ def main():
         print(f"\nWriting A matrix tiles to {output_file}...")
         for line in all_hex_lines_a:
             f.write(f"{line}\n")
-        print(f"Finished writing A. Wrote {len(all_hex_lines_a)} lines for A.")
 
         print(f"\nWriting B matrix tiles to {output_file}...")
         for line in all_hex_lines_b:
             f.write(f"{line}\n")
-        print(f"Finished writing B. Wrote {len(all_hex_lines_b)} lines for B.")
 
     np.save('matrix_a.npy', matrix_a_orig) # 保存SINT8
     np.save('matrix_b.npy', matrix_b_orig) # 保存SINT8
-
-    print(f"\nGenerated {output_file}, matrix_a.npy, and matrix_b.npy successfully.")
 
     # --- 计算预期的C矩阵 (精确SINT32) ---
     matrix_a_calc = matrix_a_orig.astype(np.int64) # 使用int64以防中间累加溢出
@@ -114,9 +106,6 @@ def main():
         print("Warning: Expected C matrix elements exceed SINT32 range during calculation!")
     expected_c_sint32 = expected_c_exact_int64.astype(np.int32) # 硬件累加器是SINT32
     np.save('matrix_c_expected_sint32.npy', expected_c_sint32)
-
-    print("\nExpected C matrix (SINT32 values):")
-    print(expected_c_sint32)
 
 if __name__ == "__main__":
     main()
