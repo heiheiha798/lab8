@@ -47,3 +47,5 @@ echo ""
 echo "----------------------------------------"
 echo "所有步骤成功完成！仿真日志已保存到 ${LOG_FILE}"
 echo "----------------------------------------"
+
+# python3 reorder_result_mem.py --matrix_dim 32 --input_csv result_mem.csv --output_csv result_mem_reordered.csv

@@ -195,38 +195,24 @@ module systolic_array #(
     // --- 6. Tile Status Logic: PE Done Flags and Overall Tile Completion ---
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            r_idx_local_while = 0;
-            while (r_idx_local_while < SIZE) begin
-                c_idx_local_while = 0;
-                while (c_idx_local_while < SIZE) begin
-                    pe_done_flags[r_idx_local_while][c_idx_local_while] <= 1'b0;
-                    c_idx_local_while = c_idx_local_while + 1;
+            for (r_loop = 0; r_loop < SIZE; r_loop = r_loop + 1) begin // Use declared integer r_loop
+                for (c_loop = 0; c_loop < SIZE; c_loop = c_loop + 1) begin // Use declared integer c_loop
+                    pe_done_flags[r_loop][c_loop] <= 1'b0;
                 end
-                r_idx_local_while = r_idx_local_while + 1;
             end
         end else if (start_new_systolic_pass) begin // Reset flags for a new computation pass
-            r_idx_local_while = 0;
-            while (r_idx_local_while < SIZE) begin
-                c_idx_local_while = 0;
-                while (c_idx_local_while < SIZE) begin
-                    pe_done_flags[r_idx_local_while][c_idx_local_while] <= 1'b0;
-                    c_idx_local_while = c_idx_local_while + 1;
+            for (r_loop = 0; r_loop < SIZE; r_loop = r_loop + 1) begin
+                for (c_loop = 0; c_loop < SIZE; c_loop = c_loop + 1) begin
+                    pe_done_flags[r_loop][c_loop] <= 1'b0;
                 end
-                r_idx_local_while = r_idx_local_while + 1;
             end
         end else if (activate_pe_computation) begin // Only update done flags if computation is active
-            r_idx_local_while = 0;
-            while (r_idx_local_while < SIZE) begin
-                c_idx_local_while = 0;
-                while (c_idx_local_while < SIZE) begin
-                    // A PE is considered "done" for this pass when its result_valid pulses high
-                    if (pe_result_valid_internal[r_idx_local_while][c_idx_local_while]) begin
-                        pe_done_flags[r_idx_local_while][c_idx_local_while] <= 1'b1;
+            for (r_loop = 0; r_loop < SIZE; r_loop = r_loop + 1) begin
+                for (c_loop = 0; c_loop < SIZE; c_loop = c_loop + 1) begin
+                    if (pe_result_valid_internal[r_loop][c_loop]) begin
+                        pe_done_flags[r_loop][c_loop] <= 1'b1;
                     end
-                    // Note: pe_done_flags remain latched high until start_new_systolic_pass
-                    c_idx_local_while = c_idx_local_while + 1;
                 end
-                r_idx_local_while = r_idx_local_while + 1;
             end
         end
     end
