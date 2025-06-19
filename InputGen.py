@@ -4,7 +4,7 @@ import math # For exp
 import random # 导入 random 模块
 
 # --- Testbench 参数 (与 testbench_top.v 匹配) ---
-MATRIX_DIM_TB = 32
+MATRIX_DIM_TB = 512
 TILE_DIM_TB = 16
 RAM_DATA_WIDTH_TB = 64
 SINT8_BITS_TB = 8

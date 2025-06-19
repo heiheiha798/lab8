@@ -3,7 +3,7 @@ import os
 import math # 仍然可以保留，以防未来需要其他数学运算
 
 # --- Testbench/Hardware 参数 ---
-MATRIX_DIM_TB = 32
+MATRIX_DIM_TB = 512
 PE_ACCUM_BITS_TB = 32
 RAM_DATA_WIDTH_TB = 64
 
@@ -118,11 +118,8 @@ def main():
     diff_sq = (hw_result_sint32.astype(np.float64) - golden_c_sint32.astype(np.float64))**2
     sse_hw_vs_golden_sint32 = np.sum(diff_sq)
     
-    score_factor_sse = 1.0 # Default if SSE is exactly 0
-
     print(f"\n>> Accuracy Metrics (vs SINT32 Golden):")
     print(f">> SSE (HW SINT32 vs Golden SINT32): {sse_hw_vs_golden_sint32:.6e}")
-    print(f">> Score Factor from SSE (exp(SSE/C0)): {score_factor_sse:.6f}")
     print("-" * 20)
 
     num_mismatches = np.sum(golden_c_sint32 != hw_result_sint32)

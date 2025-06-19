@@ -1,0 +1,15 @@
+Generate the report at 2025-06-19T20:59:50, GitVersion: aa25008b3778a76ae1975c839d4cc459f7f7b3b7.
++------------------------------------------+---------------+---------------+----------------+-------------+------+
+| Net / Pin                                | MaxSlewTime   | SlewTime      | SlewSlack      | LibCellPort | Note |
++------------------------------------------+---------------+---------------+----------------+-------------+------+
+| sa_clear_accum_pulse_reg_$_NOT__A_Y      |               |               |                |             |      |
+| sa_clear_accum_pulse_reg_$_DFF_PN0__Q:QN | 0.199r/0.199f | 0.275r/0.125f | -0.077r/0.074f | DFFR_X1/QN  | R    |
+| sa_clear_accum_pulse_reg_$_NOT__A_Y      |               |               |                |             |      |
+| fanout_buf_946:A                         | 0.199r/0.199f | 0.275r/0.125f | -0.077r/0.074f | BUF_X8/A    | R    |
+| sa_clear_accum_pulse_reg_$_NOT__A_Y      |               |               |                |             |      |
+| fanout_buf_947:A                         | 0.199r/0.199f | 0.275r/0.125f | -0.077r/0.074f | BUF_X8/A    | R    |
+| sa_clear_accum_pulse_reg_$_NOT__A_Y      |               |               |                |             |      |
+| fanout_buf_948:A                         | 0.199r/0.199f | 0.275r/0.125f | -0.077r/0.074f | BUF_X8/A    | R    |
+| sa_clear_accum_pulse_reg_$_NOT__A_Y      |               |               |                |             |      |
+| fanout_buf_949:A                         | 0.199r/0.199f | 0.275r/0.125f | -0.077r/0.074f | BUF_X8/A    | R    |
++------------------------------------------+---------------+---------------+----------------+-------------+------+

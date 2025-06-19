@@ -1,0 +1,126 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.54+15 (git sha1 cd71f190c, clang++ 14.0.0-1ubuntu1.1 -fPIC -O3)
+
+-- Executing script file `-' --
+[TCL: yosys -import] Command name collision: found pre-existing command `cd' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `eval' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `exec' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `read' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `trace' -> skip.
+
+1. Executing Verilog-2005 frontend: .././output_synth_wsl/accelerator-885MHz/accelerator.netlist.fixed.v
+Parsing Verilog input from `.././output_synth_wsl/accelerator-885MHz/accelerator.netlist.fixed.v' to AST representation.
+Generating RTLIL representation for module `\accelerator'.
+Successfully finished Verilog frontend.
+
+2. Executing Liberty frontend: /home/admin_linux/lab8/yosys-sta/scripts/../pdk/nangate45/lib/Nangate45_typ.lib
+Imported 134 cell types from liberty file.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \accelerator
+
+3.2. Analyzing design hierarchy..
+Top module:  \accelerator
+Removed 0 unused modules.
+
+4. Executing CHECK pass (checking for obvious problems).
+Checking module accelerator...
+Found and reported 0 problems.
+
+5. Printing statistics.
+
+=== accelerator ===
+
+   Number of wires:             228153
+   Number of wire bits:         229645
+   Number of public wires:      228153
+   Number of public wire bits:  229645
+   Number of ports:                 23
+   Number of port bits:            477
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:             207484
+     AND2_X1                     21775
+     AND2_X2                       333
+     AND2_X4                      2689
+     AND3_X1                      4620
+     AND3_X2                       263
+     AND3_X4                       631
+     AND4_X1                      1121
+     AND4_X2                        38
+     AND4_X4                        91
+     AOI211_X1                     388
+     AOI21_X1                     7728
+     AOI21_X2                      290
+     AOI21_X4                      494
+     AOI221_X1                       4
+     AOI221_X4                     736
+     AOI22_X1                     3440
+     AOI22_X4                      176
+     BUF_X16                         4
+     BUF_X2                        270
+     BUF_X4                       1478
+     BUF_X8                       1277
+     CLKBUF_X2                     278
+     CLKBUF_X3                       3
+     CLKGATE_X1                    820
+     DFFR_X1                     21857
+     INV_X1                      10492
+     INV_X16                        21
+     INV_X2                        903
+     INV_X32                       167
+     INV_X4                        306
+     INV_X8                          2
+     MUX2_X1                       306
+     NAND2_X1                    32214
+     NAND2_X2                     2347
+     NAND2_X4                     1721
+     NAND3_X1                     4150
+     NAND3_X2                      588
+     NAND4_X1                     1009
+     NAND4_X2                      161
+     NAND4_X4                      290
+     NOR2_X1                     13854
+     NOR2_X2                       937
+     NOR2_X4                       838
+     NOR3_X1                      7528
+     NOR3_X2                       224
+     NOR3_X4                       559
+     NOR4_X1                       559
+     NOR4_X2                         2
+     OAI211_X1                      60
+     OAI211_X2                       5
+     OAI211_X4                       2
+     OAI21_X1                     7318
+     OAI21_X2                      642
+     OAI21_X4                      263
+     OAI221_X1                      80
+     OAI22_X1                      458
+     OR2_X1                       1341
+     OR2_X2                        450
+     OR2_X4                        528
+     OR3_X1                       1257
+     OR3_X2                          4
+     OR3_X4                          1
+     OR4_X1                        567
+     OR4_X2                          2
+     OR4_X4                          1
+     XNOR2_X1                    12364
+     XNOR2_X2                     2484
+     XOR2_X1                     23001
+     XOR2_X2                      6674
+
+   Chip area for module '\accelerator': 358063.132001
+     of which used for sequential elements: 116279.240000 (32.47%)
+
+End of script. Logfile hash: 25ca848d92, CPU: user 17.53s system 2.30s, MEM: 2063.65 MB peak
+Yosys 0.54+15 (git sha1 cd71f190c, clang++ 14.0.0-1ubuntu1.1 -fPIC -O3)
+Time spent: 95% 2x read_verilog (18 sec), 2% 1x hierarchy (0 sec), ...

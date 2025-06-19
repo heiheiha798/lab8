@@ -4,7 +4,7 @@
 module tb_synth_accelerator;
 
     // --- Testbench Parameters ---
-    localparam MATRIX_DIM_GLOBAL_TB_SIM = 32;   // For faster simulation, can be 16 or 32
+    localparam MATRIX_DIM_GLOBAL_TB_SIM = 512;   // For faster simulation, can be 16 or 32
     localparam TILE_DIM_SYSTOLIC_TB   = 16;
     localparam RAM_DATA_WIDTH_TB      = 64;
     localparam SINT8_BITS_TB          = 8;
@@ -12,7 +12,7 @@ module tb_synth_accelerator;
     localparam LOGIC_ADDR_WIDTH_TB    = 18; // For Main Memory Model
     localparam MM_READ_LATENCY_CYCLES_TB = 2; // Main Memory Read Latency
 
-    localparam CLK_PERIOD_TB          = 10; // Clock period in ns
+    localparam CLK_PERIOD_TB          = 1.13; // Clock period in ns
 
     // Derived parameters for memory layout and DUT instantiation
     localparam SINT8_PER_RAM_WORD_TB = (SINT8_BITS_TB == 0) ? 1 : RAM_DATA_WIDTH_TB / SINT8_BITS_TB; // Avoid div by zero
@@ -179,9 +179,13 @@ module tb_synth_accelerator;
 
     integer fid;
     integer k;
+    reg start_time_reg_set;
+    time start_sim_time;
+    time end_sim_time;
 
     // --- Testbench Control Sequence ---
     initial begin
+        // Original initializations from your new code
         clk_tb = 1'b0; // Start clock low for clarity in waveform
         rst_n_tb = 1'b0;
         start_computation_tb = 1'b0;
@@ -190,36 +194,67 @@ module tb_synth_accelerator;
         tile_a_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
         tile_b_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
 
+        // Timing logic initializations from the example code
+        start_time_reg_set = 1'b0;
+        start_sim_time = 0;
+        end_sim_time = 0;
+
+        $timeformat(-9, 3, " ns", 10); // From the example code (3 decimal places for ns)
+
+        // Original reset sequence from your new code
         #(CLK_PERIOD_TB * 2.5); // Hold reset for a few cycles
         rst_n_tb = 1'b1;
         #(CLK_PERIOD_TB * 0.5); // Ensure reset propagates
+        $display("[%0t TB] Reset released.", $time); // Display message style from the example code
 
-        // Wait a bit for DUT to stabilize after reset if needed
+        // Original wait from your new code
         #(CLK_PERIOD_TB * 2);
 
+        // Original start computation from your new code, augmented with timing logic & display from example
+        $display("[%0t TB] Asserting start_computation.", $time); // Display message style from the example code
         start_computation_tb = 1'b1;
+        start_sim_time = $time; // Record start time (Timing logic from example)
+        start_time_reg_set = 1'b1; // Flag that start time is set (Timing logic from example)
+
         #(CLK_PERIOD_TB);
         start_computation_tb = 1'b0;
+        $display("[%0t TB] De-asserted start_computation.", $time); // Display message style from the example code
 
+        // Original wait for done from your new code, augmented with timing logic & display from example
+        $display("[%0t TB] Waiting for computation_done_tb signal...", $time); // Display message style from the example code
         wait (computation_done_tb == 1'b1);
-        #(CLK_PERIOD_TB); // Allow one more cycle for any final writes if needed
+        end_sim_time = $time; // Record end time (Timing logic from example)
+        $display("[%0t TB] computation_done_tb asserted by accelerator.", $time); // Display message style from the example code
+        if (start_time_reg_set) begin // Calculate and display execution time (Timing logic from example)
+             $display("[%0t TB] Execution time: %0t ns", $time, (end_sim_time - start_sim_time));
+        end
+
+        #(CLK_PERIOD_TB); // Original delay from your new code: Allow one more cycle for any final writes if needed
         
+        // Original file dump from your new code, augmented with display messages from example's style
+        // Assuming 'fid' and 'k' are declared appropriately (e.g., integer) elsewhere in your testbench module.
         fid = $fopen("result_mem.csv", "w");
         if (fid != 0) begin
+            // This for loop structure (including 'break') is from YOUR new code and is UNCHANGED.
             for (k = 0; k < TOTAL_SINT32_WORDS_C_SIM; k = k + 1) begin
                 if ((BASE_ADDR_C_MM_TB + k) < MAIN_MEM_SIZE_TB) begin
                     $fdisplay(fid, "%h", main_memory_model_array[BASE_ADDR_C_MM_TB + k]);
                 end else begin
-                    break;
+                    break; // Kept from your new code
                 end
             end
             $fclose(fid);
+            $display("[%0t TB] Result C matrix dumped to result_mem.csv.", $time); // Display message style from the example code
+        end else begin
+            // Added this 'else' block for robustness, consistent with example's logging style
+            $display("[%0t TB] ERROR: Could not open result_mem.csv for writing.", $time);
         end
 
+        // Original wait and finish from your new code, augmented with display from example's style
         #(CLK_PERIOD_TB * 10);
+        $display("[%0t TB] Test finished.", $time); // Display message style from the example code
         $finish;
     end
-
     // Clock generator
     always # (CLK_PERIOD_TB / 2) clk_tb = ~clk_tb;
 
