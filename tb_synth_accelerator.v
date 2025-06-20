@@ -4,7 +4,7 @@
 module tb_synth_accelerator;
 
     // --- Testbench Parameters ---
-    localparam MATRIX_DIM_GLOBAL_TB_SIM = 512;   // For faster simulation, can be 16 or 32
+    localparam MATRIX_DIM_GLOBAL_TB_SIM = 32;   // For faster simulation, can be 16 or 32
     localparam TILE_DIM_SYSTOLIC_TB   = 16;
     localparam RAM_DATA_WIDTH_TB      = 64;
     localparam SINT8_BITS_TB          = 8;
@@ -53,13 +53,13 @@ module tb_synth_accelerator;
     wire                               tile_a_sram_we_o_w;
     wire [TILE_SRAM_ADDR_WIDTH_DUT-1:0] tile_a_sram_addr_o_w; // Use calculated width for DUT
     wire [RAM_DATA_WIDTH_TB-1:0]       tile_a_sram_wdata_o_w;
-    reg  [RAM_DATA_WIDTH_TB-1:0]       tile_a_sram_rdata_i_tb;
+    wire  [RAM_DATA_WIDTH_TB-1:0]       tile_a_sram_rdata_i_tb;
 
     wire                               tile_b_sram_cs_o_w;
     wire                               tile_b_sram_we_o_w;
     wire [TILE_SRAM_ADDR_WIDTH_DUT-1:0] tile_b_sram_addr_o_w; // Use calculated width for DUT
     wire [RAM_DATA_WIDTH_TB-1:0]       tile_b_sram_wdata_o_w;
-    reg  [RAM_DATA_WIDTH_TB-1:0]       tile_b_sram_rdata_i_tb;
+    wire  [RAM_DATA_WIDTH_TB-1:0]       tile_b_sram_rdata_i_tb;
 
     // --- Instantiate Accelerator (DUT) ---
     accelerator #(
@@ -141,41 +141,41 @@ module tb_synth_accelerator;
     reg [RAM_DATA_WIDTH_TB-1:0] tile_a_sram_model_array [0:TILE_SRAM_WORDS_TB-1];
     reg [RAM_DATA_WIDTH_TB-1:0] tile_b_sram_model_array [0:TILE_SRAM_WORDS_TB-1];
 
-    // --- Tile A SRAM Model (1-cycle read latency) ---
-    always @(posedge clk_tb or negedge rst_n_tb) begin // Added rst_n_tb for completeness
+    // --- Tile A SRAM Model (Write path clocked, Read path combinational) ---
+    // Write path remains clocked
+    always @(posedge clk_tb or negedge rst_n_tb) begin
         if (!rst_n_tb) begin
-            tile_a_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'b0}};
+            // No specific reset action needed for the memory array content itself here,
+            // but you could initialize tile_a_sram_rdata_i_tb if it were still a reg for some reason.
+            // Since it's now an assign target, this block only handles writes.
         end else begin
-            if (tile_a_sram_cs_o_w) begin
-                if (tile_a_sram_we_o_w) begin // Write operation
-                    tile_a_sram_model_array[tile_a_sram_addr_o_w] <= tile_a_sram_wdata_o_w;
-                    tile_a_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'bx}}; // Output X during write
-                end else begin // Read operation
-                    tile_a_sram_rdata_i_tb <= tile_a_sram_model_array[tile_a_sram_addr_o_w];
-                end
-            end else begin // Not selected
-                tile_a_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'bx}}; // Output X when not selected (instead of Z)
+            if (tile_a_sram_cs_o_w && tile_a_sram_we_o_w) begin // Write operation
+                tile_a_sram_model_array[tile_a_sram_addr_o_w] <= tile_a_sram_wdata_o_w;
             end
         end
     end
 
-    // --- Tile B SRAM Model (1-cycle read latency) ---
-    always @(posedge clk_tb or negedge rst_n_tb) begin // Added rst_n_tb
+    // Combinational read path for Tile A SRAM
+    assign tile_a_sram_rdata_i_tb = (tile_a_sram_cs_o_w && !tile_a_sram_we_o_w) ?
+                                    tile_a_sram_model_array[tile_a_sram_addr_o_w] :
+                                    {RAM_DATA_WIDTH_TB{1'bx}}; // Output X if not selected or during write
+
+    // --- Tile B SRAM Model (Write path clocked, Read path combinational) ---
+    // Write path remains clocked
+    always @(posedge clk_tb or negedge rst_n_tb) begin
         if (!rst_n_tb) begin
-            tile_b_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'b0}};
+            // No specific reset action needed
         end else begin
-            if (tile_b_sram_cs_o_w) begin
-                if (tile_b_sram_we_o_w) begin // Write operation
-                    tile_b_sram_model_array[tile_b_sram_addr_o_w] <= tile_b_sram_wdata_o_w;
-                    tile_b_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'bx}}; // Output X during write
-                end else begin // Read operation
-                    tile_b_sram_rdata_i_tb <= tile_b_sram_model_array[tile_b_sram_addr_o_w];
-                end
-            end else begin // Not selected
-                tile_b_sram_rdata_i_tb <= {RAM_DATA_WIDTH_TB{1'bx}}; // Output X when not selected (instead of Z)
+            if (tile_b_sram_cs_o_w && tile_b_sram_we_o_w) begin // Write operation
+                tile_b_sram_model_array[tile_b_sram_addr_o_w] <= tile_b_sram_wdata_o_w;
             end
         end
     end
+
+    // Combinational read path for Tile B SRAM
+    assign tile_b_sram_rdata_i_tb = (tile_b_sram_cs_o_w && !tile_b_sram_we_o_w) ?
+                                    tile_b_sram_model_array[tile_b_sram_addr_o_w] :
+                                    {RAM_DATA_WIDTH_TB{1'bx}}; // Output X if not selected or during write
 
     integer fid;
     integer k;
@@ -191,8 +191,8 @@ module tb_synth_accelerator;
         start_computation_tb = 1'b0;
         mm_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}}; // Initialize driven regs
         mm_ready_i_tb = 1'b0;
-        tile_a_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
-        tile_b_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
+        // tile_a_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
+        // tile_b_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
 
         // Timing logic initializations from the example code
         start_time_reg_set = 1'b0;

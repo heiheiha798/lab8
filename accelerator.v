@@ -366,6 +366,73 @@ module accelerator #(
                     end
                 end
             end
+            // DEBUG DISPLAYS for SRAM A Read
+            // if (current_state_reg == S_SA_FEED_CYCLE_A_READ_REQ ||
+            //     current_state_reg == S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS ||
+            //     (next_state_reg == S_SA_FEED_CYCLE_A_READ_REQ && current_state_reg != S_SA_FEED_CYCLE_A_READ_REQ) || // Entering REQ
+            //     (next_state_reg == S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS && current_state_reg != S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS) // Entering LATCH
+            // ) begin
+            //     $display("[%0t ACCEL_DBG A_SRAM] State: %s -> %s | cs_o_curr: %b, addr_o_curr: %h | cs_o_next_comb: %b, addr_o_next_comb: %h | rdata_i: %h | latched_rdata: %h (will be latched if cond met)",
+            //         $time,
+            //         fsm_state_to_string(current_state_reg),
+            //         fsm_state_to_string(next_state_reg),
+            //         tile_a_sram_cs_o,          // 当前周期的CS输出 (在时钟沿前的值)
+            //         tile_a_sram_addr_o,        // 当前周期的Addr输出
+            //         tile_a_sram_cs_o_next_comb,  // 为下一个周期计算的CS
+            //         tile_a_sram_addr_o_next_comb,// 为下一个周期计算的Addr
+            //         tile_a_sram_rdata_i,       // SRAM的当前数据输出
+            //         ( (current_state_reg == S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS && tile_a_sram_cs_o && !tile_a_sram_we_o) ? tile_a_sram_rdata_i : latched_tile_a_sram_rdata_r) // 模拟锁存行为
+            //     );
+            // end
+
+            // if (do_unpack_a_pulse_r) begin
+            //     $display("[%0t ACCEL_DBG A_SRAM_UNPACK] Unpacking for element %d, offset %d. Latched data was: %h. temp_a_col_for_sa[%d] will be: %h",
+            //         $time,
+            //         a_element_idx_for_unpack_r,
+            //         sint8_offset_in_word_a_for_unpack_r,
+            //         latched_tile_a_sram_rdata_r,
+            //         a_element_idx_for_unpack_r,
+            //         ( (a_element_idx_for_unpack_r < TILE_DIM_SYSTOLIC && SINT8_PER_RAM_WORD > 0 && sint8_offset_in_word_a_for_unpack_r < SINT8_PER_RAM_WORD) ? 
+            //           latched_tile_a_sram_rdata_r[(sint8_offset_in_word_a_for_unpack_r * SINT8_BITS) +: SINT8_BITS] : 
+            //           {SINT8_BITS{1'bx}} )
+            //     );
+            // end
+
+            // if (current_state_reg >= S_STORE_C_TILE_SA_READ_SETUP && current_state_reg <= S_STORE_C_MM_WRITE_WAIT_READY) begin
+            //     $display("[%0t ACCEL_DBG C_STORE] State: %s | SelRow: %d, EnOut: %b, RowValid: %b | MMCS:%b,MMWE:%b,MMAddr: %h, MMWordCnt: %d | MMWDataOut: %h, MMWDataNext: %h | CStoRow: %d, CStoWordInRow: %d",
+            //         $time,
+            //         fsm_state_to_string(current_state_reg),
+            //         sa_select_row_reg,
+            //         sa_enable_output_reg,
+            //         sa_tile_row_result_valid_wire,
+            //         mm_cs_o, // 当前MM CS
+            //         mm_we_o, // 当前MM WE
+            //         mm_addr_o, // 当前MM Addr
+            //         mm_word_count_reg,
+            //         mm_wdata_o, // <--- 实际发送给MM的数据 (当前周期)
+            //         mm_wdata_o_next_comb, // <--- 将在下一个周期发送给MM的数据
+            //         c_store_row_read_idx_reg,
+            //         c_store_word_in_row_idx_reg
+            //     );
+            // end
+
+            // if (current_state_reg == S_CTL_LOOP_INCREMENT || current_state_reg == S_K_LOOP_INCREMENT) begin
+            //     $display("[%0t ACCEL_DBG LOOP_INC] State: %s | r_c: %d, c_c: %d, k: %d",
+            //         $time,
+            //         fsm_state_to_string(current_state_reg),
+            //         r_c_idx_reg, c_c_idx_reg, k_idx_reg
+            //     );
+            // end
+
+            // if (current_state_reg == S_INIT_K_LOOP_PE_SETUP) begin
+            //     $display("[%0t ACCEL_DBG SA_CTRL] State: S_INIT_K_LOOP_PE_SETUP | k_idx: %d | ClearAccumPulse: %b, CondClearSumLevel: %b, StartNewPassPulse: %b",
+            //         $time, k_idx_reg,
+            //         sa_clear_accum_pulse_next, // 或者 _reg，取决于你想看哪个时刻
+            //         sa_cond_clear_sum_level_next,
+            //         sa_start_new_pass_pulse_next
+            //     );
+            // end
+            //DEBUG END
         end
     end
 
@@ -400,10 +467,13 @@ module accelerator #(
         c_store_word_in_row_idx_next = c_store_word_in_row_idx_reg;
 
         mm_cs_o_next_comb = 1'b0; mm_we_o_next_comb = 1'b0; mm_wdata_o_next_comb = mm_wdata_o;
-        tile_a_sram_cs_o_next_comb = 1'b0; tile_a_sram_we_o_next_comb = 1'b0;
-        tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; tile_a_sram_wdata_o_next_comb = tile_a_sram_wdata_o;
+        tile_a_sram_cs_o_next_comb = 1'b0; 
+        tile_a_sram_we_o_next_comb = 1'b0;
+        // tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; 
+        tile_a_sram_wdata_o_next_comb = tile_a_sram_wdata_o;
         tile_b_sram_cs_o_next_comb = 1'b0; tile_b_sram_we_o_next_comb = 1'b0;
-        tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o; tile_b_sram_wdata_o_next_comb = tile_b_sram_wdata_o;
+        // tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o; 
+        tile_b_sram_wdata_o_next_comb = tile_b_sram_wdata_o;
 
         sa_clear_accum_pulse_next = 1'b0; sa_start_new_pass_pulse_next = 1'b0;
         computation_done_next_comb = 1'b0;
@@ -455,34 +525,26 @@ module accelerator #(
                 a_element_idx_for_unpack_next = current_a_element_row_idx_local;
                 sint8_offset_in_word_a_for_unpack_next = offset_in_word_a_local;
 
-                next_state_reg = S_SA_FEED_CYCLE_A_READ_WAIT1;
-            end
-
-            S_SA_FEED_CYCLE_A_READ_WAIT1: begin // Cycle N+1: First wait cycle for A data
-                sa_activate_comp_next = 1'b1;
-                tile_a_sram_cs_o_next_comb = tile_a_sram_cs_o; // Keep CS asserted (or de-assert if SRAM latches addr)
-                tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; // Keep address
-                // Data arrives at rdata_i at the END of this cycle
                 next_state_reg = S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS;
             end
 
-            S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS: begin // Cycle N+2: Latch A data, prepare for unpack next cycle
+            // S_SA_FEED_CYCLE_A_READ_WAIT1: begin // Cycle N+1: First wait cycle for A data
+            //     sa_activate_comp_next = 1'b1;
+            //     tile_a_sram_cs_o_next_comb = tile_a_sram_cs_o; // Keep CS asserted (or de-assert if SRAM latches addr)
+            //     tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; // Keep address
+            //     // Data arrives at rdata_i at the END of this cycle
+            //     next_state_reg = S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS;
+            // end
+
+            S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS: begin // Cycle N+1 (原Cycle N+2): Latch A data
                 sa_activate_comp_next = 1'b1;
-                // Latching of tile_a_sram_rdata_i into latched_tile_a_sram_rdata_r happens in clocked block
-                // based on current_state_reg being S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS.
-                // CS and Addr should still be valid from previous states if SRAM needs them.
-                tile_a_sram_cs_o_next_comb = tile_a_sram_cs_o;
-                tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o;
+                do_unpack_a_pulse_next = 1'b1;
 
-
-                do_unpack_a_pulse_next = 1'b1; // Set pulse to unpack the latched data in the *next* cycle
-
-                if (sa_feed_a_col_element_idx_r == TILE_DIM_SYSTOLIC - 1) begin // Done with current A column
+                if (sa_feed_a_col_element_idx_r == TILE_DIM_SYSTOLIC - 1) begin
                     temp_a_col_filled_next = 1'b1;
-                    // sa_feed_a_col_element_idx_next = 0; // Reset for next A column later
-                    next_state_reg = S_SA_FEED_CYCLE_B_READ_REQ; // Move to read B row
+                    next_state_reg = S_SA_FEED_CYCLE_B_READ_REQ;
                 end else begin
-                    sa_feed_a_col_element_idx_next = sa_feed_a_col_element_idx_r + 1; // Next element in A column
+                    sa_feed_a_col_element_idx_next = sa_feed_a_col_element_idx_r + 1;
                     next_state_reg = S_SA_FEED_CYCLE_A_READ_REQ;
                 end
             end
@@ -500,20 +562,20 @@ module accelerator #(
                 // Store word index that corresponds to this request
                 b_sram_word_idx_for_unpack_next = b_sram_word_idx_in_row_r;
 
-                next_state_reg = S_SA_FEED_CYCLE_B_READ_WAIT1;
-            end
-
-            S_SA_FEED_CYCLE_B_READ_WAIT1: begin // Cycle M+1: First wait for B data
-                sa_activate_comp_next = 1'b1;
-                tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
-                tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
                 next_state_reg = S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS;
             end
 
+            // S_SA_FEED_CYCLE_B_READ_WAIT1: begin // Cycle M+1: First wait for B data
+            //     sa_activate_comp_next = 1'b1;
+            //     tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
+            //     tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
+            //     next_state_reg = S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS;
+            // end
+
             S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS: begin // Cycle M+2: Latch B data, prepare for unpack
                 sa_activate_comp_next = 1'b1;
-                tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
-                tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
+                // tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
+                // tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
 
                 do_unpack_b_pulse_next = 1'b1;
 
