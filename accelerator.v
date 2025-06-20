@@ -2,7 +2,7 @@
 `timescale 1ns / 1ps
 
 module accelerator #(
-    parameter MATRIX_DIM_GLOBAL = 32,
+    parameter MATRIX_DIM_GLOBAL = 512,
     parameter TILE_DIM_SYSTOLIC = 16,
     parameter RAM_DATA_WIDTH    = 64, // Width for Main Memory and Tile SRAMs
     parameter SINT8_BITS        = 8,
