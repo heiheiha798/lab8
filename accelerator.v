@@ -2,19 +2,16 @@
 `timescale 1ns / 1ps
 
 module accelerator #(
-    parameter MATRIX_DIM_GLOBAL = 512,
+    parameter MATRIX_DIM_GLOBAL = 32,
     parameter TILE_DIM_SYSTOLIC = 16,
     parameter RAM_DATA_WIDTH    = 64, // Width for Main Memory and Tile SRAMs
     parameter SINT8_BITS        = 8,
     parameter PE_ACCUM_BITS     = 32,
     parameter LOGIC_ADDR_WIDTH  = 18,   // For Main Memory addressing
-    // Calculate words needed in Tile SRAM (assuming SINT8 elements)
     localparam TILE_SRAM_TOTAL_BITS  = (TILE_DIM_SYSTOLIC * TILE_DIM_SYSTOLIC * SINT8_BITS),
     localparam TILE_SRAM_WORDS_CALC  = (TILE_SRAM_TOTAL_BITS == 0 || RAM_DATA_WIDTH == 0) ? 1 : (TILE_SRAM_TOTAL_BITS + RAM_DATA_WIDTH - 1) / RAM_DATA_WIDTH, // Ceiling division
     localparam TILE_SRAM_WORDS       = (TILE_SRAM_WORDS_CALC == 0 && TILE_SRAM_TOTAL_BITS > 0) ? 1 : TILE_SRAM_WORDS_CALC,
-    parameter TILE_SRAM_ADDR_WIDTH  = (TILE_SRAM_WORDS <= 1) ? 1 : $clog2(TILE_SRAM_WORDS),
-
-    parameter MM_READ_LATENCY_CYCLES = 2 // Expected read latency from main memory controller (for FSM design)
+    parameter TILE_SRAM_ADDR_WIDTH  = (TILE_SRAM_WORDS <= 1) ? 1 : $clog2(TILE_SRAM_WORDS)
 ) (
     input wire clk,
     input wire rst_n,
@@ -63,8 +60,6 @@ module accelerator #(
                                         ((WORDS_PER_SINT8_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT8_MM_TILE)) :
                                         ((WORDS_PER_SINT32_MM_TILE <=1)? 1 : $clog2(WORDS_PER_SINT32_MM_TILE));
 
-
-    localparam TILE_AREA = TILE_DIM_SYSTOLIC * TILE_DIM_SYSTOLIC;
     localparam LOOP_COUNTER_WIDTH = (SAFE_TILES_PER_ROW_COL_GLOBAL <= 1) ? 1 : $clog2(SAFE_TILES_PER_ROW_COL_GLOBAL);
     localparam _SINT32_PER_RAM_WORD_SAFE = (SINT32_PER_RAM_WORD == 0) ? 1 : SINT32_PER_RAM_WORD;
     localparam NUM_PACKED_WORDS_PER_SA_ROW_C_CALC = (TILE_DIM_SYSTOLIC == 0) ? 0 : (SINT32_PER_RAM_WORD == 0 && TILE_DIM_SYSTOLIC > 0) ? TILE_DIM_SYSTOLIC : (TILE_DIM_SYSTOLIC + _SINT32_PER_RAM_WORD_SAFE - 1) / _SINT32_PER_RAM_WORD_SAFE;
@@ -106,12 +101,10 @@ module accelerator #(
     localparam S_STORE_C_MM_WRITE_WAIT_READY = 21;
     // States for Tile SRAM 2-cycle visible read
     localparam S_SA_FEED_CYCLE_A_READ_REQ = 22;
-    localparam S_SA_FEED_CYCLE_A_READ_WAIT1 = 23; // First wait cycle
-    localparam S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS = 24; // Second wait, latch, and setup unpack
-    localparam S_SA_FEED_CYCLE_B_READ_REQ = 25;
-    localparam S_SA_FEED_CYCLE_B_READ_WAIT1 = 26; // First wait cycle
-    localparam S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS = 27; // Second wait, latch, and setup unpack
-    localparam S_SA_PRE_EXEC_CHECK = 28;
+    localparam S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS = 23; // Second wait, latch, and setup unpack
+    localparam S_SA_FEED_CYCLE_B_READ_REQ = 24;
+    localparam S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS = 25; // Second wait, latch, and setup unpack
+    localparam S_SA_PRE_EXEC_CHECK = 26;
     localparam B_WORDS_PER_ROW = (TILE_DIM_SYSTOLIC + SINT8_PER_RAM_WORD - 1) / SINT8_PER_RAM_WORD;
 
     reg [5:0] current_state_reg, next_state_reg;
@@ -226,10 +219,8 @@ module accelerator #(
             S_LOAD_B_TILE_SRAM_WRITE:          fsm_state_to_string = "S_LOAD_B_SRAM_WR";
             S_SA_FEED_SETUP:                   fsm_state_to_string = "S_SA_FEED_SETUP";
             S_SA_FEED_CYCLE_A_READ_REQ:        fsm_state_to_string = "S_SA_A_RD_REQ";
-            S_SA_FEED_CYCLE_A_READ_WAIT1:      fsm_state_to_string = "S_SA_A_RD_WAIT1";
             S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS: fsm_state_to_string = "S_SA_A_LATCH_PROC";
             S_SA_FEED_CYCLE_B_READ_REQ:        fsm_state_to_string = "S_SA_B_RD_REQ";
-            S_SA_FEED_CYCLE_B_READ_WAIT1:      fsm_state_to_string = "S_SA_B_RD_WAIT1";
             S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS: fsm_state_to_string = "S_SA_B_LATCH_PROC";
             S_SA_PRE_EXEC_CHECK:               fsm_state_to_string = "S_SA_PRE_EXEC_CHK";
             S_SA_FEED_CYCLE_EXEC:              fsm_state_to_string = "S_SA_FEED_EXEC";
@@ -353,17 +344,27 @@ module accelerator #(
             // --- Unpack data for Tile B row (triggered by do_unpack_b_pulse_r) ---
             if (do_unpack_b_pulse_r) begin
                 if (SINT8_PER_RAM_WORD > 0) begin
+                    // --- START OF MODIFICATION ---
+
+                    // 1. 计算当前64位字在一行B数据中的基地址偏移
+                    //    例如，第0个字偏移为0，第1个字偏移为8，第2个字偏移为16...
+                    integer base_offset;
+                    base_offset = b_sram_word_idx_for_unpack_r * SINT8_PER_RAM_WORD;
+
+                    // 2. 循环遍历当前64位字中的所有SINT8元素
                     for (i = 0; i < SINT8_PER_RAM_WORD; i = i + 1) begin
-                        if (b_sram_word_idx_for_unpack_r == 0) begin // First word of the B row data
-                            if (i < TILE_DIM_SYSTOLIC) begin // Ensure within bounds of temp_b_row_for_sa
-                                temp_b_row_for_sa[i] <= latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS];
-                            end
-                        end else begin // Second word of the B row data (if TILE_DIM > SINT8_PER_RAM_WORD)
-                            if ((i + SINT8_PER_RAM_WORD) < TILE_DIM_SYSTOLIC) begin
-                                temp_b_row_for_sa[i + SINT8_PER_RAM_WORD] <= latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS];
-                            end
+                        
+                        // 3. 计算最终要写入的目标数组的索引
+                        integer target_idx;
+                        target_idx = base_offset + i;
+                        
+                        // 4. 只有当目标索引在Tile维度范围内时，才执行写入
+                        if (target_idx < TILE_DIM_SYSTOLIC) begin
+                            temp_b_row_for_sa[target_idx] <= latched_tile_b_sram_rdata_r[(i * SINT8_BITS) +: SINT8_BITS];
                         end
                     end
+
+                    // --- END OF MODIFICATION ---
                 end
             end
             // DEBUG DISPLAYS for SRAM A Read
@@ -436,11 +437,11 @@ module accelerator #(
         end
     end
 
-    integer current_a_element_row_idx_local;    // For calculating Tile A SRAM address
-    integer current_a_fixed_col_idx_local;    // For calculating Tile A SRAM address (current SA pass cycle)
-    integer element_linear_offset_a_local;    // Linear offset of A element in tile
-    integer sram_word_addr_a_local;           // Word address in Tile A SRAM
-    integer offset_in_word_a_local;           // Byte offset within that SRAM word
+    integer current_a_element_row_idx_local;                        // For calculating Tile A SRAM address
+    integer current_a_fixed_col_idx_local;                          // For calculating Tile A SRAM address (current SA pass cycle)
+    integer element_linear_offset_a_local;                          // Linear offset of A element in tile
+    reg [TILE_SRAM_ADDR_WIDTH-1:0] sram_word_addr_a_local;          // Word address in Tile A SRAM
+    reg [$clog2(SINT8_PER_RAM_WORD)-1:0] offset_in_word_a_local;    // Byte offset within that SRAM word
 
     integer base_sram_addr_for_row_b_local;   // Base word address for a row in Tile B SRAM
     integer i_pack_local_debug; // Use a distinct name for local loop var
@@ -469,10 +470,8 @@ module accelerator #(
         mm_cs_o_next_comb = 1'b0; mm_we_o_next_comb = 1'b0; mm_wdata_o_next_comb = mm_wdata_o;
         tile_a_sram_cs_o_next_comb = 1'b0; 
         tile_a_sram_we_o_next_comb = 1'b0;
-        // tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; 
         tile_a_sram_wdata_o_next_comb = tile_a_sram_wdata_o;
         tile_b_sram_cs_o_next_comb = 1'b0; tile_b_sram_we_o_next_comb = 1'b0;
-        // tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o; 
         tile_b_sram_wdata_o_next_comb = tile_b_sram_wdata_o;
 
         sa_clear_accum_pulse_next = 1'b0; sa_start_new_pass_pulse_next = 1'b0;
@@ -528,14 +527,6 @@ module accelerator #(
                 next_state_reg = S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS;
             end
 
-            // S_SA_FEED_CYCLE_A_READ_WAIT1: begin // Cycle N+1: First wait cycle for A data
-            //     sa_activate_comp_next = 1'b1;
-            //     tile_a_sram_cs_o_next_comb = tile_a_sram_cs_o; // Keep CS asserted (or de-assert if SRAM latches addr)
-            //     tile_a_sram_addr_o_next_comb = tile_a_sram_addr_o; // Keep address
-            //     // Data arrives at rdata_i at the END of this cycle
-            //     next_state_reg = S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS;
-            // end
-
             S_SA_FEED_CYCLE_A_LATCH_AND_PROCESS: begin // Cycle N+1 (原Cycle N+2): Latch A data
                 sa_activate_comp_next = 1'b1;
                 do_unpack_a_pulse_next = 1'b1;
@@ -551,9 +542,6 @@ module accelerator #(
 
             S_SA_FEED_CYCLE_B_READ_REQ: begin // Cycle M: Request read for B element
                 sa_activate_comp_next = 1'b1;
-                // B row is indexed by sa_feed_total_cycles_count_reg
-                // We read TILE_DIM_SYSTOLIC / SINT8_PER_RAM_WORD words for B row.
-                // Here, b_sram_word_idx_in_row_r is 0 for first word, 1 for second (if needed)
                 base_sram_addr_for_row_b_local = (sa_feed_total_cycles_count_reg * TILE_DIM_SYSTOLIC) / SINT8_PER_RAM_WORD;
                 tile_b_sram_addr_o_next_comb = base_sram_addr_for_row_b_local + b_sram_word_idx_in_row_r;
                 tile_b_sram_cs_o_next_comb = 1'b1;
@@ -565,24 +553,13 @@ module accelerator #(
                 next_state_reg = S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS;
             end
 
-            // S_SA_FEED_CYCLE_B_READ_WAIT1: begin // Cycle M+1: First wait for B data
-            //     sa_activate_comp_next = 1'b1;
-            //     tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
-            //     tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
-            //     next_state_reg = S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS;
-            // end
-
             S_SA_FEED_CYCLE_B_LATCH_AND_PROCESS: begin // Cycle M+2: Latch B data, prepare for unpack
                 sa_activate_comp_next = 1'b1;
-                // tile_b_sram_cs_o_next_comb = tile_b_sram_cs_o;
-                // tile_b_sram_addr_o_next_comb = tile_b_sram_addr_o;
-
                 do_unpack_b_pulse_next = 1'b1;
 
                 // Logic for multiple words for B if TILE_DIM_SYSTOLIC > SINT8_PER_RAM_WORD
                 if (b_sram_word_idx_in_row_r == B_WORDS_PER_ROW - 1) begin // Done with all words for this B row
                     temp_b_row_filled_next = 1'b1;
-                    // b_sram_word_idx_in_row_next = 0; // Reset for next B row later
                     if (temp_a_col_filled_r) begin // If A column is also ready
                         next_state_reg = S_SA_PRE_EXEC_CHECK;
                     end else begin // Should not happen if A fills first or concurrently

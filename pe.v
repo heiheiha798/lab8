@@ -4,9 +4,7 @@
 module pe #(
     parameter INPUT_DATA_WIDTH = 8,
     parameter ACCUM_DATA_WIDTH = 32,
-    parameter MAC_COUNT_TARGET = 16,
-    parameter integer PE_ROW_ID = -1,
-    parameter integer PE_COL_ID = -1
+    parameter MAC_COUNT_TARGET = 16
 )(
     input wire                          clk,
     input wire                          rst_n,
@@ -45,7 +43,6 @@ module pe #(
 
     assign mul_output_data = a_reg * b_reg;
     assign add_output_data = mul_result_reg + local_accumulator_reg;
-
     assign a_valid_out = a_valid_for_output_reg;
     assign b_valid_out = b_valid_for_output_reg;
     assign a_data_out  = a_reg; // a_reg is the latched input, so output is delayed by one cycle
@@ -97,28 +94,6 @@ module pe #(
                         pe_calculation_done_latch <= 1'b1;
                     end
                 end
-
-                // --- STROBE FOR PE ---
-                // if (enable && ( (PE_ROW_ID == 0 && PE_COL_ID == 0) || (PE_ROW_ID == 15 && PE_COL_ID == 0) ) /* && (relevant_activity_condition) */ ) begin
-                //      // The strobe needs to print values consistent with this new pipelining
-                //      // a_r, b_r are inputs from previous cycle
-                //      // mul_output_data is product of a_r, b_r
-                //      // inputs_that_produced_a_b_regs_were_valid_reg is validity of a_r, b_r
-                //      // mul_result_reg (AccIn) is product from 2 cycles ago
-                //      // mul_valid_reg (MulVldRg) is validity from 2 cycles ago
-                //     $strobe("@%0t [PE(%0d,%0d)] En:%b|Ain:%d(v%b) Bin:%d(v%b)|a_r:%d b_r:%d(valid_for_them:%b)|MulOut:%d|AccProduct:%d(valid:%b)|AccValue:%d|MACs:%d done:%b resVldWillBe:%b",
-                //         $time, PE_ROW_ID, PE_COL_ID, enable,
-                //         a_data_in, a_valid_in, b_data_in, b_valid_in, // Current port inputs
-                //         a_reg, b_reg, inputs_that_produced_a_b_regs_were_valid_reg, // Values that produced current mul_output_data
-                //         mul_output_data,            // Product of a_reg, b_reg
-                //         mul_result_reg,             // Product to be accumulated this cycle (from prev. mul_output_data)
-                //         mul_valid_reg,              // Validity of mul_result_reg
-                //         local_accumulator_reg,      // Accumulator before this cycle's add
-                //         performed_mac_count,
-                //         pe_calculation_done_latch,
-                //         (mul_valid_reg && (performed_mac_count < MAC_COUNT_TARGET) && (next_performed_mac_count_w == MAC_COUNT_TARGET))
-                //     );
-                // end
             end
         end
     end

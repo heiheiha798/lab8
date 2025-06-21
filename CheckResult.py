@@ -71,11 +71,7 @@ def read_hw_result_sint32_direct(fileName="result_mem.csv", matrix_dim_arg=MATRI
 
 # --- 主程序 ---
 def main():
-    # 对于16x16单瓦片，硬件输出的 result_mem.csv 应该已经是行主序 (内部打包到RAM字)
-    # 所以不需要 reorder_result_mem.py 的输出了。
     hw_result_file = "result_mem.csv"
-    # 如果您决定对512x512仍使用reorder脚本，并重命名输出，则相应修改此处。
-    # hw_result_file = "result_mem_reordered_sint32.csv" 
 
     try:
         matrix_a_sint8 = np.load("matrix_a.npy")

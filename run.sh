@@ -1,52 +1,72 @@
 #!/bin/bash
 
-set -e
-LOG_FILE="output.txt" # 定义日志文件名
+LOG_FILE="output.txt"
+> "${LOG_FILE}" # 清空旧日志
 
-# 默认矩阵维度
-DEFAULT_MATRIX_DIM=32 # 如果不提供参数，则使用此值
-MATRIX_DIM="${1:-${DEFAULT_MATRIX_DIM}}" # 从第一个命令行参数获取，如果未提供则使用默认值
+{
+    set -e
 
-# 新增：默认线程数
-DEFAULT_NUM_THREADS=16 # 默认使用 16 个线程
-NUM_THREADS="${2:-${DEFAULT_NUM_THREADS}}" # 从第二个命令行参数获取线程数
+    # --- 脚本配置区 ---
+    DEFAULT_MATRIX_DIM=32
+    MATRIX_DIM="${1:-${DEFAULT_MATRIX_DIM}}"
 
-# 新增：设置 OpenMP 环境变量，这会告诉编译后的仿真程序在运行时使用多少线程
-export OMP_NUM_THREADS=${NUM_THREADS}
+    DEFAULT_NUM_THREADS=16
+    NUM_THREADS="${2:-${DEFAULT_NUM_THREADS}}"
 
-echo "----------------------------------------"
-echo "使用矩阵维度: ${MATRIX_DIM}x${MATRIX_DIM}"
-echo "使用线程数: ${NUM_THREADS}" # 新增日志
-echo "----------------------------------------"
+    # --- 修改点：在这里控制 Verilator 的警告 ---
+    # -Wall: 显示所有警告 (推荐在开发时使用)
+    # "" (空字符串): 不显示任何可选警告 (用于获得干净的最终日志)
+    # "-Wno-WIDTHEXPAND -Wno-UNUSEDSIGNAL": 只关闭特定的警告
+    VERILATOR_FLAGS="-Wall"
 
-echo "步骤 1: 正在生成输入文件 (input_mem.csv)..."
-echo "----------------------------------------"
-make generate_input MATRIX_DIM=${MATRIX_DIM}
+    # 设置 OpenMP 环境变量
+    export OMP_NUM_THREADS=${NUM_THREADS}
 
-echo ""
-echo "----------------------------------------"
-echo "步骤 2: 正在编译并运行仿真 (日志将保存到 ${LOG_FILE})..."
-echo "----------------------------------------"
-# 新增：将 NUM_THREADS 传递给 make 命令
-make run MATRIX_DIM=${MATRIX_DIM} NUM_THREADS=${NUM_THREADS} > "${LOG_FILE}" 2>&1
+    echo "----------------------------------------"
+    echo "脚本开始执行"
+    echo "矩阵维度: ${MATRIX_DIM}x${MATRIX_DIM}"
+    echo "线程数: ${NUM_THREADS}"
+    echo "Verilator 警告标志: '${VERILATOR_FLAGS}'"
+    echo "所有日志将同步输出到终端和文件: ${LOG_FILE}"
+    echo "----------------------------------------"
 
-echo ""
-echo "----------------------------------------"
-echo "步骤 2.5: 正在重排硬件结果 (result_mem.csv -> result_mem_reordered.csv)..."
-echo "----------------------------------------"
-python3 reorder_result_mem.py --matrix_dim ${MATRIX_DIM} --input_csv result_mem.csv --output_csv result_mem_reordered.csv
-cp result_mem.csv result_mem_original.csv 
-mv result_mem_reordered.csv result_mem.csv
+    echo ""
+    echo "步骤 1: 正在生成输入文件 (input_mem.csv)..."
+    echo "----------------------------------------"
+    # 传递 VERILATOR_FLAGS, 以防此步骤触发编译
+    make generate_input MATRIX_DIM=${MATRIX_DIM} VERILATOR_FLAGS="${VERILATOR_FLAGS}"
 
-echo ""
-echo "----------------------------------------"
-echo "步骤 3: 正在检查仿真结果..."
-echo "----------------------------------------"
-make check_result 
+    echo ""
+    echo "步骤 2: 正在编译并运行仿真..."
+    echo "----------------------------------------"
+    # 传递 VERILATOR_FLAGS
+    make run_sim MATRIX_DIM=${MATRIX_DIM} NUM_THREADS=${NUM_THREADS} VERILATOR_FLAGS="${VERILATOR_FLAGS}"
 
-echo ""
-echo "----------------------------------------"
-echo "所有步骤成功完成！仿真日志已保存到 ${LOG_FILE}"
-echo "----------------------------------------"
+    echo ""
+    echo "步骤 3: 正在重排硬件结果 (result_mem.csv)..."
+    echo "----------------------------------------"
+    python3 reorder_result_mem.py --matrix_dim ${MATRIX_DIM} --input_csv result_mem.csv --output_csv result_mem_reordered.csv
+    cp result_mem.csv result_mem_original.csv
+    mv result_mem_reordered.csv result_mem.csv
+    echo "重排完成，result_mem.csv 已被更新。"
 
-# python3 reorder_result_mem.py --matrix_dim 512 --input_csv result_mem.csv --output_csv result_mem_reordered.csv
+    echo ""
+    echo "步骤 4: 正在检查重排后的仿真结果..."
+    echo "----------------------------------------"
+    # 传递 VERILATOR_FLAGS, 以防万一
+    make check_result VERILATOR_FLAGS="${VERILATOR_FLAGS}"
+
+    echo ""
+    echo "----------------------------------------"
+    echo "所有步骤成功完成！"
+    echo "----------------------------------------"
+
+} 2>&1 | tee -a "${LOG_FILE}"
+
+# 检查管道命令的退出状态
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    echo "脚本执行失败，请检查上面的日志。" >&2
+    exit ${PIPESTATUS[0]}
+fi
+
+echo "脚本执行成功。详细日志已保存在文件: ${LOG_FILE}"

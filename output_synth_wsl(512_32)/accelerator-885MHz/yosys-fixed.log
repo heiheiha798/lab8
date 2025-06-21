@@ -1,0 +1,139 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.54+15 (git sha1 cd71f190c, clang++ 14.0.0-1ubuntu1.1 -fPIC -O3)
+
+-- Executing script file `-' --
+[TCL: yosys -import] Command name collision: found pre-existing command `cd' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `eval' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `exec' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `read' -> skip.
+[TCL: yosys -import] Command name collision: found pre-existing command `trace' -> skip.
+
+1. Executing Verilog-2005 frontend: .././output_synth_wsl/accelerator-885MHz/accelerator.netlist.fixed.v
+Parsing Verilog input from `.././output_synth_wsl/accelerator-885MHz/accelerator.netlist.fixed.v' to AST representation.
+Generating RTLIL representation for module `\accelerator'.
+Successfully finished Verilog frontend.
+
+2. Executing Liberty frontend: /home/admin_linux/lab8/yosys-sta/scripts/../pdk/nangate45/lib/Nangate45_typ.lib
+Imported 134 cell types from liberty file.
+
+3. Executing HIERARCHY pass (managing design hierarchy).
+
+3.1. Analyzing design hierarchy..
+Top module:  \accelerator
+
+3.2. Analyzing design hierarchy..
+Top module:  \accelerator
+Removed 0 unused modules.
+
+4. Executing CHECK pass (checking for obvious problems).
+Checking module accelerator...
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [6] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [5] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [4] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [3] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [2] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [1] is used but has no driver.
+Warning: Wire accelerator.\tile_a_sram_addr_o_next_comb [0] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [6] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [5] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [4] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [3] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [2] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [1] is used but has no driver.
+Warning: Wire accelerator.\tile_b_sram_addr_o_next_comb [0] is used but has no driver.
+Found and reported 14 problems.
+
+5. Printing statistics.
+
+=== accelerator ===
+
+   Number of wires:             495630
+   Number of wire bits:         497436
+   Number of public wires:      495630
+   Number of public wire bits:  497436
+   Number of ports:                 23
+   Number of port bits:            481
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:             446884
+     AND2_X1                     45038
+     AND2_X2                      1237
+     AND2_X4                      5052
+     AND3_X1                     11712
+     AND3_X2                       583
+     AND3_X4                      1139
+     AND4_X1                      3297
+     AND4_X2                        21
+     AND4_X4                       226
+     AOI211_X1                    1069
+     AOI21_X1                    17342
+     AOI21_X2                      620
+     AOI21_X4                      932
+     AOI221_X1                       7
+     AOI221_X2                       7
+     AOI221_X4                    1846
+     AOI22_X1                     6446
+     AOI22_X4                       48
+     BUF_X16                        16
+     BUF_X2                       1158
+     BUF_X4                       3374
+     BUF_X8                       2953
+     CLKBUF_X2                     500
+     CLKBUF_X3                      13
+     CLKGATE_X1                   2624
+     DFFR_X1                     50234
+     INV_X1                      25667
+     INV_X16                        38
+     INV_X2                       1594
+     INV_X32                       231
+     INV_X4                        834
+     INV_X8                          5
+     MUX2_X1                       458
+     NAND2_X1                    60218
+     NAND2_X2                     4891
+     NAND2_X4                     3282
+     NAND3_X1                    10398
+     NAND3_X2                     1148
+     NAND4_X1                     1782
+     NAND4_X2                      383
+     NAND4_X4                      552
+     NOR2_X1                     33974
+     NOR2_X2                      1475
+     NOR2_X4                      1534
+     NOR3_X1                     16767
+     NOR3_X2                       449
+     NOR3_X4                      1118
+     NOR4_X1                      2051
+     OAI211_X1                     137
+     OAI211_X2                       1
+     OAI21_X1                    15396
+     OAI21_X2                     1143
+     OAI21_X4                      565
+     OAI221_X1                      74
+     OAI22_X1                     1080
+     OR2_X1                       5037
+     OR2_X2                       1088
+     OR2_X4                       1419
+     OR3_X1                       2600
+     OR3_X2                         14
+     OR3_X4                          7
+     OR4_X1                       1213
+     OR4_X4                          6
+     XNOR2_X1                    28017
+     XNOR2_X2                     4972
+     XOR2_X1                     46783
+     XOR2_X2                     10989
+
+   Chip area for module '\accelerator': 777477.302000
+     of which used for sequential elements: 267244.880000 (34.37%)
+
+Warnings: 14 unique messages, 14 total
+End of script. Logfile hash: 7713a39a4a, CPU: user 29.94s system 2.65s, MEM: 4466.22 MB peak
+Yosys 0.54+15 (git sha1 cd71f190c, clang++ 14.0.0-1ubuntu1.1 -fPIC -O3)
+Time spent: 96% 2x read_verilog (31 sec), 2% 1x hierarchy (0 sec), ...

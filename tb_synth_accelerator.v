@@ -15,8 +15,6 @@ module tb_synth_accelerator;
     localparam CLK_PERIOD_TB          = 1.13; // Clock period in ns
 
     // Derived parameters for memory layout and DUT instantiation
-    localparam SINT8_PER_RAM_WORD_TB = (SINT8_BITS_TB == 0) ? 1 : RAM_DATA_WIDTH_TB / SINT8_BITS_TB; // Avoid div by zero
-    localparam SINT32_PER_RAM_WORD_TB = (PE_ACCUM_BITS_TB == 0) ? 1 : RAM_DATA_WIDTH_TB / PE_ACCUM_BITS_TB;
 
     localparam TILE_SRAM_TOTAL_BITS_TB  = (TILE_DIM_SYSTOLIC_TB * TILE_DIM_SYSTOLIC_TB * SINT8_BITS_TB);
     localparam TILE_SRAM_WORDS_TB       = (TILE_SRAM_TOTAL_BITS_TB == 0 || RAM_DATA_WIDTH_TB == 0) ? 1 : (TILE_SRAM_TOTAL_BITS_TB + RAM_DATA_WIDTH_TB - 1) / RAM_DATA_WIDTH_TB;
@@ -68,24 +66,18 @@ module tb_synth_accelerator;
         .RAM_DATA_WIDTH(RAM_DATA_WIDTH_TB),
         .SINT8_BITS(SINT8_BITS_TB),
         .PE_ACCUM_BITS(PE_ACCUM_BITS_TB),
-        .LOGIC_ADDR_WIDTH(LOGIC_ADDR_WIDTH_TB),
-        // .TILE_SRAM_ADDR_WIDTH(TILE_SRAM_ADDR_WIDTH_DUT), // Pass if accelerator has it as param
-        .MM_READ_LATENCY_CYCLES(MM_READ_LATENCY_CYCLES_TB)
+        .LOGIC_ADDR_WIDTH(LOGIC_ADDR_WIDTH_TB)
     ) u_accelerator_inst (
         .clk(clk_tb), .rst_n(rst_n_tb),
         .start_computation(start_computation_tb), .computation_done(computation_done_tb),
-
         .mm_addr_o(mm_addr_o_w), .mm_wdata_o(mm_wdata_o_w), .mm_cs_o(mm_cs_o_w), .mm_we_o(mm_we_o_w),
         .mm_rdata_i(mm_rdata_i_tb), .mm_ready_i(mm_ready_i_tb),
-
         .base_addr_a_mm(BASE_ADDR_A_MM_TB),
         .base_addr_b_mm(BASE_ADDR_B_MM_TB),
         .base_addr_c_mm(BASE_ADDR_C_MM_TB),
-
         .tile_a_sram_cs_o(tile_a_sram_cs_o_w), .tile_a_sram_we_o(tile_a_sram_we_o_w),
         .tile_a_sram_addr_o(tile_a_sram_addr_o_w), .tile_a_sram_wdata_o(tile_a_sram_wdata_o_w),
         .tile_a_sram_rdata_i(tile_a_sram_rdata_i_tb),
-
         .tile_b_sram_cs_o(tile_b_sram_cs_o_w), .tile_b_sram_we_o(tile_b_sram_we_o_w),
         .tile_b_sram_addr_o(tile_b_sram_addr_o_w), .tile_b_sram_wdata_o(tile_b_sram_wdata_o_w),
         .tile_b_sram_rdata_i(tile_b_sram_rdata_i_tb)
