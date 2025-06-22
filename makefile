@@ -12,13 +12,13 @@ PYTHON = python3
 INPUT_GEN_SCRIPT = InputGen.py
 CHECK_RESULT_SCRIPT = CheckResult.py
 
-VERILATOR_ROOT := /usr/share/verilator
+# VERILATOR_ROOT := /home/admin_linux/local/verilator-git/share/verilator
 VERILATOR_FLAGS ?= -Wall
 
 # Check if VERILATOR_ROOT seems valid
-ifeq ("$(wildcard $(VERILATOR_ROOT)/include/verilated.h)","")
-    $(warning Cannot find verilated.h in $(VERILATOR_ROOT)/include. Check VERILATOR_ROOT path.)
-endif
+# ifeq ("$(wildcard $(VERILATOR_ROOT)/include/verilated.h)","")
+#     $(warning Cannot find verilated.h in $(VERILATOR_ROOT)/include. Check VERILATOR_ROOT path.)
+# endif
 
 # --- 修改点 1: 修改默认目标 ---
 # 将默认目标从 run 改为 compile，因为 run_sim 依赖输入文件，直接运行 make 可能不是我们想要的
@@ -27,7 +27,7 @@ all: compile
 # --- Main Targets ---
 compile_verilog: $(VERILOG_SOURCES) $(CPP_WRAPPER)
 	@echo "### Verilating Verilog sources with $(NUM_THREADS) threads..."
-	verilator -Wno-fatal $(VERILATOR_FLAGS) --top-module $(TARGET_MODULE) \
+	verilator -Wno-fatal --trace $(VERILATOR_FLAGS) --top-module $(TARGET_MODULE) \
 		-cc --timing -O3 --threads $(NUM_THREADS) \
 		$(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
 

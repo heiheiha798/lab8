@@ -159,8 +159,8 @@ module systolic_array #(
                     .b_valid_out(b_valid_wires[r_gen+1][c_gen]),
                     .b_data_out(b_data_wires[r_gen+1][c_gen]),
                     .result_out(pe_result_out_internal[r_gen][c_gen]),
-                    .result_valid(pe_result_valid_internal[r_gen][c_gen])
-                    // NaN/Inf ports removed
+                    .result_valid(pe_result_valid_internal[r_gen][c_gen]),
+                    .start_new_systolic_pass(start_new_systolic_pass)
                 );
             end
         end

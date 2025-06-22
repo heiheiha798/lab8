@@ -1,37 +1,43 @@
-// tb_synth_accelerator.v
+// tb_synth_accelerator_v3.v
 `timescale 1ns / 1ps
 
 module tb_synth_accelerator;
 
     // --- Testbench Parameters ---
-    localparam MATRIX_DIM_GLOBAL_TB_SIM = 32;   // For faster simulation, can be 16 or 32
+    localparam MATRIX_DIM_GLOBAL_TB_SIM = 32;   // For faster simulation
     localparam TILE_DIM_SYSTOLIC_TB   = 16;
     localparam RAM_DATA_WIDTH_TB      = 64;
     localparam SINT8_BITS_TB          = 8;
     localparam PE_ACCUM_BITS_TB       = 32;
-    localparam LOGIC_ADDR_WIDTH_TB    = 18; // For Main Memory Model
-    localparam MM_READ_LATENCY_CYCLES_TB = 2; // Main Memory Read Latency
+    localparam LOGIC_ADDR_WIDTH_TB    = 23;     // Match DUT's LOGIC_ADDR_WIDTH
+
+    localparam MM_READ_LATENCY_CYCLES_TB = 2;   // Main Memory Read Latency
+    localparam MM_WRITE_LATENCY_CYCLES_TB = 0;  // Main Memory Write Latency (0 = ready in same cycle)
 
     localparam CLK_PERIOD_TB          = 1.13; // Clock period in ns
+    localparam BYTES_PER_RAM_WORD_TB = RAM_DATA_WIDTH_TB / 8;
 
-    // Derived parameters for memory layout and DUT instantiation
-
-    localparam TILE_SRAM_TOTAL_BITS_TB  = (TILE_DIM_SYSTOLIC_TB * TILE_DIM_SYSTOLIC_TB * SINT8_BITS_TB);
-    localparam TILE_SRAM_WORDS_TB       = (TILE_SRAM_TOTAL_BITS_TB == 0 || RAM_DATA_WIDTH_TB == 0) ? 1 : (TILE_SRAM_TOTAL_BITS_TB + RAM_DATA_WIDTH_TB - 1) / RAM_DATA_WIDTH_TB;
-    localparam TILE_SRAM_ADDR_WIDTH_DUT = (TILE_SRAM_WORDS_TB <= 1) ? 1 : $clog2(TILE_SRAM_WORDS_TB);
-
-    // Main Memory Layout calculations for SIM dimension
+    // Main Memory Layout calculations for SIM dimension (Word Addressable for TB Memory)
     localparam TILES_PER_ROW_COL_SIM = (MATRIX_DIM_GLOBAL_TB_SIM == 0 || TILE_DIM_SYSTOLIC_TB == 0) ? 1 : MATRIX_DIM_GLOBAL_TB_SIM / TILE_DIM_SYSTOLIC_TB;
-    localparam WORDS_PER_SINT8_TILE_TB_SIM = (TILE_DIM_SYSTOLIC_TB*TILE_DIM_SYSTOLIC_TB*SINT8_BITS_TB)/RAM_DATA_WIDTH_TB;
+
+    localparam WORDS_PER_SINT8_TILE_TB_SIM = (TILE_DIM_SYSTOLIC_TB * TILE_DIM_SYSTOLIC_TB * SINT8_BITS_TB + RAM_DATA_WIDTH_TB - 1) / RAM_DATA_WIDTH_TB;
     localparam TOTAL_SINT8_WORDS_A_SIM  = WORDS_PER_SINT8_TILE_TB_SIM * TILES_PER_ROW_COL_SIM * TILES_PER_ROW_COL_SIM;
     localparam TOTAL_SINT8_WORDS_B_SIM  = TOTAL_SINT8_WORDS_A_SIM;
 
-    localparam WORDS_PER_SINT32_TILE_TB_SIM  = (TILE_DIM_SYSTOLIC_TB*TILE_DIM_SYSTOLIC_TB*PE_ACCUM_BITS_TB)/RAM_DATA_WIDTH_TB;
+    localparam WORDS_PER_SINT32_TILE_TB_SIM  = (TILE_DIM_SYSTOLIC_TB * TILE_DIM_SYSTOLIC_TB * PE_ACCUM_BITS_TB + RAM_DATA_WIDTH_TB - 1) / RAM_DATA_WIDTH_TB;
     localparam TOTAL_SINT32_WORDS_C_SIM   = WORDS_PER_SINT32_TILE_TB_SIM * TILES_PER_ROW_COL_SIM * TILES_PER_ROW_COL_SIM;
 
-    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_A_MM_TB = 0;
-    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_B_MM_TB = BASE_ADDR_A_MM_TB + TOTAL_SINT8_WORDS_A_SIM;
-    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_C_MM_TB = BASE_ADDR_B_MM_TB + TOTAL_SINT8_WORDS_B_SIM;
+    // Base addresses in Main Memory (WORD ADDRESSES for TB memory model)
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_A_MM_TB_WORD = 0;
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_B_MM_TB_WORD = BASE_ADDR_A_MM_TB_WORD + TOTAL_SINT8_WORDS_A_SIM;
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] BASE_ADDR_C_MM_TB_WORD = BASE_ADDR_B_MM_TB_WORD + TOTAL_SINT8_WORDS_B_SIM;
+    localparam MAX_ADDR_MM_TB_WORD      = BASE_ADDR_C_MM_TB_WORD + TOTAL_SINT32_WORDS_C_SIM;
+
+
+    // Base addresses to pass to DUT (BYTE ADDRESSES)
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] DUT_BASE_ADDR_A_MM = BASE_ADDR_A_MM_TB_WORD * BYTES_PER_RAM_WORD_TB;
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] DUT_BASE_ADDR_B_MM = BASE_ADDR_B_MM_TB_WORD * BYTES_PER_RAM_WORD_TB;
+    localparam [LOGIC_ADDR_WIDTH_TB-1:0] DUT_BASE_ADDR_C_MM = BASE_ADDR_C_MM_TB_WORD * BYTES_PER_RAM_WORD_TB;
 
     // --- Signals ---
     reg clk_tb;
@@ -39,27 +45,16 @@ module tb_synth_accelerator;
     reg start_computation_tb;
     wire computation_done_tb;
 
-    // DUT Interface Wires/Regs
-    wire [LOGIC_ADDR_WIDTH_TB-1:0] mm_addr_o_w;
-    wire [RAM_DATA_WIDTH_TB-1:0]   mm_wdata_o_w;
-    wire                           mm_cs_o_w;
-    wire                           mm_we_o_w;
-    reg  [RAM_DATA_WIDTH_TB-1:0]   mm_rdata_i_tb;
-    reg                            mm_ready_i_tb;
-
-    wire                               tile_a_sram_cs_o_w;
-    wire                               tile_a_sram_we_o_w;
-    wire [TILE_SRAM_ADDR_WIDTH_DUT-1:0] tile_a_sram_addr_o_w; // Use calculated width for DUT
-    wire [RAM_DATA_WIDTH_TB-1:0]       tile_a_sram_wdata_o_w;
-    wire  [RAM_DATA_WIDTH_TB-1:0]       tile_a_sram_rdata_i_tb;
-
-    wire                               tile_b_sram_cs_o_w;
-    wire                               tile_b_sram_we_o_w;
-    wire [TILE_SRAM_ADDR_WIDTH_DUT-1:0] tile_b_sram_addr_o_w; // Use calculated width for DUT
-    wire [RAM_DATA_WIDTH_TB-1:0]       tile_b_sram_wdata_o_w;
-    wire  [RAM_DATA_WIDTH_TB-1:0]       tile_b_sram_rdata_i_tb;
+    // DUT Interface Wires for Main Memory
+    wire [LOGIC_ADDR_WIDTH_TB-1:0] mm_addr_o_dut_byte; // DUT outputs byte address
+    wire [RAM_DATA_WIDTH_TB-1:0]   mm_wdata_o_dut;
+    wire                           mm_cs_o_dut;
+    wire                           mm_we_o_dut;
+    reg  [RAM_DATA_WIDTH_TB-1:0]   mm_rdata_i_tb;      // To DUT
+    reg                            mm_ready_i_tb;      // To DUT
 
     // --- Instantiate Accelerator (DUT) ---
+    // Ensure parameters passed to DUT match its internal expectations or are parameterized within DUT as well
     accelerator #(
         .MATRIX_DIM_GLOBAL(MATRIX_DIM_GLOBAL_TB_SIM),
         .TILE_DIM_SYSTOLIC(TILE_DIM_SYSTOLIC_TB),
@@ -67,186 +62,165 @@ module tb_synth_accelerator;
         .SINT8_BITS(SINT8_BITS_TB),
         .PE_ACCUM_BITS(PE_ACCUM_BITS_TB),
         .LOGIC_ADDR_WIDTH(LOGIC_ADDR_WIDTH_TB)
+        // Internal SRAM parameters are local to the DUT
     ) u_accelerator_inst (
         .clk(clk_tb), .rst_n(rst_n_tb),
         .start_computation(start_computation_tb), .computation_done(computation_done_tb),
-        .mm_addr_o(mm_addr_o_w), .mm_wdata_o(mm_wdata_o_w), .mm_cs_o(mm_cs_o_w), .mm_we_o(mm_we_o_w),
+        .mm_addr_o(mm_addr_o_dut_byte), .mm_wdata_o(mm_wdata_o_dut),
+        .mm_cs_o(mm_cs_o_dut), .mm_we_o(mm_we_o_dut),
         .mm_rdata_i(mm_rdata_i_tb), .mm_ready_i(mm_ready_i_tb),
-        .base_addr_a_mm(BASE_ADDR_A_MM_TB),
-        .base_addr_b_mm(BASE_ADDR_B_MM_TB),
-        .base_addr_c_mm(BASE_ADDR_C_MM_TB),
-        .tile_a_sram_cs_o(tile_a_sram_cs_o_w), .tile_a_sram_we_o(tile_a_sram_we_o_w),
-        .tile_a_sram_addr_o(tile_a_sram_addr_o_w), .tile_a_sram_wdata_o(tile_a_sram_wdata_o_w),
-        .tile_a_sram_rdata_i(tile_a_sram_rdata_i_tb),
-        .tile_b_sram_cs_o(tile_b_sram_cs_o_w), .tile_b_sram_we_o(tile_b_sram_we_o_w),
-        .tile_b_sram_addr_o(tile_b_sram_addr_o_w), .tile_b_sram_wdata_o(tile_b_sram_wdata_o_w),
-        .tile_b_sram_rdata_i(tile_b_sram_rdata_i_tb)
+        .base_addr_a_mm(DUT_BASE_ADDR_A_MM),
+        .base_addr_b_mm(DUT_BASE_ADDR_B_MM),
+        .base_addr_c_mm(DUT_BASE_ADDR_C_MM)
+        // Tile SRAM ports are removed as they are internal to DUT now
     );
 
-    // --- Main Memory Model ---
-    localparam MAIN_MEM_SIZE_TB = 1 << LOGIC_ADDR_WIDTH_TB;
-    reg [RAM_DATA_WIDTH_TB-1:0] main_memory_model_array [0:MAIN_MEM_SIZE_TB-1];
-    reg [MM_READ_LATENCY_CYCLES_TB:0] mm_latency_count_tb; // Latency counter for reads
-    reg [RAM_DATA_WIDTH_TB-1:0] mm_read_data_output_reg; // To stage read data
+    // --- Main Memory Model (Word Addressable by TB) ---
+    localparam MAIN_MEM_WORDS_TB = (MAX_ADDR_MM_TB_WORD > 0) ? MAX_ADDR_MM_TB_WORD : 2048; // Ensure some size
+    reg [RAM_DATA_WIDTH_TB-1:0] main_memory_model_array [0:MAIN_MEM_WORDS_TB-1];
+
+    reg [(MM_READ_LATENCY_CYCLES_TB > 0 ? $clog2(MM_READ_LATENCY_CYCLES_TB+1) : 1)-1:0] mm_read_latency_count_tb;
+    reg [(MM_WRITE_LATENCY_CYCLES_TB > 0 ? $clog2(MM_WRITE_LATENCY_CYCLES_TB+1) : 1)-1:0] mm_write_latency_count_tb;
+
+    reg [RAM_DATA_WIDTH_TB-1:0] mm_read_data_output_reg; // Staged read data
+    wire [LOGIC_ADDR_WIDTH_TB-1:0] mm_addr_o_tb_word;   // DUT's byte address converted to TB's word address
+
+    assign mm_addr_o_tb_word = mm_addr_o_dut_byte / BYTES_PER_RAM_WORD_TB;
 
     initial begin
         integer k_mm;
-        for (k_mm = 0; k_mm < MAIN_MEM_SIZE_TB; k_mm = k_mm + 1) begin
-            main_memory_model_array[k_mm] = {RAM_DATA_WIDTH_TB{1'bx}}; // Initialize to X
+        for (k_mm = 0; k_mm < MAIN_MEM_WORDS_TB; k_mm = k_mm + 1) begin
+            main_memory_model_array[k_mm] = {RAM_DATA_WIDTH_TB{1'bx}};
         end
-        $readmemh("input_mem.csv", main_memory_model_array);
+        // Load A and B data. Ensure input_mem.csv has enough lines for A and B.
+        // The addresses here are WORD addresses for the main_memory_model_array.
+        $readmemh("input_mem.csv", main_memory_model_array, BASE_ADDR_A_MM_TB_WORD, BASE_ADDR_B_MM_TB_WORD + TOTAL_SINT8_WORDS_B_SIM - 1);
+        $display("[%0t TB_INFO] Main memory initialized from input_mem.csv. Loaded A up to word %h, B up to word %h.",
+                  $time, BASE_ADDR_A_MM_TB_WORD + TOTAL_SINT8_WORDS_A_SIM - 1, BASE_ADDR_B_MM_TB_WORD + TOTAL_SINT8_WORDS_B_SIM - 1);
     end
 
     always @(posedge clk_tb or negedge rst_n_tb) begin
         if (!rst_n_tb) begin
             mm_ready_i_tb <= 1'b0;
-            mm_latency_count_tb <= 0;
+            mm_read_latency_count_tb <= 0;
+            mm_write_latency_count_tb <= 0;
             mm_read_data_output_reg <= {RAM_DATA_WIDTH_TB{1'b0}};
         end else begin
-            mm_ready_i_tb <= 1'b0; // Default to not ready for the current cycle
+            mm_ready_i_tb <= 1'b0; // Default to not ready for this cycle
 
-            if (mm_latency_count_tb > 0) begin
-                mm_latency_count_tb <= mm_latency_count_tb - 1;
-                if (mm_latency_count_tb == 1) begin // Data will be ready next cycle
+            if (mm_read_latency_count_tb > 0) begin
+                mm_read_latency_count_tb <= mm_read_latency_count_tb - 1;
+                if (mm_read_latency_count_tb == 1) begin // Data will be ready at the end of this cycle (bus next cycle)
                     mm_ready_i_tb <= 1'b1;
                 end
             end
 
-            if (mm_cs_o_w && mm_latency_count_tb == 0 && !mm_ready_i_tb) begin // New valid request and memory is not busy
-                if (mm_we_o_w) begin // Write operation
-                    main_memory_model_array[mm_addr_o_w] <= mm_wdata_o_w;
-                    // Simple 1-cycle ready for write acknowledge (can be 0 if write is posted)
+            if (mm_write_latency_count_tb > 0) begin
+                mm_write_latency_count_tb <= mm_write_latency_count_tb - 1;
+                if (mm_write_latency_count_tb == 1) begin // Write will "complete" at end of this cycle
                     mm_ready_i_tb <= 1'b1;
-                end else begin // Read operation
-                    mm_read_data_output_reg <= main_memory_model_array[mm_addr_o_w];
-                    if (MM_READ_LATENCY_CYCLES_TB == 0) begin
-                        mm_ready_i_tb <= 1'b1;
+                end
+            end
+
+            // New memory request from DUT, and memory is not busy with a previous operation's latency
+            if (mm_cs_o_dut && mm_read_latency_count_tb == 0 && mm_write_latency_count_tb == 0 && !mm_ready_i_tb) begin
+                if (mm_addr_o_tb_word >= MAIN_MEM_WORDS_TB) begin
+                    $error("[%0t TB_ERR] MM Address out of bounds: word_addr %h (DUT byte_addr %h)", $time, mm_addr_o_tb_word, mm_addr_o_dut_byte);
+                end else if (mm_we_o_dut) begin // Write operation
+                    main_memory_model_array[mm_addr_o_tb_word] <= mm_wdata_o_dut;
+                    $display("[%0t TB_MEM_INFO] Cycle %0d: MM Write Req: word_addr %h (byte %h), data %h", $time, u_accelerator_inst.cycle_count_dbg, mm_addr_o_tb_word, mm_addr_o_dut_byte, mm_wdata_o_dut);
+                    if (MM_WRITE_LATENCY_CYCLES_TB == 0) begin
+                        mm_ready_i_tb <= 1'b1; // Ready in the same cycle for 0 latency write
                     end else begin
-                        mm_latency_count_tb <= MM_READ_LATENCY_CYCLES_TB; // Start latency countdown
+                        mm_write_latency_count_tb <= MM_WRITE_LATENCY_CYCLES_TB; // Start latency countdown
+                    end
+                end else begin // Read operation
+                    mm_read_data_output_reg <= main_memory_model_array[mm_addr_o_tb_word];
+                    $display("[%0t TB_MEM_INFO] Cycle %0d: MM Read Req: word_addr %h (byte %h). Expect data %h", $time, u_accelerator_inst.cycle_count_dbg, mm_addr_o_tb_word, mm_addr_o_dut_byte, main_memory_model_array[mm_addr_o_tb_word]);
+                    if (MM_READ_LATENCY_CYCLES_TB == 0) begin
+                        mm_ready_i_tb <= 1'b1; // Ready in the same cycle for 0 latency read
+                    end else begin
+                        mm_read_latency_count_tb <= MM_READ_LATENCY_CYCLES_TB; // Start latency countdown
                     end
                 end
             end
         end
     end
-    assign mm_rdata_i_tb = (mm_ready_i_tb && !mm_we_o_w && mm_cs_o_w) ? mm_read_data_output_reg : {RAM_DATA_WIDTH_TB{1'bz}};
+    // Read data is valid on mm_rdata_i_tb when mm_ready_i_tb is high for a read operation
+    // and the latency counter has reached zero (meaning data is now available from mm_read_data_output_reg)
+    assign mm_rdata_i_tb = (mm_ready_i_tb && mm_cs_o_dut && !mm_we_o_dut && mm_read_latency_count_tb == 0) ? mm_read_data_output_reg : {RAM_DATA_WIDTH_TB{1'bz}};
 
-    reg [RAM_DATA_WIDTH_TB-1:0] tile_a_sram_model_array [0:TILE_SRAM_WORDS_TB-1];
-    reg [RAM_DATA_WIDTH_TB-1:0] tile_b_sram_model_array [0:TILE_SRAM_WORDS_TB-1];
 
-    // --- Tile A SRAM Model (Write path clocked, Read path combinational) ---
-    // Write path remains clocked
-    always @(posedge clk_tb or negedge rst_n_tb) begin
-        if (!rst_n_tb) begin
-            // No specific reset action needed for the memory array content itself here,
-            // but you could initialize tile_a_sram_rdata_i_tb if it were still a reg for some reason.
-            // Since it's now an assign target, this block only handles writes.
-        end else begin
-            if (tile_a_sram_cs_o_w && tile_a_sram_we_o_w) begin // Write operation
-                tile_a_sram_model_array[tile_a_sram_addr_o_w] <= tile_a_sram_wdata_o_w;
-            end
-        end
-    end
-
-    // Combinational read path for Tile A SRAM
-    assign tile_a_sram_rdata_i_tb = (tile_a_sram_cs_o_w && !tile_a_sram_we_o_w) ?
-                                    tile_a_sram_model_array[tile_a_sram_addr_o_w] :
-                                    {RAM_DATA_WIDTH_TB{1'bx}}; // Output X if not selected or during write
-
-    // --- Tile B SRAM Model (Write path clocked, Read path combinational) ---
-    // Write path remains clocked
-    always @(posedge clk_tb or negedge rst_n_tb) begin
-        if (!rst_n_tb) begin
-            // No specific reset action needed
-        end else begin
-            if (tile_b_sram_cs_o_w && tile_b_sram_we_o_w) begin // Write operation
-                tile_b_sram_model_array[tile_b_sram_addr_o_w] <= tile_b_sram_wdata_o_w;
-            end
-        end
-    end
-
-    // Combinational read path for Tile B SRAM
-    assign tile_b_sram_rdata_i_tb = (tile_b_sram_cs_o_w && !tile_b_sram_we_o_w) ?
-                                    tile_b_sram_model_array[tile_b_sram_addr_o_w] :
-                                    {RAM_DATA_WIDTH_TB{1'bx}}; // Output X if not selected or during write
+    // --- Tile SRAM Models are REMOVED as they are now internal to accelerator.v ---
 
     integer fid;
-    integer k;
-    reg start_time_reg_set;
+    integer k_file_loop;
     time start_sim_time;
     time end_sim_time;
+    integer total_sim_cycles;
 
     // --- Testbench Control Sequence ---
     initial begin
-        // Original initializations from your new code
-        clk_tb = 1'b0; // Start clock low for clarity in waveform
+
+        clk_tb = 1'b0;
         rst_n_tb = 1'b0;
         start_computation_tb = 1'b0;
         mm_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}}; // Initialize driven regs
         mm_ready_i_tb = 1'b0;
-        // tile_a_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
-        // tile_b_sram_rdata_i_tb = {RAM_DATA_WIDTH_TB{1'b0}};
 
-        // Timing logic initializations from the example code
-        start_time_reg_set = 1'b0;
         start_sim_time = 0;
         end_sim_time = 0;
+        total_sim_cycles = 0;
 
-        $timeformat(-9, 3, " ns", 10); // From the example code (3 decimal places for ns)
+        $timeformat(-9, 3, " ns", 10);
 
-        // Original reset sequence from your new code
-        #(CLK_PERIOD_TB * 2.5); // Hold reset for a few cycles
+        #(CLK_PERIOD_TB * 2.5); // Hold reset
         rst_n_tb = 1'b1;
         #(CLK_PERIOD_TB * 0.5); // Ensure reset propagates
-        $display("[%0t TB] Reset released.", $time); // Display message style from the example code
+        $display("[%0t TB_INFO] Reset released.", $time);
 
-        // Original wait from your new code
         #(CLK_PERIOD_TB * 2);
 
-        // Original start computation from your new code, augmented with timing logic & display from example
-        $display("[%0t TB] Asserting start_computation.", $time); // Display message style from the example code
+        $display("[%0t TB_INFO] Asserting start_computation.", $time);
         start_computation_tb = 1'b1;
-        start_sim_time = $time; // Record start time (Timing logic from example)
-        start_time_reg_set = 1'b1; // Flag that start time is set (Timing logic from example)
+        start_sim_time = $time;
 
         #(CLK_PERIOD_TB);
-        start_computation_tb = 1'b0;
-        $display("[%0t TB] De-asserted start_computation.", $time); // Display message style from the example code
+        start_computation_tb = 1'b0; // Pulse start_computation for one cycle
+        $display("[%0t TB_INFO] De-asserted start_computation.", $time);
 
-        // Original wait for done from your new code, augmented with timing logic & display from example
-        $display("[%0t TB] Waiting for computation_done_tb signal...", $time); // Display message style from the example code
+        $display("[%0t TB_INFO] Waiting for computation_done_tb signal from DUT...", $time);
         wait (computation_done_tb == 1'b1);
-        end_sim_time = $time; // Record end time (Timing logic from example)
-        $display("[%0t TB] computation_done_tb asserted by accelerator.", $time); // Display message style from the example code
-        if (start_time_reg_set) begin // Calculate and display execution time (Timing logic from example)
-             $display("[%0t TB] Execution time: %0t ns", $time, (end_sim_time - start_sim_time));
-        end
+        end_sim_time = $time;
+        $display("[%0t TB_INFO] computation_done_tb asserted by accelerator.", $time);
+        total_sim_cycles = (end_sim_time - start_sim_time) / CLK_PERIOD_TB;
+        $display("[%0t TB_INFO] Execution time: %0t ns (%0d cycles)", $time, (end_sim_time - start_sim_time), total_sim_cycles );
 
-        #(CLK_PERIOD_TB); // Original delay from your new code: Allow one more cycle for any final writes if needed
-        
-        // Original file dump from your new code, augmented with display messages from example's style
-        // Assuming 'fid' and 'k' are declared appropriately (e.g., integer) elsewhere in your testbench module.
+
+        #(CLK_PERIOD_TB); // Allow one more cycle for DUT to settle if needed or for final MM writes to complete.
+
         fid = $fopen("result_mem.csv", "w");
         if (fid != 0) begin
-            // This for loop structure (including 'break') is from YOUR new code and is UNCHANGED.
-            for (k = 0; k < TOTAL_SINT32_WORDS_C_SIM; k = k + 1) begin
-                if ((BASE_ADDR_C_MM_TB + k) < MAIN_MEM_SIZE_TB) begin
-                    $fdisplay(fid, "%h", main_memory_model_array[BASE_ADDR_C_MM_TB + k]);
+            $display("[%0t TB_INFO] Dumping C matrix from MM word_addr %h (byte %h) to result_mem.csv.", $time, BASE_ADDR_C_MM_TB_WORD, DUT_BASE_ADDR_C_MM);
+            for (k_file_loop = 0; k_file_loop < TOTAL_SINT32_WORDS_C_SIM; k_file_loop = k_file_loop + 1) begin
+                if ((BASE_ADDR_C_MM_TB_WORD + k_file_loop) < MAIN_MEM_WORDS_TB) begin
+                    $fdisplay(fid, "%h", main_memory_model_array[BASE_ADDR_C_MM_TB_WORD + k_file_loop]);
                 end else begin
-                    break; // Kept from your new code
+                    $error("[%0t TB_ERR] Attempting to dump C beyond memory model size at word_addr %h.", $time, BASE_ADDR_C_MM_TB_WORD + k_file_loop);
+                    break;
                 end
             end
             $fclose(fid);
-            $display("[%0t TB] Result C matrix dumped to result_mem.csv.", $time); // Display message style from the example code
+            $display("[%0t TB_INFO] Result C matrix (expected %0d words) dumped to result_mem.csv.", $time, TOTAL_SINT32_WORDS_C_SIM);
         end else begin
-            // Added this 'else' block for robustness, consistent with example's logging style
-            $display("[%0t TB] ERROR: Could not open result_mem.csv for writing.", $time);
+            $error("[%0t TB_ERR] Could not open result_mem.csv for writing.", $time);
         end
 
-        // Original wait and finish from your new code, augmented with display from example's style
         #(CLK_PERIOD_TB * 10);
-        $display("[%0t TB] Test finished.", $time); // Display message style from the example code
+        $display("[%0t TB_INFO] Test finished.", $time);
         $finish;
     end
+
     // Clock generator
     always # (CLK_PERIOD_TB / 2) clk_tb = ~clk_tb;
 

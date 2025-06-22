@@ -20,7 +20,8 @@ module pe #(
     output wire signed [INPUT_DATA_WIDTH-1:0] b_data_out,
     output wire signed [ACCUM_DATA_WIDTH-1:0] result_out,
     output wire                         result_valid,
-    input wire                          conditionally_clear_sum
+    input wire                          conditionally_clear_sum,
+    input wire                          start_new_systolic_pass
 );
     reg signed [INPUT_DATA_WIDTH-1:0] a_reg; // Holds a_data_in from PREVIOUS cycle
     reg signed [INPUT_DATA_WIDTH-1:0] b_reg; // Holds b_data_in from PREVIOUS cycle
@@ -68,13 +69,26 @@ module pe #(
         end else begin
             result_valid_reg <= 1'b0;
 
-            if (clear_accumulator) begin
-                mul_valid_reg           <= 1'b0;
-                performed_mac_count     <= 0;
-                pe_calculation_done_latch <= 1'b0;
-                if (conditionally_clear_sum) begin
-                    local_accumulator_reg   <= '0;
+            // 优先处理新的 systolic pass 开始的复位（针对每个 k 迭代）
+            if (start_new_systolic_pass) begin
+                performed_mac_count     <= 0;      // 为新的 k 迭代复位 MAC 计数
+                pe_calculation_done_latch <= 1'b0; // 允许新的计算完成过程
+                mul_valid_reg           <= 1'b0;   // 前一个 pass 的乘积无效了
+                // local_accumulator_reg 不在这里复位，除非 clear_accumulator 也有效
+                if (clear_accumulator) begin // 这个只在 k=0 且 start_new_systolic_pass 同时发生时为真
+                    if (conditionally_clear_sum) begin // 这个也应该只在 k=0 时为真
+                        local_accumulator_reg   <= '0;
+                    end
                 end
+            end 
+            // 处理 k=0 时的累加器完全清零（如果 start_new_systolic_pass 和 clear_accumulator 不是严格同时）
+            // 这个分支可能可以被上面的 if (start_new_systolic_pass) begin if (clear_accumulator) ... end end 覆盖
+            // 但保留它以明确 k=0 的特殊处理，以防万一。
+            else if (clear_accumulator) begin 
+            // performed_mac_count 和 pe_calculation_done_latch 应该已经被 start_new_systolic_pass 处理了
+            if (conditionally_clear_sum) begin // conditionally_clear_sum 通常与 clear_accumulator 一起用于 k=0
+                local_accumulator_reg   <= '0;
+            end
             end else if (enable) begin
                 a_reg <= a_data_in;
                 b_reg <= b_data_in;

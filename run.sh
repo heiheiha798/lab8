@@ -10,7 +10,7 @@ LOG_FILE="output.txt"
     DEFAULT_MATRIX_DIM=32
     MATRIX_DIM="${1:-${DEFAULT_MATRIX_DIM}}"
 
-    DEFAULT_NUM_THREADS=16
+    DEFAULT_NUM_THREADS=8
     NUM_THREADS="${2:-${DEFAULT_NUM_THREADS}}"
 
     # --- 修改点：在这里控制 Verilator 的警告 ---
