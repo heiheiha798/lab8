@@ -55,13 +55,13 @@ module pe #(
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            a_reg                   <= '0;
-            b_reg                   <= '0;
+            a_reg                   <= 0;
+            b_reg                   <= 0;
             a_valid_for_output_reg  <= 1'b0;
             b_valid_for_output_reg  <= 1'b0;
             inputs_that_produced_a_b_regs_were_valid_reg <= 1'b0;
-            local_accumulator_reg   <= '0;
-            mul_result_reg          <= '0;
+            local_accumulator_reg   <= 0;
+            mul_result_reg          <= 0;
             mul_valid_reg           <= 1'b0;
             performed_mac_count     <= 0;
             result_valid_reg        <= 1'b0;
@@ -77,7 +77,7 @@ module pe #(
                 // local_accumulator_reg 不在这里复位，除非 clear_accumulator 也有效
                 if (clear_accumulator) begin // 这个只在 k=0 且 start_new_systolic_pass 同时发生时为真
                     if (conditionally_clear_sum) begin // 这个也应该只在 k=0 时为真
-                        local_accumulator_reg   <= '0;
+                        local_accumulator_reg   <= 0;
                     end
                 end
             end 
@@ -87,7 +87,7 @@ module pe #(
             else if (clear_accumulator) begin 
             // performed_mac_count 和 pe_calculation_done_latch 应该已经被 start_new_systolic_pass 处理了
             if (conditionally_clear_sum) begin // conditionally_clear_sum 通常与 clear_accumulator 一起用于 k=0
-                local_accumulator_reg   <= '0;
+                local_accumulator_reg   <= 0;
             end
             end else if (enable) begin
                 a_reg <= a_data_in;

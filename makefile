@@ -1,68 +1,87 @@
-# Makefile for Verilator Simulation (for tb_synth_accelerator - NO VCD TRACE)
+# Makefile for Verilator Simulation
 
 # --- Variables ---
-NUM_THREADS ?= 12
-VERILOG_SOURCES = tb_synth_accelerator.v accelerator.v systolic_array.v pe.v
+# 从外部脚本传入，或使用默认值
+MATRIX_DIM ?= 48
+NUM_THREADS ?= 8
 
-TARGET_MODULE = tb_synth_accelerator
+# --- MODIFIED: 更新 Verilog 源文件列表 ---
+# 包含了所有设计模块和新的测试平台
+VERILOG_SOURCES = \
+    tb_accelerator.v \
+    accelerator.v \
+    loader.v \
+    writer.v \
+    data_formatter.v \
+    systolic_array.v \
+    pe.v\
+	sram_banked.v \
+    sram_c_accum.v
+
+# --- MODIFIED: 更新顶层模块和 C++ Wrapper ---
+TARGET_MODULE = tb_accelerator
 EXECUTABLE_NAME = V$(TARGET_MODULE)
-CPP_WRAPPER = sim_main_synth.cpp
+CPP_WRAPPER = sim_main.cpp # 保持 C++ 文件名不变
 
+# --- Python 脚本 ---
 PYTHON = python3
 INPUT_GEN_SCRIPT = InputGen.py
 CHECK_RESULT_SCRIPT = CheckResult.py
+REORDER_SCRIPT = reorder_result_mem.py
 
-# VERILATOR_ROOT := /home/admin_linux/local/verilator-git/share/verilator
+# --- Verilator 配置 ---
 VERILATOR_FLAGS ?= -Wall
-
-# Check if VERILATOR_ROOT seems valid
-# ifeq ("$(wildcard $(VERILATOR_ROOT)/include/verilated.h)","")
-#     $(warning Cannot find verilated.h in $(VERILATOR_ROOT)/include. Check VERILATOR_ROOT path.)
-# endif
-
-# --- 修改点 1: 修改默认目标 ---
-# 将默认目标从 run 改为 compile，因为 run_sim 依赖输入文件，直接运行 make 可能不是我们想要的
-all: compile
+# --- MODIFIED: 新增 TRACE 选项 ---
+# 在命令行中运行 `make TRACE=1` 来启用波形跟踪
+TRACE ?= 0
+ifeq ($(TRACE), 1)
+    VERILATOR_FLAGS += --trace
+    CPP_FLAGS = -DTRACE_ON
+else
+    CPP_FLAGS =
+endif
 
 # --- Main Targets ---
+all: compile
+
 compile_verilog: $(VERILOG_SOURCES) $(CPP_WRAPPER)
-	@echo "### Verilating Verilog sources with $(NUM_THREADS) threads..."
-	verilator -Wno-fatal --trace $(VERILATOR_FLAGS) --top-module $(TARGET_MODULE) \
+	@echo "### Verilating Verilog sources..."
+	verilator -Wno-fatal $(VERILATOR_FLAGS) --top-module $(TARGET_MODULE) \
 		-cc --timing -O3 --threads $(NUM_THREADS) \
 		$(VERILOG_SOURCES) --exe $(CPP_WRAPPER)
 
 compile_cpp: compile_verilog
-	@echo "### Compiling C++ simulation executable in obj_dir..."
-	$(MAKE) -C obj_dir -f $(EXECUTABLE_NAME).mk $(EXECUTABLE_NAME)
+	@echo "### Compiling C++ simulation executable..."
+	$(MAKE) -C obj_dir -f $(EXECUTABLE_NAME).mk $(EXECUTABLE_NAME) CXXFLAGS+="$(CPP_FLAGS)"
 
 compile: compile_cpp
 
-# --- 修改点 2: 新增一个只运行仿真的目标，并移除了检查步骤 ---
-# 这个目标叫做 run_sim，它依赖于编译完成。
-# 它只负责运行可执行文件，不再自动检查结果。
 run_sim: compile
 	@echo "### Running simulation: ./obj_dir/$(EXECUTABLE_NAME)"
 	./obj_dir/$(EXECUTABLE_NAME)
 	@echo "### Simulation finished. result_mem.csv has been generated."
 
-# --- 修改点 3: 删除了旧的 run 目标 ---
-# 我们不再需要那个会捆绑检查的 run 目标了。
-
 generate_input:
 	@echo "### Generating input_mem.csv for simulation..."
-	$(PYTHON) $(INPUT_GEN_SCRIPT)
+	$(PYTHON) $(INPUT_GEN_SCRIPT) --matrix_dim $(MATRIX_DIM)
 
-# check_result 目标保持不变，它做得很好，只负责检查
+reorder_result:
+	@echo "### Reordering hardware result..."
+	$(PYTHON) $(REORDER_SCRIPT) --matrix_dim $(MATRIX_DIM) --input_csv result_mem.csv --output_csv result_mem_reordered.csv
+	@if [ -f "result_mem.csv" ]; then cp result_mem.csv result_mem_original.csv; fi
+	@if [ -f "result_mem_reordered.csv" ]; then mv result_mem_reordered.csv result_mem.csv; fi
+
+
 check_result:
 	@echo "### Checking result..."
-	$(PYTHON) CheckResult.py
+	$(PYTHON) $(CHECK_RESULT_SCRIPT)
 
 clean:
 	@echo "### Cleaning up generated files..."
 	rm -rf obj_dir
-	rm -f result_mem_tb.csv input_mem.csv result_mem.csv result_mem_original.csv
+	rm -f result_mem_tb.csv input_mem.csv result_mem.csv result_mem_reordered.csv result_mem_original.csv
+	rm -f waveform.vcd
 	rm -f matrix_a.npy matrix_b.npy matrix_c_expected_sint32.npy
 	rm -rf __pycache__
 
-# 注意：run_sim 不依赖 generate_input，因为我们将在 sh 脚本中确保顺序
-.PHONY: all compile_verilog compile_cpp compile run_sim generate_input check_result clean
+.PHONY: all compile_verilog compile_cpp compile run_sim generate_input reorder_result check_result clean

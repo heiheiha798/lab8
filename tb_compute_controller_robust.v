@@ -1,13 +1,13 @@
 //
-// Filename: tb_compute_controller_robust.v
-// Description: A robust testbench for the compute_controller_robust module.
-//              It simulates a realistic environment where the systolic array (SA)
-//              output is NOT available every cycle (gappy/bursty stream), and
-//              it fully models the external final adder with latency.
+// Filename: tb_compute_controller_accum_pipe.v
+// Description: Testbench for the reconstructed compute_controller_accum_pipe.
+//              It simulates the on-chip C-Accumulator and the new accelerator
+//              control flow, where the DUT is called in a loop over 'k' to
+//              compute a single output tile.
 //
 `timescale 1ns / 1ps
 
-module tb_compute_controller_robust;
+module tb_compute_controller_accum_pipe;
 
     //======================================================================
     //== Testbench Parameters
@@ -17,7 +17,8 @@ module tb_compute_controller_robust;
     localparam INPUT_DATA_WIDTH         = 8;
     localparam PE_ACCUM_DATA_WIDTH      = 32;
     localparam MAIN_MEM_DATA_WIDTH_BITS = TILE_SIZE * PE_ACCUM_DATA_WIDTH;
-    localparam MATRIX_SIZE              = 48; // 使用一个较小的矩阵以加速仿真
+    localparam MATRIX_SIZE              = 48;
+    localparam ACCUM_PIPE_DELAY         = 2;
     localparam FINAL_ADDER_LATENCY      = 1;
 
     // -- Simulation Parameters --
@@ -25,9 +26,8 @@ module tb_compute_controller_robust;
     localparam NUM_TILES_PER_DIM = MATRIX_SIZE / TILE_SIZE;
 
     // -- SA Simulation Parameters --
-    localparam SA_PIPELINE_DELAY = TILE_SIZE * 2; // Latency to get the first row out
-    localparam SA_TOTAL_LATENCY  = TILE_SIZE * 3 - 2; // Latency to get the last row out
-    // [KEY] 模拟SA输出结果之间的间隙，0表示背靠背输出，>0表示有延时
+    localparam SA_PIPELINE_DELAY = TILE_SIZE * 2;
+    localparam SA_TOTAL_LATENCY  = TILE_SIZE * 3 - 2;
     localparam VALID_GAP_CYCLES  = 2;
 
     //======================================================================
@@ -37,7 +37,6 @@ module tb_compute_controller_robust;
     reg clk;
     reg rst_n;
     reg compute_req;
-    reg [$clog2(NUM_TILES_PER_DIM)-1:0] k_tile_idx;
 
     // -- DUT Interface Wires --
     wire compute_busy;
@@ -48,27 +47,25 @@ module tb_compute_controller_robust;
     wire sa_partial_sum_valid;
     wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0] sa_final_sum_in;
     wire sa_tile_all_pes_done_one_pass;
-    wire ctrl_clear_all_pe_accumulators;
     wire ctrl_start_new_systolic_pass;
     wire ctrl_activate_pe_computation;
     wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0] ctrl_c_data_to_sa;
     wire ctrl_enable_final_add;
+    wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0] ctrl_partial_sum_to_sa;
+    wire [$clog2(TILE_SIZE)-1:0] c_accum_raddr;
+    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] c_accum_rdata;
+    wire [$clog2(TILE_SIZE)-1:0] c_accum_waddr;
+    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] c_accum_wdata;
+    wire c_accum_we;
     wire [$clog2(TILE_SIZE)-1:0] sram_a_addr;
     wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_a_rdata_flat;
     wire [$clog2(TILE_SIZE)-1:0] sram_b_addr;
     wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_b_rdata_flat;
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sa_array_a_in_flat;
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sa_array_b_in_flat;
-    wire ctrl_array_data_valid_in;
-    wire [$clog2(TILE_SIZE)-1:0] sram_c_addr;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_wdata;
-    wire sram_c_we;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_rdata;
 
     // -- TB Internal Registers and Memories --
     reg [INPUT_DATA_WIDTH-1:0] simulated_sram_a [TILE_SIZE-1:0];
     reg [INPUT_DATA_WIDTH-1:0] simulated_sram_b [TILE_SIZE-1:0];
-    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] simulated_sram_c [TILE_SIZE-1:0];
+    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] simulated_c_accum [TILE_SIZE-1:0];
 
     // -- SA Simulator Internal State --
     reg sa_partial_sum_valid_sim;
@@ -79,15 +76,13 @@ module tb_compute_controller_robust;
     reg [$clog2(TILE_SIZE):0] sa_output_row_idx_cnt;
     reg [$clog2(VALID_GAP_CYCLES+1)-1:0] sa_gap_cnt;
     reg sa_output_is_ready_for_handshake;
-    reg signed [PE_ACCUM_DATA_WIDTH-1:0] mock_sa_element_val;
-
-    // -- Final Adder Simulator Internal State --
-    reg signed [MAIN_MEM_DATA_WIDTH_BITS-1:0] sa_final_sum_in_reg;
-    reg signed [MAIN_MEM_DATA_WIDTH_BITS-1:0] final_adder_pipeline [FINAL_ADDER_LATENCY-1:0];
+    // Added for Verilog-2001 compatibility to explicitly size the replicated element
+    reg signed [PE_ACCUM_DATA_WIDTH-1:0] replicated_element_val;
 
     // -- Verification State --
     integer error_count;
-
+    integer k;
+    time start_time, end_time;
 
     //======================================================================
     //== DUT Instantiation
@@ -98,12 +93,11 @@ module tb_compute_controller_robust;
         .PE_ACCUM_DATA_WIDTH(PE_ACCUM_DATA_WIDTH),
         .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS),
         .MATRIX_SIZE(MATRIX_SIZE),
-        .FINAL_ADDER_LATENCY(FINAL_ADDER_LATENCY)
+        .ACCUM_PIPE_DELAY(ACCUM_PIPE_DELAY)
     ) uut (
         .clk(clk),
         .rst_n(rst_n),
         .compute_req(compute_req),
-        .k_tile_idx(k_tile_idx),
         .compute_busy(compute_busy),
         .compute_done(compute_done),
         .dut_ready_for_sa_partial_sum(dut_ready_for_sa_partial_sum),
@@ -112,22 +106,20 @@ module tb_compute_controller_robust;
         .sa_partial_sum_row_idx(sa_partial_sum_row_idx),
         .sa_final_sum_in(sa_final_sum_in),
         .sa_tile_all_pes_done_one_pass(sa_tile_all_pes_done_one_pass),
-        .ctrl_clear_all_pe_accumulators(ctrl_clear_all_pe_accumulators),
         .ctrl_start_new_systolic_pass(ctrl_start_new_systolic_pass),
         .ctrl_activate_pe_computation(ctrl_activate_pe_computation),
         .ctrl_c_data_to_sa(ctrl_c_data_to_sa),
         .ctrl_enable_final_add(ctrl_enable_final_add),
+        .ctrl_partial_sum_to_sa(ctrl_partial_sum_to_sa),
+        .c_accum_raddr(c_accum_raddr),
+        .c_accum_rdata(c_accum_rdata),
+        .c_accum_waddr(c_accum_waddr),
+        .c_accum_wdata(c_accum_wdata),
+        .c_accum_we(c_accum_we),
         .sram_a_addr(sram_a_addr),
         .sram_a_rdata_flat(sram_a_rdata_flat),
         .sram_b_addr(sram_b_addr),
-        .sram_b_rdata_flat(sram_b_rdata_flat),
-        .sa_array_a_in_flat(sa_array_a_in_flat),
-        .sa_array_b_in_flat(sa_array_b_in_flat),
-        .ctrl_array_data_valid_in(ctrl_array_data_valid_in),
-        .sram_c_addr(sram_c_addr),
-        .sram_c_wdata(sram_c_wdata),
-        .sram_c_we(sram_c_we),
-        .sram_c_rdata(sram_c_rdata)
+        .sram_b_rdata_flat(sram_b_rdata_flat)
     );
 
     //======================================================================
@@ -139,26 +131,40 @@ module tb_compute_controller_robust;
     end
 
     initial begin
-        $dumpfile("compute_controller_robust.vcd");
-        $dumpvars(0, tb_compute_controller_robust);
+        $dumpfile("compute_controller_accum_pipe.vcd");
+        $dumpvars(0, tb_compute_controller_accum_pipe);
 
         initialize_sim();
 
-        run_computation_test(0); // Test k=0 (direct write)
-        check_c_sram(0);
+        // --- Main Test: Compute one full C_ij tile by looping over k ---
+        $display("------------------------------------------------------------------");
+        $display("[%0t] [TB] Starting full tile accumulation test (k=0 to %0d)", $time, NUM_TILES_PER_DIM-1);
+        $display("------------------------------------------------------------------");
 
-        run_computation_test(1); // Test k=1 (accumulation)
-        check_c_sram(1);
-        
-        run_computation_test(2); // Test k=2 (accumulation)
-        check_c_sram(2);
+        start_time = $time;
+
+        for (k = 0; k < NUM_TILES_PER_DIM; k = k + 1) begin
+            $display("[%0t] [TB] Requesting computation for k = %0d...", $time, k);
+            compute_req <= 1'b1;
+            @(posedge clk);
+            compute_req <= 1'b0;
+            wait (compute_done == 1'b1);
+            @(posedge clk);
+            $display("[%0t] [TB] Computation for k = %0d finished.", $time, k);
+        end
+
+        end_time = $time;
+        // --- End of Main Test ---
+
+        check_c_accum();
 
         if (error_count == 0) begin
             $display("[%0t] [TB] <<<<< SUCCESS: All test cases passed. >>>>>", $time);
+            $display("           Total cycles for one C_ij tile computation: %0d cycles", (end_time - start_time) / CLK_PERIOD);
         end else begin
             $display("[%0t] [TB] <<<<< FAILURE: %0d errors found. >>>>>", $time, error_count);
         end
-        
+
         #(CLK_PERIOD * 10);
         $finish;
     end
@@ -167,69 +173,54 @@ module tb_compute_controller_robust;
         begin
             rst_n = 1'b0;
             compute_req = 1'b0;
-            k_tile_idx = 0;
             error_count = 0;
+            // Initialize registers to a known value to prevent 'x' propagation at start
+            sa_partial_sum_in_reg = 0;
+            sa_partial_sum_row_idx_sim = 0;
 
-            // Pre-fill SRAMs with some data
             for (integer r = 0; r < TILE_SIZE; r = r + 1) begin
-                simulated_sram_a[r] = r + 1;
-                simulated_sram_b[r] = r + 1;
-                simulated_sram_c[r] = {MAIN_MEM_DATA_WIDTH_BITS{1'b0}};
+                simulated_sram_a[r] = r + 1; // Simplified data
+                simulated_sram_b[r] = r + 1; // Simplified data
+                simulated_c_accum[r] = {MAIN_MEM_DATA_WIDTH_BITS{1'b0}}; // Initialize C-ACCUM to 0
             end
 
             #(CLK_PERIOD * 2);
             rst_n = 1'b1;
             @(posedge clk);
-            $display("[%0t] [TB] System reset released.", $time);
+            $display("[%0t] [TB] System reset released. C-ACCUM is zeroed.", $time);
         end
     endtask
 
-    task run_computation_test(input [$clog2(NUM_TILES_PER_DIM)-1:0] k_val);
-        begin
-            $display("------------------------------------------------------------------");
-            $display("[%0t] [TB] Starting compute request for k_tile_idx = %0d", $time, k_val);
-            $display("------------------------------------------------------------------");
-            @(posedge clk);
-            compute_req <= 1'b1;
-            k_tile_idx <= k_val;
-            @(posedge clk);
-            compute_req <= 1'b0;
-            wait (compute_done == 1'b1);
-            @(posedge clk);
-            $display("[%0t] [TB] Compute request for k_tile_idx = %0d finished.", $time, k_val);
-        end
-    endtask
-
-    integer local_errors;
-    reg signed [PE_ACCUM_DATA_WIDTH-1:0] expected_element;
-    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] expected_row, actual_row;
-    task check_c_sram(input [$clog2(NUM_TILES_PER_DIM)-1:0] current_k);
+    task check_c_accum;
+        integer local_errors;
+        reg signed [PE_ACCUM_DATA_WIDTH-1:0] expected_element;
+        reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] expected_row, actual_row;
         begin
             local_errors = 0;
-            $display("[%0t] [TB] Verifying C-SRAM contents after k=%0d...", $time, current_k);
+            $display("[%0t] [TB] Verifying final C-ACCUM contents...", $time);
 
             for (integer r = 0; r < TILE_SIZE; r = r + 1) begin
-                // Simplified check: C[r][c] = (r+1)*(k+1)*TILE_SIZE
-                expected_element = (r + 1) * (current_k + 1) * TILE_SIZE;
-                
+                // Expected result after all K loops: C[r][c] = (r+1)*TILE_SIZE * NUM_K_TILES
+                expected_element = (r + 1) * TILE_SIZE * NUM_TILES_PER_DIM;
+
                 for (integer c_elem = 0; c_elem < TILE_SIZE; c_elem = c_elem + 1) begin
                    expected_row[c_elem*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] = expected_element;
                 end
-                
-                actual_row = simulated_sram_c[r];
+
+                actual_row = simulated_c_accum[r];
 
                 if (expected_row !== actual_row) begin
-                    $error("[%0t] [TB] C-SRAM CHECK FAILED for row %0d.", $time, r);
+                    $error("[%0t] [TB] C-ACCUM CHECK FAILED for row %0d.", $time, r);
                     $error("      Expected[0]: %d (0x%h)", expected_element, expected_element);
                     $error("      Actual[0]:   %d (0x%h)", actual_row[PE_ACCUM_DATA_WIDTH-1:0], actual_row[PE_ACCUM_DATA_WIDTH-1:0]);
                     local_errors = local_errors + 1;
                 end
             end
-            
+
             if (local_errors == 0) begin
-                $display("[%0t] [TB] C-SRAM verification PASSED for k=%0d.", $time, current_k);
+                $display("[%0t] [TB] C-ACCUM verification PASSED.", $time);
             end else begin
-                $display("[%0t] [TB] C-SRAM verification FAILED for k=%0d with %0d errors.", $time, current_k, local_errors);
+                $display("[%0t] [TB] C-ACCUM verification FAILED with %0d errors.", $time, local_errors);
                 error_count = error_count + local_errors;
             end
         end
@@ -244,44 +235,24 @@ module tb_compute_controller_robust;
     assign sa_partial_sum_in           = sa_partial_sum_in_reg;
     assign sa_partial_sum_row_idx      = sa_partial_sum_row_idx_sim;
     assign sa_tile_all_pes_done_one_pass = sa_tile_all_pes_done_one_pass_sim;
-    assign sa_final_sum_in             = sa_final_sum_in_reg;
+    // assign sa_final_sum_in             = sa_final_sum_in; // Directly connect from adder sim
 
-    // --- SRAM Simulators ---
+    // --- A/B/C SRAM/ACCUM Simulators ---
     assign sram_a_rdata_flat = {TILE_SIZE{simulated_sram_a[sram_a_addr]}};
     assign sram_b_rdata_flat = {TILE_SIZE{simulated_sram_b[sram_b_addr]}};
-    assign sram_c_rdata = simulated_sram_c[sram_c_addr];
+    // C-ACCUM Dual-Port SRAM behavioral model
+    assign c_accum_rdata = simulated_c_accum[c_accum_raddr]; // Read port
     always @(posedge clk) begin
-        if (sram_c_we) begin
-            simulated_sram_c[sram_c_addr] <= sram_c_wdata;
+        if (c_accum_we) begin
+            simulated_c_accum[c_accum_waddr] <= c_accum_wdata; // Write port
         end
     end
 
     // --- Final Adder Simulator ---
-    reg signed [PE_ACCUM_DATA_WIDTH-1:0] new_val;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            sa_final_sum_in_reg <= 0;
-            for (integer i=0; i<FINAL_ADDER_LATENCY; i=i+1) begin
-                final_adder_pipeline[i] <= 0;
-            end
-        end else begin
-            if (ctrl_enable_final_add) begin
-                // A simplified model for accumulation based on our test data pattern
-                // C_old = (row+1)*k*TILE_SIZE
-                // A*B   = (row+1)*TILE_SIZE
-                // C_new = (row+1)*(k+1)*TILE_SIZE
-                new_val = (sa_partial_sum_row_idx_sim + 1) * (k_tile_idx + 1) * TILE_SIZE;
-                final_adder_pipeline[0] <= {TILE_SIZE{new_val}};
-            end
+    // The final adder's result is purely combinational in this model for simplicity,
+    // but its result is used by the DUT's pipeline, which models the latency.
+    assign sa_final_sum_in = ctrl_enable_final_add ? (ctrl_partial_sum_to_sa + ctrl_c_data_to_sa) : 0;
 
-            // Pipeline shift
-            for (integer i=0; i < FINAL_ADDER_LATENCY-1; i=i+1) begin
-                final_adder_pipeline[i+1] <= final_adder_pipeline[i];
-            end
-            sa_final_sum_in_reg <= final_adder_pipeline[FINAL_ADDER_LATENCY-1];
-        end
-    end
-    
     // --- Realistic Systolic Array Simulator (with Gaps) ---
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -292,9 +263,8 @@ module tb_compute_controller_robust;
             sa_partial_sum_row_idx_sim <= 0;
             sa_output_is_ready_for_handshake <= 1'b0;
             sa_gap_cnt <= 0;
-            mock_sa_element_val <= 0;
         end else begin
-            // Default to not valid unless handshake fires
+            // 默认将valid拉低，仅在握手成功时拉高一周期
             sa_partial_sum_valid_sim <= 1'b0;
 
             if (ctrl_start_new_systolic_pass) begin
@@ -306,40 +276,35 @@ module tb_compute_controller_robust;
             end else if (ctrl_activate_pe_computation) begin
                 sa_sim_cycle_cnt <= sa_sim_cycle_cnt + 1;
 
-                // Logic to determine if a new row result is ready internally from SA
+                // [修正逻辑] Stage 1: 准备数据 (Data Prep)
+                // 当满足输出条件时，先准备好数据，并进入“准备握手”状态
                 if (sa_output_row_idx_cnt < TILE_SIZE && sa_gap_cnt == 0 && !sa_output_is_ready_for_handshake) begin
                     if (sa_sim_cycle_cnt >= (SA_PIPELINE_DELAY + sa_output_row_idx_cnt)) begin
                         sa_output_is_ready_for_handshake <= 1'b1;
-                        $display("[%0t] [TB-SA-SIM] DEBUG: Row %0d data is ready internally. Waiting for DUT ready signal...", $time, sa_output_row_idx_cnt);
+                        // 在此更新数据，确保数据在下一个周期 'valid' 信号变高之前是稳定的
+                        sa_partial_sum_row_idx_sim <= sa_output_row_idx_cnt;
+                        replicated_element_val = (sa_output_row_idx_cnt + 1) * TILE_SIZE;
+                        sa_partial_sum_in_reg <= {TILE_SIZE{replicated_element_val}};
                     end
                 end
 
-                // Handshake Logic
+                // [修正逻辑] Stage 2: 执行握手 (Handshake)
+                // 当处于“准备握手”状态且下游就绪时，正式发出 valid 信号
                 if (sa_output_is_ready_for_handshake && dut_ready_for_sa_partial_sum) begin
-                    $display("[%0t] [TB-SA-SIM] INFO: Handshake success! DUT is ready. Outputting Row %0d result.", $time, sa_output_row_idx_cnt);
-                    // Fire the handshake
                     sa_partial_sum_valid_sim <= 1'b1;
-                    sa_partial_sum_row_idx_sim <= sa_output_row_idx_cnt;
-                    // Mocked data: for row 'r', each element is (r+1)*TILE_SIZE
-                    mock_sa_element_val = (sa_output_row_idx_cnt + 1) * TILE_SIZE;
-                    sa_partial_sum_in_reg <= {TILE_SIZE{mock_sa_element_val}};
 
-                    // Prepare for next row
+                    // 更新状态机，为下一行做准备
                     sa_output_row_idx_cnt <= sa_output_row_idx_cnt + 1;
                     sa_output_is_ready_for_handshake <= 1'b0;
-                    // Start the gap counter to introduce delay
                     sa_gap_cnt <= VALID_GAP_CYCLES;
                 end
 
-                // Countdown the gap timer
                 if (sa_gap_cnt > 0) begin
                     sa_gap_cnt <= sa_gap_cnt - 1;
                 end
-                
-                // Signal when the entire pass is done from SA's perspective
+
                 if (sa_sim_cycle_cnt == SA_TOTAL_LATENCY - 1) begin
                     sa_tile_all_pes_done_one_pass_sim <= 1'b1;
-                    $display("[%0t] [TB-SA-SIM] INFO: SA pass finished signal asserted.", $time);
                 end
             end
         end

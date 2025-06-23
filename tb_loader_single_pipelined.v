@@ -3,7 +3,6 @@
 // Description: An advanced testbench for the pipelined loader module.
 //              It features a NON-BLOCKING, pipelined memory model to test
 //              the DUT under high-performance conditions.
-//              Integrated with sram_banked modules for A and B tiles.
 //
 `timescale 1ns / 1ps
 
@@ -17,12 +16,6 @@ module tb_loader_pipelined;
     localparam MAIN_MEM_ADDR_WIDTH       = 32;
     localparam MAIN_MEM_DATA_WIDTH_BITS  = 64;
 
-    // SRAM_banked parameters (must match sram_banked.v defaults or adjusted as needed)
-    localparam SRAM_NUM_BANKS           = 16;
-    localparam SRAM_BANK_DEPTH          = 16;
-    localparam SRAM_BANK_DATA_WIDTH     = 8;
-    localparam SRAM_BUS_DATA_WIDTH      = 64; // Matches MAIN_MEM_DATA_WIDTH_BITS
-
     // Testbench control
     localparam CLK_PERIOD    = 10; // ns
     localparam MEM_LATENCY   = 3;  // Memory latency in clock cycles
@@ -30,7 +23,7 @@ module tb_loader_pipelined;
     //--------------------------------------------------------------------------
     // Signal Declarations
     //--------------------------------------------------------------------------
-    // Inputs to DUT (Loader)
+    // Inputs to DUT
     reg                                          clk;
     reg                                          rst_n;
     reg                                          load_req;
@@ -39,53 +32,35 @@ module tb_loader_pipelined;
     reg [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      k_tile_idx;
     reg                                          load_to_ping;
 
-    // Memory interface signals (connected to Loader)
+    // Memory interface signals
     reg                                          mem_req_ready;
     reg                                          mem_resp_valid;
     reg [MAIN_MEM_DATA_WIDTH_BITS-1:0]           mem_resp_rdata;
 
-    // Outputs from DUT (Loader)
+    // Outputs from DUT
     wire                                         load_busy;
     wire                                         load_done;
     wire                                         mem_req_valid;
     wire [MAIN_MEM_ADDR_WIDTH-1:0]               mem_req_addr;
 
-    // SRAM interfaces from Loader (these will connect to sram_banked inputs)
-    // The address width for SRAM is derived from (TILE_SIZE*TILE_SIZE*INPUT_DATA_WIDTH/MAIN_MEM_DATA_WIDTH_BITS)
-    // where INPUT_DATA_WIDTH is 8 bits (for SINT8).
-    localparam SRAM_WADDR_WIDTH = $clog2((TILE_SIZE * TILE_SIZE * SRAM_BANK_DATA_WIDTH) / MAIN_MEM_DATA_WIDTH_BITS);
-
-    wire [SRAM_WADDR_WIDTH-1:0] sram_a_addr;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]         sram_a_wdata;
-    wire                                         sram_a_we;
-
-    wire [SRAM_WADDR_WIDTH-1:0] sram_b_addr;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]         sram_b_wdata;
-    wire                                         sram_b_we;
-
-    // SRAM read data outputs (from sram_banked, not used by Loader in this testbench)
-    wire [SRAM_NUM_BANKS*SRAM_BANK_DATA_WIDTH-1:0] sram_a_rdata;
-    wire [SRAM_NUM_BANKS*SRAM_BANK_DATA_WIDTH-1:0] sram_b_rdata;
-    
-    // SRAM read address inputs (for sram_banked, will connect to Data_Formatter in full system)
-    // For this testbench, we will connect them to a constant value as Loader doesn't read from SRAMs.
-    wire [SRAM_NUM_BANKS*$clog2(SRAM_BANK_DEPTH)-1:0] sram_a_raddr;
-    wire [SRAM_NUM_BANKS*$clog2(SRAM_BANK_DEPTH)-1:0] sram_b_raddr;
-    
-    // Connect SRAM read addresses to a constant zero for this testbench
-    assign sram_a_raddr = 0;
-    assign sram_b_raddr = 0;
+    // SRAM interfaces
+    wire [$clog2(TILE_SIZE*TILE_SIZE*8/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_a_addr;
+    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                              sram_a_wdata;
+    wire                                                             sram_a_we;
+    wire [$clog2(TILE_SIZE*TILE_SIZE*8/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_b_addr;
+    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                              sram_b_wdata;
+    wire                                                             sram_b_we;
 
 
     //--------------------------------------------------------------------------
-    // Instantiate the Device Under Test (DUT) - Loader
+    // Instantiate the Device Under Test (DUT)
     //--------------------------------------------------------------------------
     loader #(
         .MATRIX_SIZE               (MATRIX_SIZE),
         .TILE_SIZE                 (TILE_SIZE),
         .MAIN_MEM_ADDR_WIDTH       (MAIN_MEM_ADDR_WIDTH),
         .MAIN_MEM_DATA_WIDTH_BITS  (MAIN_MEM_DATA_WIDTH_BITS)
-    ) uut_loader ( // Changed instance name to uut_loader for clarity
+    ) uut (
         .clk                       (clk),
         .rst_n                     (rst_n),
         .load_req                  (load_req),
@@ -109,40 +84,6 @@ module tb_loader_pipelined;
     );
 
     //--------------------------------------------------------------------------
-    // Instantiate the SRAM Banked Modules (A-Tile and B-Tile)
-    //--------------------------------------------------------------------------
-    // SRAM for A-Tile (Ping buffer)
-    sram_banked #(
-        .NUM_BANKS          (SRAM_NUM_BANKS),
-        .BANK_DEPTH         (SRAM_BANK_DEPTH),
-        .BANK_DATA_WIDTH    (SRAM_BANK_DATA_WIDTH),
-        .BUS_DATA_WIDTH     (SRAM_BUS_DATA_WIDTH)
-    ) sram_a_tile (
-        .clk                (clk),
-        .we                 (sram_a_we),
-        .waddr              (sram_a_addr),
-        .wdata              (sram_a_wdata),
-        .raddr              (sram_a_raddr),
-        .rdata              (sram_a_rdata)
-    );
-
-    // SRAM for B-Tile (Pong buffer)
-    sram_banked #(
-        .NUM_BANKS          (SRAM_NUM_BANKS),
-        .BANK_DEPTH         (SRAM_BANK_DEPTH),
-        .BANK_DATA_WIDTH    (SRAM_BANK_DATA_WIDTH),
-        .BUS_DATA_WIDTH     (SRAM_BUS_DATA_WIDTH)
-    ) sram_b_tile (
-        .clk                (clk),
-        .we                 (sram_b_we),
-        .waddr              (sram_b_addr),
-        .wdata              (sram_b_wdata),
-        .raddr              (sram_b_raddr),
-        .rdata              (sram_b_rdata)
-    );
-
-
-    //--------------------------------------------------------------------------
     // Clock and Reset Generation
     //--------------------------------------------------------------------------
     initial begin
@@ -151,14 +92,8 @@ module tb_loader_pipelined;
     end
 
     initial begin
-        // Dump waves for debugging with gtkwave
-        $dumpfile("loader_pipelined_sram_waveform.vcd"); // Changed waveform file name
-        // Dump all signals in the current module instance (tb_loader_pipelined)
-        // and also the signals within the uut_loader and sram_a_tile/sram_b_tile instances.
-        $dumpvars(0, tb_loader_pipelined.uut_loader);
-        $dumpvars(0, tb_loader_pipelined.sram_a_tile);
-        $dumpvars(0, tb_loader_pipelined.sram_b_tile);
-        $dumpvars(0, tb_loader_pipelined); // Dump top-level signals
+        $dumpfile("loader_pipelined_waveform.vcd");
+        $dumpvars(0, tb_loader_pipelined);
 
         rst_n = 1'b0;
         #(CLK_PERIOD * 2);
@@ -183,21 +118,19 @@ module tb_loader_pipelined;
 
         load_req <= 1'b1;
         i_tile_idx <= 1; j_tile_idx <= 2; k_tile_idx <= 0;
-        load_to_ping <= 1'b1; // Load to PING (A-Tile)
+        load_to_ping <= 1'b1;
         @(posedge clk);
-        load_req <= 1'b0; // De-assert request after one cycle
+        load_req <= 1'b0;
 
-        // Wait until the loader is done
-        // THIS IS THE CRITICAL LINE: If load_done never becomes 1, simulation won't stop.
         wait (load_done == 1'b1);
-        @(posedge clk); // Give one more cycle for signals to settle after load_done
-
+        @(posedge clk);
+        
         $display("--------------------------------------------------");
         $display("%0t [TB] INFO: Test Case PASSED. Loader has finished.", $time);
         $display("--------------------------------------------------");
         
-        #(CLK_PERIOD * 10); // Wait a bit more to observe final states
-        $finish; // Terminate simulation
+        #(CLK_PERIOD * 10);
+        $finish;
     end
     
     //--------------------------------------------------------------------------
@@ -228,8 +161,7 @@ module tb_loader_pipelined;
             valid_pipe_2 <= 1'b0;
         end else begin
             // --- Stage 0: Accept new request from DUT ---
-            // mem_req_ready is always high in this testbench, meaning memory is always ready to accept requests
-            if (mem_req_valid && mem_req_ready) begin // This condition is effectively just mem_req_valid
+            if (mem_req_valid && mem_req_ready) begin
                 addr_pipe_0 <= mem_req_addr;
                 valid_pipe_0 <= 1'b1;
             end else begin
@@ -246,10 +178,8 @@ module tb_loader_pipelined;
             // --- Drive memory response from the last pipeline stage ---
             mem_resp_valid <= valid_pipe_2; 
             if (valid_pipe_2) begin 
-                // Return some fake data, e.g., part of the address, for easy debugging
-                mem_resp_rdata <= {32'hBA5ED00D, uut_loader.mem_req_addr}; // Use uut_loader instance name
-            end else begin
-                mem_resp_rdata <= 0; // Clear data when not valid
+                // 修改这一行：使用具体的十六进制数值替换 'PIPE_LINE'
+                mem_resp_rdata <= {32'hBA5ED00D, addr_pipe_2}; // 使用具体的十六进制值
             end
         end
     end

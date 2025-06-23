@@ -1,280 +1,187 @@
 //
-// Filename: compute_controller_robust.v
-// Description: A robust compute controller implementing a full valid/ready handshake
-//              and a realistic, pipelined accumulation FSM. This design accounts
-//              for memory/adder latencies and non-ideal systolic array outputs.
+// Filename: compute_controller.v
+// Description: A reconstructed, high-performance compute controller.
+//              This version is adapted to work with an external Data_Formatter
+//              and a pure-computation systolic array. It no longer handles
+//              data feeding, only high-level control and result accumulation.
 //
 `timescale 1ns / 1ps
 
 module compute_controller #(
     parameter TILE_SIZE                 = 16,
-    parameter INPUT_DATA_WIDTH          = 8,
     parameter PE_ACCUM_DATA_WIDTH       = 32,
     parameter MAIN_MEM_DATA_WIDTH_BITS  = TILE_SIZE * PE_ACCUM_DATA_WIDTH,
-    parameter MATRIX_SIZE               = 512,
-    // 假设外部加法器完成一次加法需要1个周期
-    parameter FINAL_ADDER_LATENCY       = 1
+    // [UNCHANGED] The latency of the accumulation pipeline itself remains the same.
+    parameter ACCUM_PIPE_DELAY          = 2
 )(
-    // 控制接口
+    // --- Control Interface ---
     input wire                                          clk,
     input wire                                          rst_n,
-    input wire                                          compute_req,
-    input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      k_tile_idx,
+    input wire                                          compute_req, // From top-level accelerator
     output reg                                          compute_busy,
     output reg                                          compute_done,
 
-    // ---- 脉动阵列 (SA) 接口 ----
-    // 握手信号
+    // --- Systolic Array (SA) Result Interface ---
+    // [UNCHANGED] This interface for receiving results remains the same.
     output wire                                         dut_ready_for_sa_partial_sum,
     input wire                                          sa_partial_sum_valid,
-    // 部分和 (A_tile * B_tile) 输入
     input wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]    sa_partial_sum_in,
     input wire [$clog2(TILE_SIZE)-1:0]                  sa_partial_sum_row_idx,
-    // 最终和 (A_tile * B_tile + C_old) 输入
     input wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]    sa_final_sum_in,
-    // SA 状态
-    input wire                                          sa_tile_all_pes_done_one_pass,
-    // SA 控制
-    output reg                                          ctrl_clear_all_pe_accumulators,
+    input wire                                          sa_tile_all_pes_done_one_pass, // Still useful for observation/debug
+
+    // --- Systolic Array & Formatter Control Interface ---
+    // [MODIFIED] This is now a high-level start pulse for both the formatter and the array.
     output reg                                          ctrl_start_new_systolic_pass,
+    // [MODIFIED] This is a general enable signal, active during computation.
     output wire                                         ctrl_activate_pe_computation,
 
-    // ---- SA 最终加法器控制端口 ----
-    output reg signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]    ctrl_c_data_to_sa,
-    output reg                                          ctrl_enable_final_add,
+    // --- SA Final Adder Control Ports ---
+    // [UNCHANGED] This logic is part of the accumulation pipeline.
+    output wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]   ctrl_c_data_to_sa,
+    output wire                                         ctrl_enable_final_add,
+    output wire signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]   ctrl_partial_sum_to_sa,
 
-    // ---- A/B SRAM 读取接口 (给SA喂数据) ----
-    output wire [$clog2(TILE_SIZE)-1:0]                 sram_a_addr,
-    input wire  [TILE_SIZE*INPUT_DATA_WIDTH-1:0]        sram_a_rdata_flat,
-    output wire [$clog2(TILE_SIZE)-1:0]                 sram_b_addr,
-    input wire  [TILE_SIZE*INPUT_DATA_WIDTH-1:0]        sram_b_rdata_flat,
-    output wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]        sa_array_a_in_flat,
-    output wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]        sa_array_b_in_flat,
-    output wire                                         ctrl_array_data_valid_in,
+    // --- C-ACCUM (Accumulator SRAM) Interface ---
+    // [UNCHANGED] The interface to the result accumulator SRAM is identical.
+    output wire [$clog2(TILE_SIZE)-1:0]                 c_accum_raddr,
+    input wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]           c_accum_rdata,
+    output wire [$clog2(TILE_SIZE)-1:0]                 c_accum_waddr,
+    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]          c_accum_wdata,
+    output wire                                         c_accum_we
 
-    // ---- C-SRAM 读写接口 ----
-    output reg [$clog2(TILE_SIZE)-1:0]                  sram_c_addr,
-    output reg [MAIN_MEM_DATA_WIDTH_BITS-1:0]           sram_c_wdata,
-    output reg                                          sram_c_we,
-    input wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]           sram_c_rdata
+    // --- [REMOVED] SRAM Read and SA Data Feed Interfaces ---
+    // All ports related to reading from A/B SRAMs and feeding the array
+    // (sram_a_addr, sram_a_rdata, sa_array_a_in_flat, etc.) have been removed.
+    // This functionality is now handled by the Data_Formatter.
 );
 
     //======================================================================
-    //== 内部参数和信号声明
+    //== Internal Parameters and Signals
     //======================================================================
 
-    // -- 主FSM --
-    localparam MAIN_FSM_WIDTH = 2;
-    localparam S_IDLE         = {MAIN_FSM_WIDTH{1'b0}},
-               S_START_SA     = S_IDLE + 1,
-               S_COMPUTING    = S_START_SA + 1,
-               S_FINISH       = S_COMPUTING + 1;
-    reg [MAIN_FSM_WIDTH-1:0] main_fsm_state, main_fsm_next_state;
-    reg [TILE_SIZE-1:0]      row_done_flags;
+    // -- Internal state --
+    reg  is_computing; // Main state flag, replaces complex FSM
+    reg  [$clog2(TILE_SIZE):0] processed_row_count;
 
-    // -- 累加微流水线 FSM --
-    localparam ACCUM_FSM_WIDTH = 3;
-    localparam ACCUM_IDLE              = {ACCUM_FSM_WIDTH{1'b0}},
-               ACCUM_LATCH_PARTIAL     = ACCUM_IDLE + 1,
-               // k > 0 分支
-               ACCUM_READ_C_CMD        = ACCUM_LATCH_PARTIAL + 1,
-               ACCUM_WAIT_C_AND_ADD    = ACCUM_READ_C_CMD + 1,
-               ACCUM_WAIT_FINAL_SUM    = ACCUM_WAIT_C_AND_ADD + 1,
-               ACCUM_WRITE_FINAL_CMD   = ACCUM_WAIT_FINAL_SUM + 1,
-               // k = 0 分支
-               ACCUM_WRITE_PARTIAL_CMD = ACCUM_WRITE_FINAL_CMD + 1;
-    reg [ACCUM_FSM_WIDTH-1:0] accum_fsm_state, accum_fsm_next_state;
+    // -- Accumulation pipeline registers --
+    // [UNCHANGED] This pipeline is independent of the data feed mechanism.
+    reg [ACCUM_PIPE_DELAY-1:0]                  pipe_valid;
+    reg [$clog2(TILE_SIZE)-1:0]                 pipe_row_idx      [ACCUM_PIPE_DELAY-1:0];
+    reg signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]   pipe_partial_sum  [ACCUM_PIPE_DELAY-1:0];
+    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0]          pipe_c_old_data   [ACCUM_PIPE_DELAY-1:0];
 
-    // -- 数据喂入逻辑 --
-    reg [$clog2(TILE_SIZE)-1:0] sa_feed_counter;
-    
-    // -- 数据寄存器 --
-    reg [$clog2(TILE_SIZE)-1:0]                 processing_row_idx_reg;
-    reg signed [MAIN_MEM_DATA_WIDTH_BITS-1:0]   partial_sum_reg;
-
-    // -- 握手信号 --
+    // -- Handshake signal --
     wire handshake_fire;
 
+    // -- [REMOVED] Data feed logic --
+    // The `sa_feed_counter` register has been removed.
+
+    genvar i;
 
     //======================================================================
-    //== 核心逻辑实现
+    //== Core Logic Implementation
     //======================================================================
 
-    // --- 握手与就绪信号 ---
-    // 当累加FSM空闲时，我们才能接收下一个结果
-    assign dut_ready_for_sa_partial_sum = (accum_fsm_state == ACCUM_IDLE);
-    // 握手成功信号
+    // --- Handshake & Status Control ---
+    assign dut_ready_for_sa_partial_sum = 1'b1; // Assume accum pipeline can always accept data
     assign handshake_fire = sa_partial_sum_valid && dut_ready_for_sa_partial_sum;
 
+    // This signal is a level that stays high for the duration of the computation pass.
+    assign ctrl_activate_pe_computation = is_computing;
 
-    // --- 主 FSM ---
+    // Main Control Logic (FSM-like behavior)
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            main_fsm_state <= S_IDLE;
+            is_computing <= 1'b0;
+            compute_busy <= 1'b0;
+            compute_done <= 1'b0;
+            ctrl_start_new_systolic_pass <= 1'b0;
+            processed_row_count <= 0;
         end else begin
-            main_fsm_state <= main_fsm_next_state;
-        end
-    end
+            // Default to a single-cycle pulse for starting a pass
+            ctrl_start_new_systolic_pass <= 1'b0;
 
-    always @(*) begin
-        main_fsm_next_state = main_fsm_state;
-        compute_busy = 1'b0;
-        compute_done = 1'b0;
-        ctrl_start_new_systolic_pass = 1'b0;
-        ctrl_clear_all_pe_accumulators = 1'b0;
+            if (compute_req && !is_computing) begin
+                // A new computation request for a tile pass (one 'k' iteration)
+                is_computing <= 1'b1;
+                compute_busy <= 1'b1;
+                compute_done <= 1'b0;
+                // [MODIFIED] Send a single pulse to start the Data_Formatter and Systolic Array
+                ctrl_start_new_systolic_pass <= 1'b1;
+                processed_row_count <= 0;
+            end else if (is_computing) begin
+                compute_busy <= 1'b1;
 
-        case(main_fsm_state)
-            S_IDLE: begin
-                if (compute_req) begin
-                    main_fsm_next_state = S_START_SA;
+                // [UNCHANGED] Row counting logic is driven by the accumulation pipeline's write enable.
+                if (c_accum_we) begin
+                    processed_row_count <= processed_row_count + 1;
                 end
-            end
-            S_START_SA: begin
-                compute_busy = 1'b1;
-                ctrl_start_new_systolic_pass = 1'b1;
-                // 仅在整个矩阵乘法的第一个k-tile时才清除PE累加器
-                if (k_tile_idx == 0) begin
-                    ctrl_clear_all_pe_accumulators = 1'b1;
-                end
-                main_fsm_next_state = S_COMPUTING;
-            end
-            S_COMPUTING: begin
-                compute_busy = 1'b1;
-                // 当所有行的结果都已处理完毕，并且SA本身也完成了它的计算 pass，才算结束
-                if (row_done_flags == {TILE_SIZE{1'b1}} && sa_tile_all_pes_done_one_pass) begin
-                    main_fsm_next_state = S_FINISH;
-                end
-            end
-            S_FINISH: begin
-                compute_done = 1'b1;
-                main_fsm_next_state = S_IDLE;
-            end
-            default: begin
-                main_fsm_next_state = S_IDLE;
-            end
-        endcase
-    end
 
-
-    // --- 数据喂入SA的逻辑 ---
-    assign ctrl_activate_pe_computation = (main_fsm_state == S_COMPUTING);
-    assign ctrl_array_data_valid_in = (main_fsm_state == S_COMPUTING && sa_feed_counter < TILE_SIZE);
-    
-    // SRAM地址生成与数据通路连接
-    assign sram_a_addr = sa_feed_counter;
-    assign sram_b_addr = sa_feed_counter;
-    assign sa_array_a_in_flat = sram_a_rdata_flat;
-    assign sa_array_b_in_flat = sram_b_rdata_flat;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            sa_feed_counter <= 0;
-        end else if (ctrl_start_new_systolic_pass) begin
-            sa_feed_counter <= 0;
-        end else if (ctrl_array_data_valid_in) begin
-            sa_feed_counter <= sa_feed_counter + 1;
-        end
-    end
-
-
-    // --- 累加微流水线 FSM ---
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            accum_fsm_state <= ACCUM_IDLE;
-        end else begin
-            accum_fsm_state <= accum_fsm_next_state;
-        end
-    end
-
-    // 累加FSM的组合逻辑（状态输出）
-    always @(*) begin
-        accum_fsm_next_state = accum_fsm_state;
-        sram_c_we = 1'b0;
-        sram_c_addr = 0;
-        sram_c_wdata = 0;
-        ctrl_enable_final_add = 1'b0;
-        ctrl_c_data_to_sa = 0;
-
-        case(accum_fsm_state)
-            ACCUM_IDLE: begin
-                if (handshake_fire) begin
-                    accum_fsm_next_state = ACCUM_LATCH_PARTIAL;
-                end
-            end
-            ACCUM_LATCH_PARTIAL: begin
-                // 根据k值决定走累加路径还是直接写路径
-                if (k_tile_idx > 0) begin
-                    accum_fsm_next_state = ACCUM_READ_C_CMD;
+                // [UNCHANGED] The condition for finishing a pass is when the last row
+                // has been written to the accumulator. This logic is robust and remains.
+                if (c_accum_we && (processed_row_count == TILE_SIZE - 1)) begin
+                    is_computing <= 1'b0;
+                    compute_busy <= 1'b0;
+                    compute_done <= 1'b1; // Assert completion signal
                 end else begin
-                    accum_fsm_next_state = ACCUM_WRITE_PARTIAL_CMD;
+                    compute_done <= 1'b0;
+                end
+            end else begin
+                // Idle state
+                compute_busy <= 1'b0;
+                compute_done <= 1'b0; // De-assert done when not busy
+                if (!compute_req) begin
+                    processed_row_count <= 0;
                 end
             end
-            // --- k > 0 的累加路径 ---
-            ACCUM_READ_C_CMD: begin
-                // 向C-SRAM发出读指令
-                sram_c_addr = processing_row_idx_reg;
-                accum_fsm_next_state = ACCUM_WAIT_C_AND_ADD;
-            end
-            ACCUM_WAIT_C_AND_ADD: begin
-                // C-SRAM数据已准备好，送给加法器并使其能
-                ctrl_c_data_to_sa = sram_c_rdata;
-                ctrl_enable_final_add = 1'b1;
-                // 假设加法器有N周期延迟
-                if (FINAL_ADDER_LATENCY == 0) begin
-                    accum_fsm_next_state = ACCUM_WRITE_FINAL_CMD;
-                end else begin
-                    // 这里我们简单等待1周期，可扩展为多周期
-                    accum_fsm_next_state = ACCUM_WAIT_FINAL_SUM;
-                end
-            end
-            ACCUM_WAIT_FINAL_SUM: begin
-                 // 等待加法器输出最终和
-                accum_fsm_next_state = ACCUM_WRITE_FINAL_CMD;
-            end
-            ACCUM_WRITE_FINAL_CMD: begin
-                // 将最终和写入C-SRAM
-                sram_c_we = 1'b1;
-                sram_c_addr = processing_row_idx_reg;
-                sram_c_wdata = sa_final_sum_in;
-                accum_fsm_next_state = ACCUM_IDLE;
-            end
-            // --- k = 0 的直接写路径 ---
-            ACCUM_WRITE_PARTIAL_CMD: begin
-                // 直接将部分和写入C-SRAM
-                sram_c_we = 1'b1;
-                sram_c_addr = processing_row_idx_reg;
-                sram_c_wdata = partial_sum_reg;
-                accum_fsm_next_state = ACCUM_IDLE;
-            end
-            default: begin
-                accum_fsm_next_state = ACCUM_IDLE;
-            end
-        endcase
+        end
     end
 
-    // --- 数据锁存与状态标志更新的序贯逻辑 ---
+    // --- High-Performance Accumulation Pipeline ---
+    // This logic is purely reactive to the `sa_partial_sum_valid` signal
+    // from the systolic array and requires no changes.
+
+    // Stage 0: Issue read command to C-ACCUM SRAM
+    assign c_accum_raddr = sa_partial_sum_row_idx;
+
+    // Pipeline Stage 1: Latch inputs
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            row_done_flags <= 0;
-            processing_row_idx_reg <= 0;
-            partial_sum_reg <= 0;
+            pipe_valid[0] <= 1'b0;
         end else begin
-            // 在新一轮计算开始时，清除所有完成标志
-            if (ctrl_start_new_systolic_pass) begin
-                row_done_flags <= 0;
-            end
-
-            // 当握手成功时，锁存来自SA的数据
+            pipe_valid[0] <= handshake_fire;
             if (handshake_fire) begin
-                processing_row_idx_reg <= sa_partial_sum_row_idx;
-                partial_sum_reg        <= sa_partial_sum_in;
-            end
-
-            // 当累加FSM完成一轮循环并即将返回IDLE时，设置对应行的完成标志
-            if (accum_fsm_state != ACCUM_IDLE && accum_fsm_next_state == ACCUM_IDLE) begin
-                row_done_flags[processing_row_idx_reg] <= 1'b1;
+                pipe_row_idx[0]     <= sa_partial_sum_row_idx;
+                pipe_partial_sum[0] <= sa_partial_sum_in;
+                pipe_c_old_data[0]  <= c_accum_rdata;
             end
         end
     end
+
+    // Pipeline Stage 2 to N-1: Intermediate registers
+    generate
+        for (i = 0; i < ACCUM_PIPE_DELAY - 1; i = i + 1) begin: pipe_middle_stages
+            always @(posedge clk or negedge rst_n) begin
+                if (!rst_n) begin
+                    pipe_valid[i+1] <= 1'b0;
+                end else begin
+                    pipe_valid[i+1]       <= pipe_valid[i];
+                    pipe_row_idx[i+1]     <= pipe_row_idx[i];
+                    pipe_partial_sum[i+1] <= pipe_partial_sum[i];
+                    pipe_c_old_data[i+1]  <= pipe_c_old_data[i];
+                end
+            end
+        end
+    endgenerate
+
+    // Pipeline Last Stage: Drive final adder and C-ACCUM write
+    assign ctrl_c_data_to_sa      = pipe_c_old_data[ACCUM_PIPE_DELAY-1];
+    assign ctrl_partial_sum_to_sa = pipe_partial_sum[ACCUM_PIPE_DELAY-1];
+    assign ctrl_enable_final_add  = pipe_valid[ACCUM_PIPE_DELAY-1];
+
+    assign c_accum_waddr = pipe_row_idx[ACCUM_PIPE_DELAY-1];
+    assign c_accum_wdata = sa_final_sum_in;
+    assign c_accum_we    = pipe_valid[ACCUM_PIPE_DELAY-1];
 
 endmodule
