@@ -55,11 +55,13 @@ module accelerator #(
     //== Internal Wires and Registers
     //======================================================================
 
+    localparam TILE_IDX_WIDTH = ($clog2(NUM_TILES_PER_DIM) > 0) ? $clog2(NUM_TILES_PER_DIM) : 1;
+
     // --- FSM and Loop Control ---
     reg [FSM_STATE_WIDTH-1:0] current_state, next_state;
-    reg [$clog2(NUM_TILES_PER_DIM)-1:0] i, j;
-    reg [$clog2(NUM_TILES_PER_DIM)-1:0] load_k_ptr;
-    reg [$clog2(NUM_TILES_PER_DIM)-1:0] compute_k_ptr;
+    reg [TILE_IDX_WIDTH-1:0] i, j;
+    reg [TILE_IDX_WIDTH-1:0] load_k_ptr;
+    reg [TILE_IDX_WIDTH-1:0] compute_k_ptr;
 
     // --- Ping-Pong Buffer Control & Status Flags ---
     // A/B SRAMs (for Loader and Compute Controller)
@@ -108,10 +110,10 @@ module accelerator #(
     wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    c_accum_wdata, c_accum_rdata_from_A;
     wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    c_accum_ping_rdata_A, c_accum_pong_rdata_A;
     wire                                         c_accum_we;
-    wire                                         sa_final_sum_in; // 假设有一个外部加法器
-
+    wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    sa_final_sum_in;
+    
     // C-SRAM -> Writer (CORRECTED INTERFACE)
-    wire [$clog2(TILE_SIZE*TILE_SIZE*4/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_c_raddr_from_writer;
+    wire [$clog2(TILE_SIZE*TILE_SIZE*PE_ACCUM_DATA_WIDTH/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_c_raddr_from_writer;
     wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                                sram_c_rdata_to_writer;
     wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                                sram_c_ping_rdata_B, sram_c_pong_rdata_B;
 
@@ -264,7 +266,7 @@ module accelerator #(
 
             // C Buffer Control
             accum_to_pong <= 1'b0;
-            write_from_pong <= 1'b1; // 假设写回单元从pong开始，与累加单元错开
+            write_from_pong <= 1'b0; // 假设写回单元从pong开始，与累加单元错开
 
         end else begin
             // --- FSM State Transition ---

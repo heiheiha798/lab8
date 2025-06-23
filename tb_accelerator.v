@@ -11,7 +11,7 @@ module tb_accelerator;
     //======================================================================
     //== Test Parameters (与Python脚本和DUT保持一致)
     //======================================================================
-    localparam MATRIX_SIZE               = 48;
+    localparam MATRIX_SIZE               = 16;
     localparam TILE_SIZE                 = 16;
     
     localparam MAIN_MEM_ADDR_WIDTH       = 32;
@@ -25,7 +25,7 @@ module tb_accelerator;
 
     // 仿真控制参数
     localparam CLK_PERIOD                = 10; // 10 ns = 100 MHz clock
-    localparam MEM_READ_LATENCY          = 8;  // 主存读取延迟 (周期数)
+    localparam MEM_READ_LATENCY          = 0;  // 主存读取延迟 (周期数) - 已修改为0
 
     // --- 内存模型参数 (以64位字为单位) ---
     // A矩阵和B矩阵各占用的字数
@@ -95,35 +95,61 @@ module tb_accelerator;
     // 将主存建模为64位宽的存储器数组，与文件格式完全对应
     reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] unified_memory [0:MEM_TOTAL_WORDS-1];
     
-    reg [MAIN_MEM_ADDR_WIDTH-1:0] imem_read_addr_reg;
-    reg [MEM_READ_LATENCY:0]      imem_latency_shifter;
+    // reg [MAIN_MEM_ADDR_WIDTH-1:0] imem_read_addr_reg; // 不再需要
+    // reg [MEM_READ_LATENCY:0]      imem_latency_shifter; // 不再需要
+
+    // --- 新增：用于模拟流水线内存的寄存器 ---
+    // 这组寄存器用于存储“在途”的内存请求地址和有效状态
+    reg [MAIN_MEM_ADDR_WIDTH-1:0] addr_pipeline [0:MEM_READ_LATENCY]; // MEM_READ_LATENCY为0时，数组大小为1
+    reg                           valid_pipeline[0:MEM_READ_LATENCY]; // MEM_READ_LATENCY为0时，数组大小为1
+    integer k; // 用于for循环
     
-    // --- 内存读取逻辑 ---
+    // --- 内存读取逻辑 (高性能流水线版本) ---
     always @(posedge clk or negedge rst_n) begin
         if(!rst_n) begin
             imem_req_ready <= 1'b0;
             imem_resp_valid <= 1'b0;
-            imem_latency_shifter <= 0;
+            // 复位流水线
+            for (k = 0; k <= MEM_READ_LATENCY; k = k + 1) begin // MEM_READ_LATENCY为0时，k=0
+                valid_pipeline[k] <= 1'b0;
+            end
         end else begin
-            imem_req_ready <= (imem_latency_shifter == 0);
+            // 1. 内存永远准备好接收新的请求
+            imem_req_ready <= 1'b1;
 
-            imem_latency_shifter <= {imem_latency_shifter[MEM_READ_LATENCY-1:0], 1'b0};
-            
-            if (imem_req_valid && imem_req_ready) begin
-                imem_read_addr_reg <= imem_req_addr;
-                imem_latency_shifter[0] <= 1'b1;
+            // 2. 处理新的请求并移位流水线
+            // 如果DUT发来有效请求，则将其送入流水线第0级
+            if (imem_req_valid) begin // imem_req_ready在此处总为1
+                addr_pipeline[0] <= imem_req_addr;
+                valid_pipeline[0] <= 1'b1;
+            end else begin
+                // 如果没有新请求，则在流水线中插入一个“气泡”（无效标志）
+                valid_pipeline[0] <= 1'b0;
+            end
+
+            // 将流水线中的所有请求向后移动一级
+            for (k = 1; k <= MEM_READ_LATENCY; k = k + 1) begin // MEM_READ_LATENCY为0时，此循环不执行
+                addr_pipeline[k] <= addr_pipeline[k-1];
+                valid_pipeline[k] <= valid_pipeline[k-1];
             end
             
-            imem_resp_valid <= imem_latency_shifter[MEM_READ_LATENCY];
+            // 3. 生成响应
+            // 响应是否有效，取决于 MEM_READ_LATENCY 个周期前是否有有效请求进入流水线
+            imem_resp_valid <= valid_pipeline[MEM_READ_LATENCY]; // MEM_READ_LATENCY为0时，直接使用valid_pipeline[0]
 
-            if(imem_latency_shifter[MEM_READ_LATENCY-1]) begin
+            // 如果响应有效，就使用刚从流水线末端取出的地址来查找数据
+            if (valid_pipeline[MEM_READ_LATENCY]) begin // MEM_READ_LATENCY为0时，直接使用valid_pipeline[0]
                 integer word_index;
+                reg [MAIN_MEM_ADDR_WIDTH-1:0] delayed_addr;
+
+                // delayed_addr 就是 MEM_READ_LATENCY 个周期前请求的地址
+                delayed_addr = addr_pipeline[MEM_READ_LATENCY]; // MEM_READ_LATENCY为0时，直接使用addr_pipeline[0]
                 
                 // 将DUT的字节地址转换为内存模型的字地址索引
-                if (imem_read_addr_reg >= BASE_ADDR_B) begin
-                    word_index = ((imem_read_addr_reg - BASE_ADDR_B) / MAIN_MEM_DATA_WIDTH_BYTES) + WORDS_PER_MATRIX_A_OR_B;
+                if (delayed_addr >= BASE_ADDR_B) begin
+                    word_index = ((delayed_addr - BASE_ADDR_B) / MAIN_MEM_DATA_WIDTH_BYTES) + WORDS_PER_MATRIX_A_OR_B;
                 end else begin
-                    word_index = (imem_read_addr_reg - BASE_ADDR_A) / MAIN_MEM_DATA_WIDTH_BYTES;
+                    word_index = (delayed_addr - BASE_ADDR_A) / MAIN_MEM_DATA_WIDTH_BYTES;
                 end
                 
                 // 直接从字内存中读取
