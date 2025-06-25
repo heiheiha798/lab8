@@ -1,9 +1,7 @@
 //
 // Filename: data_formatter.v
 // Description: A high-performance data formatter for the systolic array.
-//              It reads data from banked on-chip SRAMs and generates the
-//              time-skewed data wavefronts required by the pure-computation
-//              systolic array, enabling maximum throughput.
+//              (REVISED Address Generation)
 //
 `timescale 1ns / 1ps
 
@@ -18,17 +16,22 @@ module data_formatter #(
     output reg                                  pass_done,  // To Compute Controller
 
     // --- SRAM Read Interface (Banked) ---
-    // Assumes 16 independent banks for A and 16 for B.
-    // Each bank stores one row/column of a tile.
+    // sram_a_addr: For each bank of SRAM A, this provides the ROW ADDRESS to read.
+    //              Bank index corresponds to A_tile's COLUMN index.
     output wire [TILE_SIZE*$clog2(TILE_SIZE)-1:0] sram_a_addr,
-    input wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   sram_a_rdata, // Concatenated data from all A banks
+    input wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   sram_a_rdata, // Concatenated data from all banks of SRAM A
+
+    // sram_b_addr: For each bank of SRAM B, this provides the ROW ADDRESS to read.
+    //              Bank index corresponds to B_tile's ROW index.
     output wire [TILE_SIZE*$clog2(TILE_SIZE)-1:0] sram_b_addr,
-    input wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   sram_b_rdata, // Concatenated data from all B banks
+    input wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   sram_b_rdata, // Concatenated data from all banks of SRAM B
 
     // --- Systolic Array Feed Interface ---
     output reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   skewed_a_out,
     output reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0]   skewed_b_out,
-    output reg                                    data_valid_out
+    output reg                                    data_valid_out,         // Overall valid for the wavefront
+    output reg [TILE_SIZE-1:0]                    skewed_a_valid_out,     // Individual valid for each A element
+    output reg [TILE_SIZE-1:0]                    skewed_b_valid_out      // Individual valid for each B element
 );
 
     //======================================================================
@@ -39,71 +42,87 @@ module data_formatter #(
     localparam S_STREAMING       = S_IDLE + 1;
     localparam S_DONE            = S_STREAMING + 1;
 
-    // A full data pass requires 2*SIZE - 1 wavefronts. Counter goes from 0 to 2*SIZE-2.
-    localparam TIME_COUNTER_WIDTH = $clog2(TILE_SIZE * 2 - 1);
-    localparam TIME_COUNTER_MAX   = TILE_SIZE * 2 - 2;
+    localparam TIME_COUNTER_MAX   = 3 * TILE_SIZE - 2; // For a full pass
+    localparam TIME_COUNTER_WIDTH = $clog2(TIME_COUNTER_MAX + 1);
 
-    localparam SRAM_ADDR_WIDTH = $clog2(TILE_SIZE);
+    localparam SRAM_ADDR_WIDTH = $clog2(TILE_SIZE); // Width for a single bank's row address
+    // PIPELINE_COMPENSATION:
+    // Cycle 0 (T_addr_gen): Address sent from DF.
+    // Cycle 1 (T_addr_gen + 1): Data available on sram_x_rdata input.
+    // Cycle 2 (T_addr_gen + 2): Data latched into sram_x_rdata_reg_q.
+    //                           skewed_x_out logic uses this data.
+    //                           t_feed_equivalent = (T_addr_gen + 2) - PIPELINE_COMPENSATION.
+    //                           If we want t_feed_equivalent = T_addr_gen, then PIPELINE_COMPENSATION = 2.
+    localparam PIPELINE_COMPENSATION = 2;
 
     //======================================================================
     //== Internal Registers and Wires
     //======================================================================
-    reg [FSM_STATE_WIDTH-1:0] current_state, next_state;
-    reg [TIME_COUNTER_WIDTH-1:0] time_cnt;
+    reg [FSM_STATE_WIDTH-1:0] current_state_q, next_state_d;
+    reg [TIME_COUNTER_WIDTH-1:0] time_cnt_q, time_cnt_d; // This counter drives the effective time for address generation
 
-    // Pipeline register for data read from SRAM to improve timing
-    reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_a_rdata_reg;
-    reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_b_rdata_reg;
+    reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_a_rdata_reg_q;
+    reg [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_b_rdata_reg_q;
+
+    wire [SRAM_ADDR_WIDTH-1:0] sram_a_addr_internal [0:TILE_SIZE-1];
+    wire [SRAM_ADDR_WIDTH-1:0] sram_b_addr_internal [0:TILE_SIZE-1];
 
     //======================================================================
     //== FSM and Control Logic
     //======================================================================
-
-    // FSM state transitions (sequential)
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            current_state <= S_IDLE;
+            current_state_q <= S_IDLE;
         end else begin
-            current_state <= next_state;
+            current_state_q <= next_state_d;
         end
     end
 
-    // FSM outputs and next-state logic (combinational)
     always @(*) begin
-        next_state      = current_state;
+        next_state_d      = current_state_q;
         pass_done       = 1'b0;
-        data_valid_out  = 1'b0;
+        data_valid_out  = 1'b0; // Default, will be overridden
 
-        case (current_state)
+        case (current_state_q)
             S_IDLE: begin
                 if (start_pass) begin
-                    next_state = S_STREAMING;
+                    next_state_d = S_STREAMING;
                 end
             end
             S_STREAMING: begin
+                // data_valid_out will be high when DF is streaming.
+                // The actual validity of skewed_x_out depends on t_feed_equivalent and indices.
                 data_valid_out = 1'b1;
-                if (time_cnt == TIME_COUNTER_MAX) begin
-                    next_state = S_DONE;
+                if (time_cnt_q == TIME_COUNTER_MAX) begin
+                    next_state_d = S_DONE;
                 end
             end
             S_DONE: begin
                 pass_done = 1'b1;
-                next_state = S_IDLE;
+                next_state_d = S_IDLE;
             end
             default: begin
-                next_state = S_IDLE;
+                next_state_d = S_IDLE;
             end
         endcase
     end
 
-    // Time counter logic (sequential)
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            time_cnt <= 0;
-        end else if (current_state == S_IDLE && next_state == S_STREAMING) begin
-            time_cnt <= 0; // Reset counter when starting a new pass
-        end else if (current_state == S_STREAMING) begin
-            time_cnt <= time_cnt + 1;
+            time_cnt_q <= 0;
+        end else begin
+            time_cnt_q <= time_cnt_d;
+        end
+    end
+
+    always @(*) begin
+        time_cnt_d = time_cnt_q;
+        if (current_state_q == S_IDLE && next_state_d == S_STREAMING) begin
+            time_cnt_d = 0; // Reset counter when starting a pass
+        end else if (current_state_q == S_STREAMING) begin
+            if (time_cnt_q < TIME_COUNTER_MAX) begin
+                time_cnt_d = time_cnt_q + 1;
+            end
         end
     end
 
@@ -111,55 +130,138 @@ module data_formatter #(
     //== Datapath Logic
     //======================================================================
 
-    // --- SRAM Address Generation (Combinational) ---
-    // This logic generates 16 parallel addresses for the 16 SRAM banks each cycle.
+    // --- SRAM Address Generation (REVISED) ---
+    // `time_cnt_q` here is the `T_addr_gen` from our derivation.
+    // The data read using these addresses will be available in `sram_x_rdata_reg_q`
+    // when `time_cnt_q` (for skewed_out calc) is `T_addr_gen + 2`.
+    // At that point, `t_feed_equivalent` will be `(T_addr_gen + 2) - PIPELINE_COMPENSATION = T_addr_gen`.
+    // So, `time_cnt_q` used for address generation directly corresponds to the `t_feed_equivalent`
+    // for which this data is intended.
+    genvar i_sram_bank_phys_idx; // Physical SRAM bank index (0 to TILE_SIZE-1)
     generate
-        genvar i;
-        for (i = 0; i < TILE_SIZE; i = i + 1) begin : addr_gen_loop
-            // The address for bank 'i' is `time - i`.
-            // If `time < i`, the subtraction would underflow, but the `valid_mask`
-            // ensures that the output data for this bank is zeroed out anyway.
-            wire [SRAM_ADDR_WIDTH-1:0] a_addr = time_cnt - i;
-            wire [SRAM_ADDR_WIDTH-1:0] b_addr = time_cnt - i;
+        for (i_sram_bank_phys_idx = 0; i_sram_bank_phys_idx < TILE_SIZE; i_sram_bank_phys_idx = i_sram_bank_phys_idx + 1) begin : addr_gen_loop
+            logic [SRAM_ADDR_WIDTH-1:0] calculated_row_addr;
+            logic addr_gen_active;
+            logic addr_in_bounds;
 
-            assign sram_a_addr[i*SRAM_ADDR_WIDTH +: SRAM_ADDR_WIDTH] = a_addr;
-            assign sram_b_addr[i*SRAM_ADDR_WIDTH +: SRAM_ADDR_WIDTH] = b_addr;
+            assign addr_gen_active = ((current_state_q == S_STREAMING) || (current_state_q == S_IDLE && next_state_d == S_STREAMING));
+
+            // For SRAM A:
+            // Physical bank `i_sram_bank_phys_idx` corresponds to A_tile's COLUMN `i_sram_bank_phys_idx`.
+            // The row address to be read from this bank is `time_cnt_q - i_sram_bank_phys_idx`.
+            // This row address corresponds to A_tile's ROW `(time_cnt_q - i_sram_bank_phys_idx)`.
+            // So, this fetches A_tile[ (time_cnt_q - i_sram_bank_phys_idx) ][ i_sram_bank_phys_idx ].
+            assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
+            assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
+
+            assign sram_a_addr_internal[i_sram_bank_phys_idx] = (addr_gen_active && addr_in_bounds) ?
+                                                               calculated_row_addr :
+                                                               {SRAM_ADDR_WIDTH{1'bx}}; // Use 'x' for invalid address to help debug
+
+            // For SRAM B:
+            // Physical bank `i_sram_bank_phys_idx` corresponds to B_tile's ROW `i_sram_bank_phys_idx`.
+            // The row address to be read from this bank is `time_cnt_q - i_sram_bank_phys_idx`.
+            // This row address corresponds to B_tile's COLUMN `(time_cnt_q - i_sram_bank_phys_idx)`.
+            // So, this fetches B_tile[ i_sram_bank_phys_idx ][ (time_cnt_q - i_sram_bank_phys_idx) ].
+            // calculated_row_addr and addr_in_bounds are the same as for A for this specific address formula.
+            assign sram_b_addr_internal[i_sram_bank_phys_idx] = (addr_gen_active && addr_in_bounds) ?
+                                                               calculated_row_addr :
+                                                               {SRAM_ADDR_WIDTH{1'bx}};
         end
     endgenerate
 
+    // Concatenate internal bank addresses to form the module's output address buses
+    genvar concat_idx;
+    generate
+        for (concat_idx = 0; concat_idx < TILE_SIZE; concat_idx = concat_idx + 1) begin : concat_addr_loop
+            assign sram_a_addr[concat_idx*SRAM_ADDR_WIDTH +: SRAM_ADDR_WIDTH] = sram_a_addr_internal[concat_idx];
+            assign sram_b_addr[concat_idx*SRAM_ADDR_WIDTH +: SRAM_ADDR_WIDTH] = sram_b_addr_internal[concat_idx];
+        end
+    endgenerate
 
-    // --- SRAM Data Pipelining and Skewed Output Generation ---
-
-    // Latch the parallel data read from all SRAM banks
+    // --- SRAM Data Pipelining ---
     always @(posedge clk) begin
-        sram_a_rdata_reg <= sram_a_rdata;
-        sram_b_rdata_reg <= sram_b_rdata;
+        // These registers (sram_x_rdata_reg_q) introduce one stage of the PIPELINE_COMPENSATION.
+        // The SRAM itself introduces the other stage.
+        sram_a_rdata_reg_q <= sram_a_rdata;
+        sram_b_rdata_reg_q <= sram_b_rdata;
+
+        if (current_state_q == S_STREAMING) begin
+            // This $display shows what's coming *from* SRAM *into* the first pipeline register.
+            // The addresses that generated this data were calculated two cycles prior if PIPELINE_COMPENSATION is 2
+            // and sram_x_rdata_reg_q is the point of use.
+            // More accurately, if address is gen at T, data is on sram_x_rdata at T+1, in _reg_q at T+2.
+            $display("%0t [DF READ] time_cnt_q=%d. SRAM_A_ADDRS[0]=%x,...,%x. SRAM_B_ADDRS[0]=%x,...,%x. sram_a_rdata=%h, sram_b_rdata=%h",
+                     $time, time_cnt_q,
+                     sram_a_addr_internal[0], sram_a_addr_internal[TILE_SIZE-1],
+                     sram_b_addr_internal[0], sram_b_addr_internal[TILE_SIZE-1],
+                     sram_a_rdata, sram_b_rdata);
+        end
     end
 
-    // Generate the final skewed output for the systolic array
+    // --- Skewed Output Generation (REVISED data selection for B) ---
     always @(posedge clk or negedge rst_n) begin
+        integer i_out_ch;         // Output channel index (0 to TILE_SIZE-1), SA's perspective
+        integer target_col_A;     // Target COLUMN index for A_tile for channel i_out_ch
+        integer target_row_B;     // Target ROW index for B_tile for channel i_out_ch
+        integer t_feed_equivalent; // SA wavefront time, starts from 0
+
         if (!rst_n) begin
-            skewed_a_out <= 0;
-            skewed_b_out <= 0;
-        end else if (data_valid_out) begin // Only update when streaming
-            // For each input of the systolic array, select the corresponding
-            // data from the pipelined SRAM read data IF it's valid for the
-            // current time step. Otherwise, output zero.
-            for (integer i = 0; i < TILE_SIZE; i = i + 1) begin
-                // A data element for row/col 'i' is valid only when time >= i
-                if (time_cnt >= i) begin
-                    skewed_a_out[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_a_rdata_reg[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
-                    skewed_b_out[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_b_rdata_reg[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
-                end else begin
-                    // Before its time, feed zeros. The PE will ignore it
-                    // because its corresponding valid signal will be low.
-                    skewed_a_out[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= 0;
-                    skewed_b_out[i*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= 0;
-                end
-            end
+            skewed_a_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
+            skewed_b_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
+            skewed_a_valid_out <= {TILE_SIZE{1'b0}};
+            skewed_b_valid_out <= {TILE_SIZE{1'b0}};
         end else begin
-            skewed_a_out <= 0;
-            skewed_b_out <= 0;
+            if (data_valid_out) begin // True when FSM is in S_STREAMING
+                                     // For correct data, should ideally be (time_cnt_q >= PIPELINE_COMPENSATION)
+                t_feed_equivalent = time_cnt_q - PIPELINE_COMPENSATION;
+
+                for (i_out_ch = 0; i_out_ch < TILE_SIZE; i_out_ch = i_out_ch + 1) begin
+                    // --- For Matrix A ---
+                    // SA channel 'i_out_ch' (SA row index) needs A_tile[i_out_ch][t_feed_equivalent - i_out_ch]
+                    target_col_A = t_feed_equivalent - i_out_ch;
+
+                    if (target_col_A >= 0 && target_col_A < TILE_SIZE && t_feed_equivalent >= 0) begin
+                        // SRAM A: bank index is A_tile's COLUMN index.
+                        // Data in sram_a_rdata_reg_q[bank 'target_col_A'] was read from A_tile's ROW 'i_out_ch'
+                        // due to the revised address generation: sram_a_addr_internal[target_col_A] was set to 'i_out_ch'
+                        // (where i_out_ch = t_feed_at_addr_gen - target_col_A, and t_feed_at_addr_gen = t_feed_equivalent)
+                        skewed_a_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_a_rdata_reg_q[target_col_A*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
+                        skewed_a_valid_out[i_out_ch]                                <= 1'b1;
+                        if (time_cnt_q >= PIPELINE_COMPENSATION) begin // Only display when t_feed_equivalent is non-negative
+                            $display("%0t [DF SEND A] @t_f=%d, SA_ch=%d (A_row %d), needs A[%d][%d], from sram_a_rdata_reg_q[bank_A_col %d]=%h",
+                                     $time, t_feed_equivalent, i_out_ch, i_out_ch, i_out_ch, target_col_A, target_col_A, sram_a_rdata_reg_q[target_col_A*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH]);
+                        end
+                    end else begin
+                        skewed_a_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= {INPUT_DATA_WIDTH{1'b0}};
+                        skewed_a_valid_out[i_out_ch]                                <= 1'b0;
+                    end
+
+                    // --- For Matrix B ---
+                    // SA channel 'i_out_ch' (SA col index) needs B_tile[t_feed_equivalent - i_out_ch][i_out_ch]
+                    target_row_B = t_feed_equivalent - i_out_ch; // This is the ROW of B_tile
+
+                    if (target_row_B >= 0 && target_row_B < TILE_SIZE && t_feed_equivalent >= 0) begin
+                        // SRAM B: bank index is B_tile's ROW index.
+                        // Data in sram_b_rdata_reg_q[bank 'target_row_B'] was read from B_tile's COLUMN 'i_out_ch'
+                        // due to the revised address generation: sram_b_addr_internal[target_row_B] was set to 'i_out_ch'
+                        skewed_b_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_b_rdata_reg_q[target_row_B*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
+                        skewed_b_valid_out[i_out_ch]                                <= 1'b1;
+                        if (time_cnt_q >= PIPELINE_COMPENSATION) begin
+                            $display("%0t [DF SEND B] @t_f=%d, SA_ch=%d (B_col %d), needs B[%d][%d], from sram_b_rdata_reg_q[bank_B_row %d]=%h",
+                                    $time, t_feed_equivalent, i_out_ch, i_out_ch, target_row_B, i_out_ch, target_row_B, sram_b_rdata_reg_q[target_row_B*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH]);
+                        end
+                    end else begin
+                        skewed_b_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= {INPUT_DATA_WIDTH{1'b0}};
+                        skewed_b_valid_out[i_out_ch]                                <= 1'b0;
+                    end
+                end
+            end else begin // if not data_valid_out (i.e., not S_STREAMING)
+                skewed_a_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
+                skewed_b_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
+                skewed_a_valid_out <= {TILE_SIZE{1'b0}};
+                skewed_b_valid_out <= {TILE_SIZE{1'b0}};
+            end
         end
     end
 

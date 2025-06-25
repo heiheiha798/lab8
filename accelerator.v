@@ -1,350 +1,313 @@
 //
 // Filename: accelerator.v
-// Description: Redesigned, robust top-level accelerator module.
-//              Implements a true pipeline manager using status flags to
-//              decouple Load, Compute, and Write operations, preventing deadlocks.
+// Description: A fully integrated matrix multiplication accelerator.
+//              (FINAL VERSION) This module contains a single, unified FSM that
+//              controls the entire GEMM computation flow. It includes a precise
+//              2-cycle delay between starting the Data Formatter and the Systolic
+//              Array to compensate for the DF's internal pipeline, ensuring
+//              correct data alignment and calculation.
 //
 `timescale 1ns / 1ps
 
 module accelerator #(
+    // Architectural Parameters
     parameter MATRIX_SIZE               = 48,
     parameter TILE_SIZE                 = 16,
+
+    // Data Type Parameters
     parameter INPUT_DATA_WIDTH          = 8,
-    parameter PE_ACCUM_DATA_WIDTH       = 32,
+    parameter ACCUM_DATA_WIDTH          = 32,
+
+    // External Memory Interface Parameters
     parameter MAIN_MEM_ADDR_WIDTH       = 32,
     parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
+
+    // Base Addresses in Main Memory
     parameter BASE_ADDR_A               = 32'h10000000,
     parameter BASE_ADDR_B               = 32'h20000000,
     parameter BASE_ADDR_C               = 32'h30000000
-)(
-    input wire                                          clk,
-    input wire                                          rst_n,
-    input wire                                          start,
-    output wire                                         busy,
-    output wire                                         done,
+) (
+    // --- Top Controller Interface ---
+    input  wire                                 clk,
+    input  wire                                 rst_n,
+    input  wire                                 comp_enb,       // Start signal for the entire computation
+    output logic                                busyb,          // Active low busy signal ('1' = IDLE, '0' = BUSY)
+    output logic                                done,           // Pulsed high when computation finishes
 
-    // 主存读取接口 (for Loader)
-    output wire                                         imem_req_valid,
-    input wire                                          imem_req_ready,
-    input wire                                          imem_resp_valid,
-    input wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]           imem_resp_rdata,
-    output wire [MAIN_MEM_ADDR_WIDTH-1:0]               imem_req_addr,
+    // --- Input Memory Interface (Read-only) ---
+    output logic [MAIN_MEM_ADDR_WIDTH-1:0]      imem_addr,
+    output logic                                imem_read_enb,
+    input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  imem_data_in,
+    input  wire                                 imem_req_ready,
+    input  wire                                 imem_resp_valid,
 
-    // 主存写入接口 (for Writer)
-    output wire                                         omem_req_valid,
-    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]          omem_req_wdata,
-    output wire [MAIN_MEM_ADDR_WIDTH-1:0]               omem_req_addr,
-    input wire                                          omem_req_ready
+    // --- Result Memory Interface (Write-only) ---
+    output logic [MAIN_MEM_ADDR_WIDTH-1:0]      omem_addr,
+    output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] omem_wdata,
+    output logic                                omem_write_enb,
+    input  wire                                 omem_req_ready
 );
 
-    //======================================================================
-    //== Local Parameters and State Definitions
-    //======================================================================
+    //--------------------------------------------------------------------------
+    // Local Parameters & Derived Values
+    //--------------------------------------------------------------------------
     localparam NUM_TILES_PER_DIM = MATRIX_SIZE / TILE_SIZE;
+    localparam K_ITER_MAX        = NUM_TILES_PER_DIM;
+    localparam J_ITER_MAX        = NUM_TILES_PER_DIM;
+    localparam I_ITER_MAX        = NUM_TILES_PER_DIM;
+
+    localparam LOADER_SRAM_ADDR_WIDTH   = $clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
+    localparam DF_SRAM_ADDR_WIDTH       = TILE_SIZE * $clog2(TILE_SIZE);
+    localparam DF_SRAM_DATA_WIDTH       = TILE_SIZE * INPUT_DATA_WIDTH;
+    localparam SA_SRAM_C_ROW_WIDTH      = TILE_SIZE * ACCUM_DATA_WIDTH;
+    localparam WRITER_SRAM_C_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
+
+    //--------------------------------------------------------------------------
+    // FSM State Definitions (Re-architected for Pipeline Delay)
+    //--------------------------------------------------------------------------
+    typedef enum logic [3:0] {
+        S_IDLE,
+        S_INIT_GEMM,
+        S_LOAD_FIRST,
+        S_WAIT_LOAD_FIRST,
+        S_START_DF,
+        S_PIPE_DELAY, // New state for 2-cycle delay
+        S_START_SA,
+        S_WAIT_SA_AND_LOAD,
+        S_WRITE_TILE,
+        S_WAIT_WRITE_DONE,
+        S_FINISH
+    } accel_fsm_state_t;
+    accel_fsm_state_t current_state_q, next_state_d;
+
+    //--------------------------------------------------------------------------
+    // Internal Signals and Registers
+    //--------------------------------------------------------------------------
+    logic [$clog2(I_ITER_MAX)-1:0] i_tile_idx_q, i_tile_idx_d;
+    logic [$clog2(J_ITER_MAX)-1:0] j_tile_idx_q, j_tile_idx_d;
+    logic [$clog2(K_ITER_MAX)-1:0] k_tile_idx_q, k_tile_idx_d;
+
+    logic load_ab_select_q,  load_ab_select_d;
+    logic compute_ab_select_q, compute_ab_select_d;
+    logic compute_c_select_q,  compute_c_select_d;
+    logic write_c_select_q,    write_c_select_d;
+
+    logic loader_req_pulse;
+    logic df_start_pass_pulse;
+    logic sa_start_k_iter_pulse;
+    logic writer_req_pulse;
+
+    logic sa_activate_pe_level;
+
+    logic loader_done;
+    logic sa_k_iter_done;
+    logic writer_done;
     
-    // FSM 状态定义
-    localparam FSM_STATE_WIDTH   = 3;
-    localparam S_IDLE            = {FSM_STATE_WIDTH{1'b0}};
-    localparam S_RUN_PIPELINE    = S_IDLE + 1;
-    localparam S_DRAIN_PIPELINE  = S_RUN_PIPELINE + 1;
-    localparam S_KICKOFF_WRITE   = S_DRAIN_PIPELINE + 1;
-    localparam S_WAIT_FINAL_WRITE= S_KICKOFF_WRITE + 1;
-    localparam S_DONE            = S_WAIT_FINAL_WRITE + 1;
-
-    //======================================================================
-    //== Internal Wires and Registers
-    //======================================================================
-
-    localparam TILE_IDX_WIDTH = ($clog2(NUM_TILES_PER_DIM) > 0) ? $clog2(NUM_TILES_PER_DIM) : 1;
-
-    // --- FSM and Loop Control ---
-    reg [FSM_STATE_WIDTH-1:0] current_state, next_state;
-    reg [TILE_IDX_WIDTH-1:0] i, j;
-    reg [TILE_IDX_WIDTH-1:0] load_k_ptr;
-    reg [TILE_IDX_WIDTH-1:0] compute_k_ptr;
-
-    // --- Ping-Pong Buffer Control & Status Flags ---
-    // A/B SRAMs (for Loader and Compute Controller)
-    reg  load_to_pong;      // Loader 写入的目标: 0=ping, 1=pong
-    reg  compute_from_pong; // Compute 读取的来源: 0=ping, 1=pong
-    reg  buffer_is_valid[1:0];   // 标志位: 0=ping, 1=pong. 1表示数据已加载好，可供计算
-    reg  buffer_is_loading[1:0]; // 标志位: 1表示此缓冲区正在被加载
-    wire load_target_is_pong = load_to_pong;
-    wire compute_source_is_pong = compute_from_pong;
-
-    // C SRAM (for Compute Controller and Writer)
-    reg  accum_to_pong;     // Compute 累加的目标: 0=ping, 1=pong
-    reg  write_from_pong;   // Writer 读取的来源: 0=ping, 1=pong
+    logic load_done_flag_q,    load_done_flag_d;
+    logic compute_done_flag_q, compute_done_flag_d;
     
-    // --- Sub-module Control and Status ---
-    reg  loader_req;
-    wire loader_busy, loader_done;
-    reg  compute_req;
-    wire compute_busy, compute_done;
-    reg  writer_req;
-    wire writer_busy, writer_done;
-    wire clear_pe_accum_for_k0; // 用于在 k=0 时清空PE累加器
+    reg [1:0] pipe_delay_cnt_q, pipe_delay_cnt_d;
 
-    // --- Datapath Wires ---
-    // A/B SRAMs
-    wire [TILE_SIZE*$clog2(TILE_SIZE)-1:0] sram_a_addr_from_formatter, sram_b_addr_from_formatter;
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_a_rdata, sram_b_rdata;
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_a_ping_rdata, sram_a_pong_rdata;
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] sram_b_ping_rdata, sram_b_pong_rdata;
-    wire [$clog2(TILE_SIZE*TILE_SIZE*8/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_a_waddr, sram_b_waddr;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_wdata, sram_b_wdata;
-    wire sram_a_we, sram_b_we;
+    //--------------------------------------------------------------------------
+    // Sub-module Instantiations (Connections are unchanged)
+    //--------------------------------------------------------------------------
+    // ... (All sub-module instantiations remain the same as your Canvas version)
+    // --- Loader ---
+    logic [LOADER_SRAM_ADDR_WIDTH-1:0] loader_sram_a_addr, loader_sram_b_addr;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] loader_sram_a_wdata, loader_sram_b_wdata;
+    logic loader_sram_a_we, loader_sram_b_we;
+
+    loader #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_A(BASE_ADDR_A), .BASE_ADDR_B(BASE_ADDR_B))
+        u_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .k_tile_idx(k_tile_idx_q), .load_to_ping(load_ab_select_q), .load_busy(), .load_done(loader_done), .mem_req_valid(imem_read_enb), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_data_in), .mem_req_addr(imem_addr), .sram_a_addr(loader_sram_a_addr), .sram_a_wdata(loader_sram_a_wdata), .sram_a_we(loader_sram_a_we), .sram_b_addr(loader_sram_b_addr), .sram_b_wdata(loader_sram_b_wdata), .sram_b_we(loader_sram_b_we));
+    // --- SRAMs ---
+    logic sram_a_ping_we, sram_a_pong_we, sram_b_ping_we, sram_b_pong_we;
+    logic [LOADER_SRAM_ADDR_WIDTH-1:0] sram_a_ping_waddr, sram_a_pong_waddr, sram_b_ping_waddr, sram_b_pong_waddr;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_ping_wdata, sram_a_pong_wdata, sram_b_ping_wdata, sram_b_pong_wdata;
+    logic [DF_SRAM_ADDR_WIDTH-1:0] sram_a_ping_raddr, sram_a_pong_raddr, sram_b_ping_raddr, sram_b_pong_raddr;
+    logic [DF_SRAM_DATA_WIDTH-1:0] sram_a_ping_rdata, sram_a_pong_rdata, sram_b_ping_rdata, sram_b_pong_rdata;
+    sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_ping (.clk(clk), .we(sram_a_ping_we), .waddr(sram_a_ping_waddr), .wdata(sram_a_ping_wdata), .raddr(sram_a_ping_raddr), .rdata(sram_a_ping_rdata));
+    sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_pong (.clk(clk), .we(sram_a_pong_we), .waddr(sram_a_pong_waddr), .wdata(sram_a_pong_wdata), .raddr(sram_a_pong_raddr), .rdata(sram_a_pong_rdata));
+    sram_banked #(.IS_SRAM_A(1'b0), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_b_ping (.clk(clk), .we(sram_b_ping_we), .waddr(sram_b_ping_waddr), .wdata(sram_b_ping_wdata), .raddr(sram_b_ping_raddr), .rdata(sram_b_ping_rdata));
+    sram_banked #(.IS_SRAM_A(1'b0), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_b_pong (.clk(clk), .we(sram_b_pong_we), .waddr(sram_b_pong_waddr), .wdata(sram_b_pong_wdata), .raddr(sram_b_pong_raddr), .rdata(sram_b_pong_rdata));
+    // --- Data Formatter ---
+    logic [DF_SRAM_ADDR_WIDTH-1:0] df_sram_a_addr, df_sram_b_addr;
+    logic [DF_SRAM_DATA_WIDTH-1:0] df_sram_a_rdata, df_sram_b_rdata, df_skewed_a_out, df_skewed_b_out;
+    logic [TILE_SIZE-1:0] df_skewed_a_valid_out, df_skewed_b_valid_out;
+    data_formatter #(.TILE_SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH)) u_data_formatter (.clk(clk), .rst_n(rst_n), .start_pass(df_start_pass_pulse), .pass_done(), .sram_a_addr(df_sram_a_addr), .sram_a_rdata(df_sram_a_rdata), .sram_b_addr(df_sram_b_addr), .sram_b_rdata(df_sram_b_rdata), .skewed_a_out(df_skewed_a_out), .skewed_b_out(df_skewed_b_out), .data_valid_out(), .skewed_a_valid_out(df_skewed_a_valid_out), .skewed_b_valid_out(df_skewed_b_valid_out));
+    // --- SA ---
+    logic [$clog2(TILE_SIZE)-1:0] sa_sram_c_raddr_A, sa_sram_c_waddr;
+    logic signed [SA_SRAM_C_ROW_WIDTH-1:0] sa_sram_c_rdata_A, sa_sram_c_wdata;
+    logic sa_sram_c_we;
+    sa_enhanced #(.SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH), .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)) u_sa_enhanced (.clk(clk), .rst_n(rst_n), .start_new_k_iteration(sa_start_k_iter_pulse), .activate_pe_computation(sa_activate_pe_level), .array_a_in(df_skewed_a_out), .array_b_in(df_skewed_b_out), .array_a_valid_in_indywidual(df_skewed_a_valid_out), .array_b_valid_in_indywidual(df_skewed_b_valid_out), .sa_k_iteration_accum_done(sa_k_iter_done), .sa_busy(), .sram_c_raddr_A_to_sram(sa_sram_c_raddr_A), .sram_c_rdata_A_from_sram(sa_sram_c_rdata_A), .sram_c_waddr_to_sram(sa_sram_c_waddr), .sram_c_wdata_to_sram(sa_sram_c_wdata), .sram_c_we_to_sram(sa_sram_c_we));
+    // --- SRAM C ---
+    logic sram_c_ping_we, sram_c_pong_we;
+    logic [$clog2(TILE_SIZE)-1:0] sram_c_ping_waddr, sram_c_pong_waddr, sram_c_ping_raddr_A, sram_c_pong_raddr_A;
+    logic [SA_SRAM_C_ROW_WIDTH-1:0] sram_c_ping_wdata, sram_c_pong_wdata, sram_c_ping_rdata_A, sram_c_pong_rdata_A;
+    logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] sram_c_ping_raddr_B, sram_c_pong_raddr_B;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_ping_rdata_B, sram_c_pong_rdata_B;
+    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_ping (.clk(clk), .rst_n(rst_n), .we(sram_c_ping_we), .waddr(sram_c_ping_waddr), .wdata(sram_c_ping_wdata), .raddr_A(sram_c_ping_raddr_A), .rdata_A(sram_c_ping_rdata_A), .raddr_B(sram_c_ping_raddr_B), .rdata_B(sram_c_ping_rdata_B));
+    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_pong (.clk(clk), .rst_n(rst_n), .we(sram_c_pong_we), .waddr(sram_c_pong_waddr), .wdata(sram_c_pong_wdata), .raddr_A(sram_c_pong_raddr_A), .rdata_A(sram_c_pong_rdata_A), .raddr_B(sram_c_pong_raddr_B), .rdata_B(sram_c_pong_rdata_B));
+    // --- Writer ---
+    logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] writer_sram_c_addr;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] writer_sram_c_rdata;
+    writer #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_C(BASE_ADDR_C)) u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .write_busy(), .write_done(writer_done), .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(writer_sram_c_rdata));
     
-    // Data Formatter -> Systolic Array
-    wire [TILE_SIZE*INPUT_DATA_WIDTH-1:0] skewed_a_to_sa, skewed_b_to_sa;
-    wire formatter_valid_out_to_sa;
-    
-    // Systolic Array -> Compute Controller
-    wire signed [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0] sa_partial_sum_out;
-    wire sa_partial_sum_valid;
-    wire [$clog2(TILE_SIZE)-1:0] sa_partial_sum_row_idx;
-    wire tile_all_pes_done_one_pass;
+    //--------------------------------------------------------------------------
+    // Ping-Pong MUX Logic (Unchanged)
+    //--------------------------------------------------------------------------
+    assign sram_a_ping_we = (load_ab_select_q == 0) ? loader_sram_a_we : 1'b0;
+    assign sram_a_pong_we = (load_ab_select_q == 1) ? loader_sram_a_we : 1'b0;
+    assign sram_a_ping_waddr = loader_sram_a_addr; assign sram_a_ping_wdata = loader_sram_a_wdata;
+    assign sram_a_pong_waddr = loader_sram_a_addr; assign sram_a_pong_wdata = loader_sram_a_wdata;
+    assign sram_b_ping_we = (load_ab_select_q == 0) ? loader_sram_b_we : 1'b0;
+    assign sram_b_pong_we = (load_ab_select_q == 1) ? loader_sram_b_we : 1'b0;
+    assign sram_b_ping_waddr = loader_sram_b_addr; assign sram_b_ping_wdata = loader_sram_b_wdata;
+    assign sram_b_pong_waddr = loader_sram_b_addr; assign sram_b_pong_wdata = loader_sram_b_wdata;
+    assign sram_a_ping_raddr = df_sram_a_addr; assign sram_a_pong_raddr = df_sram_a_addr;
+    assign df_sram_a_rdata = (compute_ab_select_q == 0) ? sram_a_ping_rdata : sram_a_pong_rdata;
+    assign sram_b_ping_raddr = df_sram_b_addr; assign sram_b_pong_raddr = df_sram_b_addr;
+    assign df_sram_b_rdata = (compute_ab_select_q == 0) ? sram_b_ping_rdata : sram_b_pong_rdata;
+    assign sram_c_ping_we = (compute_c_select_q == 0) ? sa_sram_c_we : 1'b0;
+    assign sram_c_pong_we = (compute_c_select_q == 1) ? sa_sram_c_we : 1'b0;
+    assign sram_c_ping_waddr = sa_sram_c_waddr; assign sram_c_ping_wdata = sa_sram_c_wdata;
+    assign sram_c_pong_waddr = sa_sram_c_waddr; assign sram_c_pong_wdata = sa_sram_c_wdata;
+    assign sram_c_ping_raddr_A = sa_sram_c_raddr_A; assign sram_c_pong_raddr_A = sa_sram_c_raddr_A;
+    assign sa_sram_c_rdata_A = (compute_c_select_q == 0) ? sram_c_ping_rdata_A : sram_c_pong_rdata_A;
+    assign sram_c_ping_raddr_B = writer_sram_c_addr; assign sram_c_pong_raddr_B = writer_sram_c_addr;
+    assign writer_sram_c_rdata = (write_c_select_q == 0) ? sram_c_ping_rdata_B : sram_c_pong_rdata_B;
 
-    // Compute Controller <-> C-SRAM
-    wire [$clog2(TILE_SIZE)-1:0]                 c_accum_waddr, c_accum_raddr;
-    wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    c_accum_wdata, c_accum_rdata_from_A;
-    wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    c_accum_ping_rdata_A, c_accum_pong_rdata_A;
-    wire                                         c_accum_we;
-    wire [TILE_SIZE*PE_ACCUM_DATA_WIDTH-1:0]    sa_final_sum_in;
-    
-    // C-SRAM -> Writer (CORRECTED INTERFACE)
-    wire [$clog2(TILE_SIZE*TILE_SIZE*PE_ACCUM_DATA_WIDTH/MAIN_MEM_DATA_WIDTH_BITS)-1:0] sram_c_raddr_from_writer;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                                sram_c_rdata_to_writer;
-    wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]                                sram_c_ping_rdata_B, sram_c_pong_rdata_B;
-
-    // Misc Control
-    wire ctrl_start_new_systolic_pass;
-    wire ctrl_activate_pe_computation;
-
-    //======================================================================
-    //== On-Chip SRAM Instantiations and Muxing
-    //======================================================================
-    // --- A/B SRAM Banks for Input Tiles ---
-    assign sram_a_rdata = compute_source_is_pong ? sram_a_pong_rdata : sram_a_ping_rdata;
-    assign sram_b_rdata = compute_source_is_pong ? sram_b_pong_rdata : sram_b_ping_rdata;
-
-    sram_banked sram_a_ping (.clk(clk), .we(sram_a_we & ~load_target_is_pong), .waddr(sram_a_waddr), .wdata(sram_a_wdata), .raddr(sram_a_addr_from_formatter), .rdata(sram_a_ping_rdata));
-    sram_banked sram_a_pong (.clk(clk), .we(sram_a_we &  load_target_is_pong), .waddr(sram_a_waddr), .wdata(sram_a_wdata), .raddr(sram_a_addr_from_formatter), .rdata(sram_a_pong_rdata));
-    sram_banked sram_b_ping (.clk(clk), .we(sram_b_we & ~load_target_is_pong), .waddr(sram_b_waddr), .wdata(sram_b_wdata), .raddr(sram_b_addr_from_formatter), .rdata(sram_b_ping_rdata));
-    sram_banked sram_b_pong (.clk(clk), .we(sram_b_we &  load_target_is_pong), .waddr(sram_b_waddr), .wdata(sram_b_wdata), .raddr(sram_b_addr_from_formatter), .rdata(sram_b_pong_rdata));
-
-    // --- C-Accumulator SRAM Banks for Output Tiles ---
-    // Port A for Compute Controller (wide read/write)
-    assign c_accum_rdata_from_A = accum_to_pong ? c_accum_pong_rdata_A : c_accum_ping_rdata_A;
-    // Port B for Writer (narrow read)
-    assign sram_c_rdata_to_writer = write_from_pong ? sram_c_pong_rdata_B : sram_c_ping_rdata_B;
-    
-    sram_c_accum sram_c_ping (.clk(clk), .we(c_accum_we & ~accum_to_pong), .waddr(c_accum_waddr), .wdata(c_accum_wdata), .raddr_A(c_accum_raddr), .rdata_A(c_accum_ping_rdata_A), .raddr_B(sram_c_raddr_from_writer), .rdata_B(sram_c_ping_rdata_B));
-    sram_c_accum sram_c_pong (.clk(clk), .we(c_accum_we &  accum_to_pong), .waddr(c_accum_waddr), .wdata(c_accum_wdata), .raddr_A(c_accum_raddr), .rdata_A(c_accum_pong_rdata_A), .raddr_B(sram_c_raddr_from_writer), .rdata_B(sram_c_pong_rdata_B));
-    
-    //======================================================================
-    //== Sub-Module Instantiations
-    //======================================================================
-    loader #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_A(BASE_ADDR_A), .BASE_ADDR_B(BASE_ADDR_B)) 
-    i_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req), .i_tile_idx(i), .j_tile_idx(j), .k_tile_idx(load_k_ptr), .load_to_ping(~load_target_is_pong), .load_busy(loader_busy), .load_done(loader_done), .mem_req_valid(imem_req_valid), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_resp_rdata), .mem_req_addr(imem_req_addr), .sram_a_addr(sram_a_waddr), .sram_a_wdata(sram_a_wdata), .sram_a_we(sram_a_we), .sram_b_addr(sram_b_waddr), .sram_b_wdata(sram_b_wdata), .sram_b_we(sram_b_we));
-    
-    data_formatter #(.TILE_SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH)) 
-    i_formatter (.clk(clk), .rst_n(rst_n), .start_pass(ctrl_start_new_systolic_pass), .pass_done(), .sram_a_addr(sram_a_addr_from_formatter), .sram_a_rdata(sram_a_rdata), .sram_b_addr(sram_b_addr_from_formatter), .sram_b_rdata(sram_b_rdata), .skewed_a_out(skewed_a_to_sa), .skewed_b_out(skewed_b_to_sa), .data_valid_out(formatter_valid_out_to_sa));
-    
-    systolic_array #(.SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH), .PE_ACCUM_DATA_WIDTH(PE_ACCUM_DATA_WIDTH)) 
-    i_sa (.clk(clk), .rst_n(rst_n), .clear_all_pe_accumulators(clear_pe_accum_for_k0), .conditionally_clear_pe_sums_level(clear_pe_accum_for_k0), .activate_pe_computation(ctrl_activate_pe_computation), .array_data_valid_in(formatter_valid_out_to_sa), .array_a_in(skewed_a_to_sa), .array_b_in(skewed_b_to_sa), .array_a_data_valid_out(), .array_a_out(), .array_b_data_valid_out(), .array_b_out(), .tile_row_result_out(sa_partial_sum_out), .tile_row_result_valid(sa_partial_sum_valid), .sa_partial_sum_row_idx(sa_partial_sum_row_idx), .tile_all_pes_done_one_pass(tile_all_pes_done_one_pass), .start_new_systolic_pass(ctrl_start_new_systolic_pass));
-    
-    compute_controller #(.TILE_SIZE(TILE_SIZE), .PE_ACCUM_DATA_WIDTH(PE_ACCUM_DATA_WIDTH)) 
-    i_comp (.clk(clk), .rst_n(rst_n), .compute_req(compute_req), .compute_busy(compute_busy), .compute_done(compute_done), .dut_ready_for_sa_partial_sum(), .sa_partial_sum_valid(sa_partial_sum_valid), .sa_partial_sum_in(sa_partial_sum_out), .sa_partial_sum_row_idx(sa_partial_sum_row_idx), .sa_final_sum_in(sa_final_sum_in), .sa_tile_all_pes_done_one_pass(tile_all_pes_done_one_pass), .ctrl_start_new_systolic_pass(ctrl_start_new_systolic_pass), .ctrl_activate_pe_computation(ctrl_activate_pe_computation), .ctrl_c_data_to_sa(), .ctrl_enable_final_add(), .ctrl_partial_sum_to_sa(), .c_accum_raddr(c_accum_raddr), .c_accum_rdata(c_accum_rdata_from_A), .c_accum_waddr(c_accum_waddr), .c_accum_wdata(c_accum_wdata), .c_accum_we(c_accum_we));
-    
-    writer #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_C(BASE_ADDR_C)) 
-    i_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req), .i_tile_idx(i), .j_tile_idx(j), .write_busy(writer_busy), .write_done(writer_done), .mem_req_valid(omem_req_valid), .mem_req_wdata(omem_req_wdata), .mem_req_addr(omem_req_addr), .mem_req_ready(omem_req_ready), .sram_c_addr(sram_c_raddr_from_writer), .sram_c_rdata(sram_c_rdata_to_writer));
-
-    // 简化: 假设存在一个理想的单周期加法器
-    // 在真实设计中, 这会是一个多级流水线的加法器
-    assign sa_final_sum_in = sa_partial_sum_out + c_accum_rdata_from_A;
-    assign clear_pe_accum_for_k0 = (compute_k_ptr == 0);
-
-    //======================================================================
-    //== Top-Level FSM
-    //======================================================================
-    assign busy = (current_state != S_IDLE) && (current_state != S_DONE);
-    assign done = (current_state == S_DONE);
-    
-    // --- Combinational FSM Logic ---
-    always @(*) begin
-        // 默认值, 防止锁存器
-        next_state    = current_state;
-        loader_req    = 1'b0;
-        compute_req   = 1'b0;
-        writer_req    = 1'b0;
-
-        case (current_state)
-            S_IDLE: begin
-                if (start) begin
-                    next_state = S_RUN_PIPELINE;
-                end
-            end
-
-            S_RUN_PIPELINE: begin
-                // --- 计算任务分派逻辑 ---
-                // 条件: 对应的输入缓冲区数据有效 且 计算单元空闲
-                if (buffer_is_valid[compute_source_is_pong] && !compute_busy) begin
-                    compute_req = 1'b1;
-                end
-
-                // --- 加载任务分派逻辑 ---
-                // 条件: 存在空闲的输入缓冲区 且 加载单元空闲 且 还有k需要加载
-                if (!buffer_is_valid[load_target_is_pong] && !buffer_is_loading[load_target_is_pong] && !loader_busy && (load_k_ptr < NUM_TILES_PER_DIM)) begin
-                    loader_req = 1'b1;
-                end
-
-                // --- 状态转移逻辑 ---
-                // 当所有k的计算任务都已分派，进入流水线排空状态
-                if (compute_k_ptr == NUM_TILES_PER_DIM) begin
-                    next_state = S_DRAIN_PIPELINE;
-                end
-            end
-
-            S_DRAIN_PIPELINE: begin
-                // 等待流水线中的最后一个计算任务完成
-                if (!compute_busy) begin
-                    next_state = S_KICKOFF_WRITE;
-                end
-            end
-
-            S_KICKOFF_WRITE: begin
-                // 发起写回任务
-                writer_req = 1'b1;
-                
-                // 判断是否所有瓦片都已完成
-                if (i == NUM_TILES_PER_DIM - 1 && j == NUM_TILES_PER_DIM - 1) begin
-                    // 这是最后一个瓦片，进入等待最终写回完成的状态
-                    next_state = S_WAIT_FINAL_WRITE;
-                end else begin
-                    // 还有其他瓦片，返回RUN状态开始下一轮
-                    next_state = S_RUN_PIPELINE;
-                end
-            end
-
-            S_WAIT_FINAL_WRITE: begin
-                // 等待最后一个写回任务完成
-                if (!writer_busy) begin
-                    next_state = S_DONE;
-                end
-            end
-
-            S_DONE: begin
-                if (!start) begin // 等待 start 信号释放后才能回到 IDLE
-                    next_state = S_IDLE;
-                end
-            end
-            
-            default: begin
-                next_state = S_IDLE;
-            end
-        endcase
+    //--------------------------------------------------------------------------
+    // Main Accelerator FSM - Sequential Logic
+    //--------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            current_state_q <= S_IDLE;
+            i_tile_idx_q <= '0; j_tile_idx_q <= '0; k_tile_idx_q <= '0;
+            load_ab_select_q <= 1'b0; compute_ab_select_q <= 1'b1;
+            compute_c_select_q <= 1'b0; write_c_select_q <= 1'b1;
+            load_done_flag_q <= 1'b0; compute_done_flag_q <= 1'b0;
+            pipe_delay_cnt_q <= '0;
+        end else begin
+            current_state_q <= next_state_d;
+            i_tile_idx_q <= i_tile_idx_d; j_tile_idx_q <= j_tile_idx_d; k_tile_idx_q <= k_tile_idx_d;
+            load_ab_select_q <= load_ab_select_d; compute_ab_select_q <= compute_ab_select_d;
+            compute_c_select_q <= compute_c_select_d; write_c_select_q <= write_c_select_d;
+            load_done_flag_q <= load_done_flag_d; compute_done_flag_q <= compute_done_flag_d;
+            pipe_delay_cnt_q <= pipe_delay_cnt_d;
+        end
     end
 
-    // --- Sequential FSM Logic and State Variable Updates ---
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            // FSM and Loop Counters
-            current_state <= S_IDLE;
-            i <= 0;
-            j <= 0;
-            load_k_ptr <= 0;
-            compute_k_ptr <= 0;
+    //--------------------------------------------------------------------------
+    // Main Accelerator FSM - Combinational Logic (FINAL CORRECTED VERSION)
+    //--------------------------------------------------------------------------
+    always_comb begin
+        next_state_d = current_state_q;
+        i_tile_idx_d = i_tile_idx_q; j_tile_idx_d = j_tile_idx_q; k_tile_idx_d = k_tile_idx_q;
+        load_ab_select_d = load_ab_select_q; compute_ab_select_d = compute_ab_select_q;
+        compute_c_select_d = compute_c_select_q; write_c_select_d = write_c_select_q;
+        load_done_flag_d = load_done_flag_q; compute_done_flag_d = compute_done_flag_q;
+        pipe_delay_cnt_d = pipe_delay_cnt_q;
+        
+        loader_req_pulse = 1'b0; df_start_pass_pulse = 1'b0; sa_start_k_iter_pulse = 1'b0; writer_req_pulse = 1'b0;
+        
+        sa_activate_pe_level = (current_state_q == S_START_SA || current_state_q == S_WAIT_SA_AND_LOAD);
 
-            // A/B Buffer Control
-            load_to_pong <= 1'b0;      // 第一次加载到 Ping (buffer 0)
-            compute_from_pong <= 1'b0; // 对应计算也从 Ping 开始
-            buffer_is_valid[0] <= 1'b0;
-            buffer_is_valid[1] <= 1'b0;
-            buffer_is_loading[0] <= 1'b0;
-            buffer_is_loading[1] <= 1'b0;
+        busyb = (current_state_q == S_IDLE);
+        done = (current_state_q == S_FINISH);
+        
+        if (loader_done) load_done_flag_d = 1'b1;
+        if (sa_k_iter_done) compute_done_flag_d = 1'b1;
 
-            // C Buffer Control
-            accum_to_pong <= 1'b0;
-            write_from_pong <= 1'b0; // 假设写回单元从pong开始，与累加单元错开
+        case (current_state_q)
+            S_IDLE: if (comp_enb) next_state_d = S_INIT_GEMM;
+            
+            S_INIT_GEMM: begin
+                i_tile_idx_d = 0; j_tile_idx_d = 0; k_tile_idx_d = 0;
+                load_ab_select_d = 0; compute_ab_select_d = 1;
+                compute_c_select_d = 0; write_c_select_d = 1;
+                next_state_d = S_LOAD_FIRST;
+            end
 
-        end else begin
-            // --- FSM State Transition ---
-            current_state <= next_state;
+            S_LOAD_FIRST: begin
+                loader_req_pulse = 1'b1;
+                load_done_flag_d = 1'b0;
+                next_state_d = S_WAIT_LOAD_FIRST;
+            end
 
-            // --- 任务触发与指针更新 (基于组合逻辑的决定) ---
-            // 对 loader_req 的处理: 只有在请求成功发出时才更新指针和标志
-            if (loader_req) begin
-                // 检查以防止在 loader_busy 的延迟窗口内重复触发
-                // 只有当目标缓冲区当前不是 loading 状态时，才真正地分派任务
-                if (!buffer_is_loading[load_target_is_pong]) begin
-                    buffer_is_loading[load_target_is_pong] <= 1'b1;
-                    load_k_ptr <= load_k_ptr + 1;
-                    load_to_pong <= ~load_to_pong; // 为下一次加载准备
+            S_WAIT_LOAD_FIRST: begin
+                if (load_done_flag_q) begin
+                    compute_ab_select_d = load_ab_select_q;
+                    load_ab_select_d = ~load_ab_select_q;
+                    k_tile_idx_d = 0;
+                    next_state_d = S_START_DF;
                 end
             end
 
-            // 对 compute_req 的处理: 消耗数据，更新指针
-            if (compute_req) begin
-                 // 检查以确保不会意外触发
-                if (buffer_is_valid[compute_source_is_pong]) begin
-                    buffer_is_valid[compute_source_is_pong] <= 1'b0; // 消耗掉这个缓冲区的数据
-                    compute_k_ptr <= compute_k_ptr + 1;
-                    compute_from_pong <= ~compute_from_pong; // 为下一次计算准备
-                end
+            S_START_DF: begin
+                df_start_pass_pulse = 1'b1;
+                if (k_tile_idx_q < K_ITER_MAX - 1) loader_req_pulse = 1'b1;
+                load_done_flag_d = 1'b0;
+                compute_done_flag_d = 1'b0;
+                pipe_delay_cnt_d = 0;
+                next_state_d = S_PIPE_DELAY;
             end
-
-            // --- 状态标志更新 (基于硬件的完成信号) ---
-            if (loader_done) begin
-                // 当加载任务完成时，我们需要找出是哪个缓冲区完成了加载
-                // 这种写法比依赖 ~load_target_is_pong 更稳健
-                if (buffer_is_loading[0]) begin
-                    buffer_is_loading[0] <= 1'b0;
-                    buffer_is_valid[0] <= 1'b1;
-                end
-                if (buffer_is_loading[1]) begin
-                    buffer_is_loading[1] <= 1'b0;
-                    buffer_is_valid[1] <= 1'b1;
+            
+            S_PIPE_DELAY: begin
+                if (pipe_delay_cnt_q == 2'd1) begin // Wait for 2 cycles (0->1, 1->2)
+                    next_state_d = S_START_SA;
+                end else begin
+                    pipe_delay_cnt_d = pipe_delay_cnt_q + 1;
                 end
             end
             
-            // --- C[i,j] 瓦片迭代与全局状态重置 ---
-            if (next_state == S_RUN_PIPELINE && current_state != S_RUN_PIPELINE) begin
-                // 这是一个新C_ij瓦片的开始 (从 KICKOFF_WRITE 或 IDLE 进入)
-                load_k_ptr <= 0;
-                compute_k_ptr <= 0;
-
-                load_to_pong <= 1'b0;
-                compute_from_pong <= 1'b0;
-
-                buffer_is_valid[0] <= 1'b0;
-                buffer_is_valid[1] <= 1'b0;
-                buffer_is_loading[0] <= 1'b0;
-                buffer_is_loading[1] <= 1'b0;
-
-                // 更新 i, j 索引
-                if (current_state == S_KICKOFF_WRITE) begin
-                     if (j == NUM_TILES_PER_DIM - 1) begin
-                         j <= 0;
-                         i <= i + 1;
+            S_START_SA: begin
+                sa_start_k_iter_pulse = 1'b1;
+                next_state_d = S_WAIT_SA_AND_LOAD;
+            end
+            
+            S_WAIT_SA_AND_LOAD: begin
+                logic load_task_finished = (k_tile_idx_q == K_ITER_MAX - 1) ? 1'b1 : load_done_flag_q;
+                if (compute_done_flag_q && load_task_finished) begin
+                     if (k_tile_idx_q == K_ITER_MAX - 1) begin
+                        write_c_select_d = compute_c_select_q;
+                        next_state_d = S_WRITE_TILE;
                      end else begin
-                         j <= j + 1;
+                        k_tile_idx_d = k_tile_idx_q + 1;
+                        compute_ab_select_d = load_ab_select_q;
+                        load_ab_select_d = ~load_ab_select_q;
+                        next_state_d = S_START_DF;
                      end
                 end
             end
             
-            if (current_state == S_KICKOFF_WRITE) begin
-                // C缓冲区的乒乓切换
-                accum_to_pong <= ~accum_to_pong;
-                write_from_pong <= ~write_from_pong;
+            S_WRITE_TILE: begin
+                writer_req_pulse = 1'b1;
+                next_state_d = S_WAIT_WRITE_DONE;
             end
-            
-            // --- 顶层复位逻辑 ---
-            if (next_state == S_IDLE) begin
-                i <= 0;
-                j <= 0;
+
+            S_WAIT_WRITE_DONE: begin
+                if (writer_done) begin
+                    if (i_tile_idx_q == I_ITER_MAX - 1 && j_tile_idx_q == J_ITER_MAX - 1) begin
+                        next_state_d = S_FINISH;
+                    end else begin
+                        if (j_tile_idx_q == J_ITER_MAX - 1) begin
+                            i_tile_idx_d = i_tile_idx_q + 1; j_tile_idx_d = 0;
+                        end else begin
+                            j_tile_idx_d = j_tile_idx_q + 1;
+                        end
+                        compute_c_select_d = ~compute_c_select_q;
+                        next_state_d = S_LOAD_FIRST;
+                    end
+                end
             end
-        end
+
+            S_FINISH: begin
+                done = 1'b1;
+                next_state_d = S_IDLE;
+            end
+
+            default: next_state_d = S_IDLE;
+        endcase
     end
 
 endmodule

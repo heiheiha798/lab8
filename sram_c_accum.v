@@ -1,7 +1,7 @@
 // Filename: sram_c_accum.v
 // Description: A behavioral model of the C-Accumulator SRAM with dual read ports.
 //              MODIFIED: Initializes memory to zero on reset.
-//
+//512bit写 
 `timescale 1ns / 1ps
 
 module sram_c_accum #(
@@ -42,12 +42,15 @@ module sram_c_accum #(
     always @(posedge clk) begin
         if (we) begin
             memory[waddr] <= wdata;
-`ifdef DEBUG_SRAM_WRITE
-            $display("[%0t] [SRAM_C_WRITE] WE: %b, Addr: %d, WData[0]=%d, WData[1]=%d",
-                     $time, we, waddr,
-                     wdata[0*ELEM_WIDTH +: ELEM_WIDTH], // Corrected PE_ACCUM_DATA_WIDTH to ELEM_WIDTH
-                     wdata[1*ELEM_WIDTH +: ELEM_WIDTH]); // Corrected PE_ACCUM_DATA_WIDTH to ELEM_WIDTH
-`endif
+            // Add this display, only for waddr = 0
+            if (waddr == 0) begin
+                $display("[%0t] [SRAM_C_WRITE] Addr: %d, WData[0]=%d, WData[1]=%d, WData[2]=%d, WData[3]=%d",
+                        $time, waddr,
+                        wdata[0*ELEM_WIDTH +: ELEM_WIDTH],
+                        wdata[1*ELEM_WIDTH +: ELEM_WIDTH],
+                        wdata[2*ELEM_WIDTH +: ELEM_WIDTH],
+                        wdata[3*ELEM_WIDTH +: ELEM_WIDTH]);
+            end
         end
     end
 

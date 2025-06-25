@@ -134,13 +134,11 @@ module loader #(
                         sram_a_we = 1'b1;
                         sram_a_wdata = mem_resp_rdata;
                         sram_a_addr = resp_cnt; // 地址是 0 to 31
-                        $display("%0t [LOADER] DEBUG: Writing to SRAM A, word_addr=%d, data=0x%h", $time, sram_a_addr, sram_a_wdata);
                     end else begin
                         // 响应对应的是 B 瓦片
                         sram_b_we = 1'b1;
                         sram_b_wdata = mem_resp_rdata;
                         sram_b_addr = resp_cnt - WORDS_PER_TILE; // 地址是 0 to 31
-                        $display("%0t [LOADER] DEBUG: Writing to SRAM B, word_addr=%d, data=0x%h", $time, sram_b_addr, sram_b_wdata);
                     end
                 end
 
@@ -207,9 +205,18 @@ module loader #(
                         end
                     end
                     
-                    // 流水化更新响应计数器
+                    // 流水化更新响应计数器和数据显示
                     if (mem_resp_valid) begin
                         resp_cnt <= resp_cnt + 1;
+                        // **重要调试信息**: 在时钟沿，当 mem_resp_valid有效时，打印loader模块准备驱动到其输出端口的值。
+                        // 这里打印的值是基于 mem_resp_rdata 和 resp_cnt (更新前的值) 组合逻辑赋值的结果。
+                        if (resp_cnt < WORDS_PER_TILE) begin
+                            // 打印将要驱动到 SRAM A 输出端口的值
+                            $display("%0t [LOADER-DRV] Driving SRAM A: we=%b, addr=%d, wdata=0x%h", $time, sram_a_we, sram_a_addr, sram_a_wdata);
+                        end else begin
+                            // 打印将要驱动到 SRAM B 输出端口的值
+                            $display("%0t [LOADER-DRV] Driving SRAM B: we=%b, addr=%d, wdata=0x%h", $time, sram_b_we, sram_b_addr, sram_b_wdata);
+                        end
                     end
 
                     // 如果所有请求都发完了，但响应还没收完，则停止发送请求但继续接收

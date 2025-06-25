@@ -7,7 +7,7 @@ LOG_FILE="output.txt"
     set -e
 
     # --- 脚本配置区 ---
-    DEFAULT_MATRIX_DIM=32
+    DEFAULT_MATRIX_DIM=48
     MATRIX_DIM="${1:-${DEFAULT_MATRIX_DIM}}"
 
     DEFAULT_NUM_THREADS=8

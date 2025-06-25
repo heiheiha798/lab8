@@ -81,106 +81,113 @@ module pe #(
             inputs_that_produced_a_b_regs_were_valid_reg <= 1'b0;
             local_accumulator_reg   <= 0;
             mul_result_reg          <= 0;
-            mul_valid_reg           <= 1'b0;
+            mul_valid_reg           <= 1'b0; // 在rst_n时清零是正确的
             performed_mac_count     <= 0;
             result_valid_reg        <= 1'b0;
             pe_calculation_done_latch <= 1'b0;
-            pe_calculation_done_latch_prev <= 1'b0; // 初始化
+            pe_calculation_done_latch_prev <= 1'b0;
         end else begin
-            result_valid_reg <= 1'b0; // Pulse behavior for result_valid
+            result_valid_reg <= 1'b0; // 脉冲行为
 
-            // 优先处理新的 systolic pass 开始的复位（针对每个 k 迭代）
+            // 1. 处理 start_new_systolic_pass (主要用于复位状态和累加器)
             if (start_new_systolic_pass) begin
-                performed_mac_count     <= 0;      // 为新的 k 迭代复位 MAC 计数
-                pe_calculation_done_latch <= 1'b0; // 允许新的计算完成过程
-                mul_valid_reg           <= 1'b0;   // 前一个 pass 的乘积无效了
-                if (clear_accumulator) begin
-                    if (conditionally_clear_sum) begin
-                        local_accumulator_reg   <= 0;
-                    end
-                end
-            end
-            // 处理 k=0 时的累加器完全清零（如果 start_new_systolic_pass 和 clear_accumulator 不是严格同时）
-            else if (clear_accumulator) begin
-                if (conditionally_clear_sum) begin
+                performed_mac_count     <= 0;
+                pe_calculation_done_latch <= 1'b0;
+                // 注意：不再在这里直接操作 mul_valid_reg
+                if (conditionally_clear_sum) begin // 假设这个信号决定是否清除累加器
+                                                    // `clear_accumulator` 来自顶层，通常在K=0时为高
+                                                    // 或者如果SA设计为每个K轮次都清零，则此条件就足够
                     local_accumulator_reg   <= 0;
                 end
-            end else if (enable) begin
-                // Pipeline stage 1: Input data registers
+            end
+            // 如果 clear_accumulator 是一个独立的信号，用于K=0时的强制清零，
+            // 且 start_new_systolic_pass 可能在K>0时也来，那么需要更细致的条件
+            // else if (clear_accumulator && conditionally_clear_sum) begin
+            //     local_accumulator_reg <= 0;
+            // end
+
+            // 2. 处理PE的使能和流水线操作 (仅当 enable 为高)
+            if (enable) begin
+                // 流水线阶段 1: 锁存输入数据和有效性
                 a_reg <= a_data_in;
                 b_reg <= b_data_in;
+                // `inputs_that_produced_a_b_regs_were_valid_reg` 记录了当前 a_reg/b_reg 是否由有效输入产生
                 inputs_that_produced_a_b_regs_were_valid_reg <= a_valid_in && b_valid_in;
-                a_valid_for_output_reg <= a_valid_in;
-                b_valid_for_output_reg <= b_valid_in;
+                a_valid_for_output_reg <= a_valid_in; // Propagate valid
+                b_valid_for_output_reg <= b_valid_in; // Propagate valid
 
-                // Pipeline stage 2: Multiplication
-                mul_result_reg <= mul_output_data; // Product of a_reg, b_reg (inputs from previous cycle)
-                mul_valid_reg  <= inputs_that_produced_a_b_regs_were_valid_reg; // Validity of those inputs
+                // 流水线阶段 2: 乘法
+                // `mul_result_reg` 存储 a_reg * b_reg 的结果 (即上上周期输入的乘积)
+                // `mul_valid_reg` 表明 `mul_result_reg` 中的数据是否有效
+                mul_result_reg <= mul_output_data; // mul_output_data = a_reg * b_reg (组合逻辑)
+                mul_valid_reg  <= inputs_that_produced_a_b_regs_were_valid_reg; // 有效性传递
 
-                // ==================== MODIFIED LOGIC BLOCK START ====================
-                // Pipeline stage 3: Accumulation
-                if (!pe_calculation_done_latch) begin
-                    if (mul_valid_reg) begin // If product from previous cycle (now in mul_result_reg) is valid
-                        
-                        // Step 1: Accumulate
-                        if (conditionally_clear_sum && performed_mac_count == 0) begin // If it's the first MAC of a new pass
-                            local_accumulator_reg <= mul_result_reg; // Start with the product
+                // 流水线阶段 3: 累加
+                if (!pe_calculation_done_latch) begin // 仅当PE未完成当前K轮次的计算时
+                    if (mul_valid_reg) begin // 仅当来自流水线上一级的乘积有效时
+                        // 当 performed_mac_count 为0时，是本轮K迭代的第一次有效乘积累加
+                        // 此时，如果累加器已被 start_new_systolic_pass 清零，则直接加载；否则累加。
+                        if (performed_mac_count == 0) begin // (并且 conditionally_clear_sum 已经在 start_pass 时处理了清零)
+                            local_accumulator_reg <= mul_result_reg;
                         end else begin
-                            local_accumulator_reg <= add_output_data; // Accumulate
+                            local_accumulator_reg <= add_output_data; // add_output_data = mul_result_reg + local_accumulator_reg_prev
                         end
                         
-                        // Step 2: Update count
+                        // 更新已执行的MAC计数
                         performed_mac_count <= next_performed_mac_count_w;
 
-                        // Step 3: Assert pe_calculation_done_latch when the last MAC is processed
-                        // This check is now inside the same block as accumulation, ensuring they are scheduled together.
-                        // It triggers when the count is ABOUT to become the target.
+                        // 检查是否完成了所有的MAC操作
                         if (next_performed_mac_count_w == MAC_COUNT_TARGET) begin
-                            result_valid_reg <= 1'b1;
-                            pe_calculation_done_latch <= 1'b1;
+                            result_valid_reg <= 1'b1; // 输出结果有效信号（脉冲）
+                            pe_calculation_done_latch <= 1'b1; // 标记PE完成当前K轮次计算
                         end
                     end
                 end
-                // ===================== MODIFIED LOGIC BLOCK END =====================
+            end else begin // if (!enable)
+                // 当PE不使能时，理想情况下不应该有新的有效乘积产生
+                // 如果不使能时，a_reg/b_reg不更新，那么inputs_that..._valid_reg也会保持旧值
+                // 为了确保安全，可以在不使能时将mul_valid_reg清零
+                mul_valid_reg <= 1'b0;
             end
 
-            // 更新 pe_calculation_done_latch_prev
+            // 更新 pe_calculation_done_latch_prev 用于调试日志
             pe_calculation_done_latch_prev <= pe_calculation_done_latch;
 
             // --- 调试信息 ---
             // if ((ROW_IDX == 0 && COL_IDX == 0) || (ROW_IDX == 1 && COL_IDX == 1) || (ROW_IDX == 15 && COL_IDX == 15)) begin
-            //     if (start_new_systolic_pass) begin // Display on pass start
-            //         $strobe("[%0t] [PE(%0d,%0d)] NewPass: MAC_count_reset_to_0, pe_done_latch_reset_to_0, mul_valid_reset_to_0",
-            //                 $time, ROW_IDX, COL_IDX);
-            //     end
+            if (COL_IDX == 0) begin
+                if (start_new_systolic_pass) begin // Display on pass start
+                    $strobe("[%0t] [PE(%0d,%0d)] NewPass: MAC_count_reset_to_0, pe_done_latch_reset_to_0, mul_valid_reset_to_0",
+                            $time, ROW_IDX, COL_IDX);
+                end
 
-            //     if (enable) begin // Only display when PE is supposed to be active
-            //         if (mul_valid_reg) begin // Display when a multiplication is considered valid for accumulation
-            //             $strobe("[%0t] [PE(%0d,%0d)] MAC: count_prev=%0d, count_next=%0d, mul_val=%b, a_in=%d, b_in=%d, a_reg=%d, b_reg=%d, mul_res=%d, cur_sum=%d, next_sum_val_if_acc=%d, pe_done_latch=%b",
-            //                     $time, ROW_IDX, COL_IDX, performed_mac_count, next_performed_mac_count_w, mul_valid_reg,
-            //                     a_data_in, b_data_in, a_reg, b_reg, mul_result_reg, local_accumulator_reg, add_output_data, pe_calculation_done_latch);
-            //         end
+                if (enable) begin // Only display when PE is supposed to be active
+                    if (mul_valid_reg) begin // Display when a multiplication is considered valid for accumulation
+                        $strobe("[%0t] [PE(%0d,%0d)] MAC: count_prev=%0d, count_next=%0d, mul_val=%b, a_in=%d, b_in=%d, a_reg=%d, b_reg=%d, mul_res=%d, cur_sum=%d, next_sum_val_if_acc=%d, pe_done_latch=%b",
+                                $time, ROW_IDX, COL_IDX, performed_mac_count, next_performed_mac_count_w, mul_valid_reg,
+                                a_data_in, b_data_in, a_reg, b_reg, mul_result_reg, local_accumulator_reg, add_output_data, pe_calculation_done_latch);
+                    end
 
-            //         // Display when the done latch condition is met OR when it changes
-            //         if ((performed_mac_count == (MAC_COUNT_TARGET-1) && mul_valid_reg) && !pe_calculation_done_latch) begin
-            //                $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_AboutToSet: count=%0d (target-1=%0d), mul_valid=%b. Latch will be 1 next.",
-            //                        $time, ROW_IDX, COL_IDX, performed_mac_count, MAC_COUNT_TARGET-1, mul_valid_reg);
-            //         end
-            //         // 监测 done latch 的变化
-            //         if (pe_calculation_done_latch != pe_calculation_done_latch_prev) begin
-            //             $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_Change: %b -> %b, MAC_count_at_change_moment=%d, mul_valid_reg=%b",
-            //                     $time, ROW_IDX, COL_IDX, pe_calculation_done_latch_prev, pe_calculation_done_latch, performed_mac_count, mul_valid_reg);
-            //         end
-            //     end
+                    // Display when the done latch condition is met OR when it changes
+                    if ((performed_mac_count == (MAC_COUNT_TARGET-1) && mul_valid_reg) && !pe_calculation_done_latch) begin
+                           $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_AboutToSet: count=%0d (target-1=%0d), mul_valid=%b. Latch will be 1 next.",
+                                   $time, ROW_IDX, COL_IDX, performed_mac_count, MAC_COUNT_TARGET-1, mul_valid_reg);
+                    end
+                    // 监测 done latch 的变化
+                    if (pe_calculation_done_latch != pe_calculation_done_latch_prev) begin
+                        $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_Change: %b -> %b, MAC_count_at_change_moment=%d, mul_valid_reg=%b",
+                                $time, ROW_IDX, COL_IDX, pe_calculation_done_latch_prev, pe_calculation_done_latch, performed_mac_count, mul_valid_reg);
+                    end
+                end
 
-            //     // Display for when enable goes low
-            //     if (enable_prev && !enable) begin
-            //         $strobe("[%0t] [PE(%0d,%0d)] PE_DISABLE: MAC_count=%0d, pe_done_latch=%b", $time, ROW_IDX, COL_IDX, performed_mac_count, pe_calculation_done_latch);
-            //     end
-            // end
+                // Display for when enable goes low
+                if (enable_prev && !enable) begin
+                    $strobe("[%0t] [PE(%0d,%0d)] PE_DISABLE: MAC_count=%0d, pe_done_latch=%b", $time, ROW_IDX, COL_IDX, performed_mac_count, pe_calculation_done_latch);
+                end
+            end
         end
     end
-
+    
     assign result_out = local_accumulator_reg;
     assign result_valid = result_valid_reg;
 
