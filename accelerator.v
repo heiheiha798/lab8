@@ -8,44 +8,148 @@
 //
 `timescale 1ns / 1ps
 
-module accelerator #(
-    // Architectural Parameters
-    parameter MATRIX_SIZE               = 48,
-    parameter TILE_SIZE                 = 16,
+`ifndef SYNTHESIS
+    // This is for simulation, define a module with the original port list
+    module accelerator #(
+        // Architectural Parameters
+        parameter MATRIX_SIZE               = 512,
+        parameter TILE_SIZE                 = 16,
 
-    // Data Type Parameters
-    parameter INPUT_DATA_WIDTH          = 8,
-    parameter ACCUM_DATA_WIDTH          = 32,
+        // Data Type Parameters
+        parameter INPUT_DATA_WIDTH          = 8,
+        parameter ACCUM_DATA_WIDTH          = 32,
 
-    // External Memory Interface Parameters
-    parameter MAIN_MEM_ADDR_WIDTH       = 32,
-    parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
+        // External Memory Interface Parameters
+        parameter MAIN_MEM_ADDR_WIDTH       = 32,
+        parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
 
-    // Base Addresses in Main Memory
-    parameter BASE_ADDR_A               = 32'h10000000,
-    parameter BASE_ADDR_B               = 32'h20000000,
-    parameter BASE_ADDR_C               = 32'h30000000
-) (
-    // --- Top Controller Interface ---
-    input  wire                                 clk,
-    input  wire                                 rst_n,
-    input  wire                                 comp_enb,       // Start signal for the entire computation
-    output logic                                busyb,          // Active low busy signal ('1' = IDLE, '0' = BUSY)
-    output logic                                done,           // Pulsed high when computation finishes
+        // Base Addresses in Main Memory
+        parameter BASE_ADDR_A               = 32'h10000000,
+        parameter BASE_ADDR_B               = 32'h20000000,
+        parameter BASE_ADDR_C               = 32'h30000000
+    ) (
+        // --- Top Controller Interface ---
+        input  wire                                 clk,
+        input  wire                                 rst_n,
+        input  wire                                 comp_enb,       // Start signal for the entire computation
+        output logic                                busyb,          // Active low busy signal ('1' = IDLE, '0' = BUSY)
+        output logic                                done,           // Pulsed high when computation finishes
 
-    // --- Input Memory Interface (Read-only) ---
-    output logic [MAIN_MEM_ADDR_WIDTH-1:0]      imem_addr,
-    output logic                                imem_read_enb,
-    input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  imem_data_in,
-    input  wire                                 imem_req_ready,
-    input  wire                                 imem_resp_valid,
+        // --- Input Memory Interface (Read-only) ---
+        output logic [MAIN_MEM_ADDR_WIDTH-1:0]      imem_addr,
+        output logic                                imem_read_enb,
+        input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  imem_data_in,
+        input  wire                                 imem_req_ready,
+        input  wire                                 imem_resp_valid,
 
-    // --- Result Memory Interface (Write-only) ---
-    output logic [MAIN_MEM_ADDR_WIDTH-1:0]      omem_addr,
-    output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] omem_wdata,
-    output logic                                omem_write_enb,
-    input  wire                                 omem_req_ready
-);
+        // --- Result Memory Interface (Write-only) ---
+        output logic [MAIN_MEM_ADDR_WIDTH-1:0]      omem_addr,
+        output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] omem_wdata,
+        output logic                                omem_write_enb,
+        input  wire                                 omem_req_ready
+    );
+`else
+    // This is for synthesis, define a module with the SRAM ports exposed
+    module accelerator #(
+        // Architectural Parameters
+        parameter MATRIX_SIZE               = 512,
+        parameter TILE_SIZE                 = 16,
+
+        // Data Type Parameters
+        parameter INPUT_DATA_WIDTH          = 8,
+        parameter ACCUM_DATA_WIDTH          = 32,
+
+        // External Memory Interface Parameters
+        parameter MAIN_MEM_ADDR_WIDTH       = 32,
+        parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
+
+        // Base Addresses in Main Memory
+        parameter BASE_ADDR_A               = 32'h10000000,
+        parameter BASE_ADDR_B               = 32'h20000000,
+        parameter BASE_ADDR_C               = 32'h30000000
+    ) (
+        // --- Original accelerator ports ---
+        input  wire                                 clk,
+        input  wire                                 rst_n,
+        input  wire                                 comp_enb,
+        output logic                                busyb,
+        output logic                                done,
+        output logic [MAIN_MEM_ADDR_WIDTH-1:0]      imem_addr,
+        output logic                                imem_read_enb,
+        input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  imem_data_in,
+        input  wire                                 imem_req_ready,
+        input  wire                                 imem_resp_valid,
+        output logic [MAIN_MEM_ADDR_WIDTH-1:0]      omem_addr,
+        output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] omem_wdata,
+        output logic                                omem_write_enb,
+        input  wire                                 omem_req_ready,
+
+        // --- SRAM Ports Exposed for Synthesis ---
+        // Derived localparams for port widths
+        // (These need to be defined outside the module or copied here if not globally visible)
+        // For simplicity, defining them here assuming they are derived from parameters
+        // and will be consistent with the internal logic.
+        // It's better to define these localparams once outside the `module` declaration
+        // or ensure they are passed as parameters if they are truly global.
+        // For this example, I'll put them here, assuming they are derived from module parameters.
+        // A more robust solution might involve a common header file for such definitions.
+
+        // Re-declaring localparams for the synthesis port list
+        // This is a common pattern when you change the module interface based on `ifdef`.
+        // These localparams are derived from the module parameters, so they are valid here.
+        localparam LOADER_SRAM_ADDR_WIDTH   = $clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS),
+        localparam DF_SRAM_ADDR_WIDTH       = TILE_SIZE * $clog2(TILE_SIZE),
+        localparam DF_SRAM_DATA_WIDTH       = TILE_SIZE * INPUT_DATA_WIDTH,
+        localparam SA_SRAM_C_ROW_WIDTH      = TILE_SIZE * ACCUM_DATA_WIDTH,
+        localparam WRITER_SRAM_C_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS),
+
+        // SRAM A Ping
+        output wire                                 sram_a_ping_we,
+        output wire [LOADER_SRAM_ADDR_WIDTH-1:0]    sram_a_ping_waddr,
+        output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_a_ping_wdata,
+        output wire [DF_SRAM_ADDR_WIDTH-1:0]        sram_a_ping_raddr,
+        input  wire [DF_SRAM_DATA_WIDTH-1:0]        sram_a_ping_rdata,
+
+        // SRAM A Pong
+        output wire                                 sram_a_pong_we,
+        output wire [LOADER_SRAM_ADDR_WIDTH-1:0]    sram_a_pong_waddr,
+        output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_a_pong_wdata,
+        output wire [DF_SRAM_ADDR_WIDTH-1:0]        sram_a_pong_raddr,
+        input  wire [DF_SRAM_DATA_WIDTH-1:0]        sram_a_pong_rdata,
+
+        // SRAM B Ping
+        output wire                                 sram_b_ping_we,
+        output wire [LOADER_SRAM_ADDR_WIDTH-1:0]    sram_b_ping_waddr,
+        output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_b_ping_wdata,
+        output wire [DF_SRAM_ADDR_WIDTH-1:0]        sram_b_ping_raddr,
+        input  wire [DF_SRAM_DATA_WIDTH-1:0]        sram_b_ping_rdata,
+
+        // SRAM B Pong
+        output wire                                 sram_b_pong_we,
+        output wire [LOADER_SRAM_ADDR_WIDTH-1:0]    sram_b_pong_waddr,
+        output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_b_pong_wdata,
+        output wire [DF_SRAM_ADDR_WIDTH-1:0]        sram_b_pong_raddr,
+        input  wire [DF_SRAM_DATA_WIDTH-1:0]        sram_b_pong_rdata,
+
+        // SRAM C Ping
+        output wire                                 sram_c_ping_we,
+        output wire [$clog2(TILE_SIZE)-1:0]         sram_c_ping_waddr,
+        output wire [SA_SRAM_C_ROW_WIDTH-1:0]       sram_c_ping_wdata,
+        output wire [$clog2(TILE_SIZE)-1:0]         sram_c_ping_raddr_A,
+        input  wire [SA_SRAM_C_ROW_WIDTH-1:0]       sram_c_ping_rdata_A,
+        output wire [WRITER_SRAM_C_ADDR_WIDTH-1:0]  sram_c_ping_raddr_B,
+        input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_c_ping_rdata_B,
+        
+        // SRAM C Pong
+        output wire                                 sram_c_pong_we,
+        output wire [$clog2(TILE_SIZE)-1:0]         sram_c_pong_waddr,
+        output wire [SA_SRAM_C_ROW_WIDTH-1:0]       sram_c_pong_wdata,
+        output wire [$clog2(TILE_SIZE)-1:0]         sram_c_pong_raddr_A,
+        input  wire [SA_SRAM_C_ROW_WIDTH-1:0]       sram_c_pong_rdata_A,
+        output wire [WRITER_SRAM_C_ADDR_WIDTH-1:0]  sram_c_pong_raddr_B,
+        input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0]  sram_c_pong_rdata_B
+    );
+`endif
 
     //--------------------------------------------------------------------------
     // Local Parameters & Derived Values
@@ -55,6 +159,8 @@ module accelerator #(
     localparam J_ITER_MAX        = NUM_TILES_PER_DIM;
     localparam I_ITER_MAX        = NUM_TILES_PER_DIM;
 
+    // These localparams are used internally by the logic and also for port widths
+    // They are defined here to be accessible by both `ifdef` branches.
     localparam LOADER_SRAM_ADDR_WIDTH   = $clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
     localparam DF_SRAM_ADDR_WIDTH       = TILE_SIZE * $clog2(TILE_SIZE);
     localparam DF_SRAM_DATA_WIDTH       = TILE_SIZE * INPUT_DATA_WIDTH;
@@ -123,21 +229,38 @@ module accelerator #(
     // *** MODIFIED ***: Changed .k_tile_idx connection to use k_tile_idx_for_load
     loader #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_A(BASE_ADDR_A), .BASE_ADDR_B(BASE_ADDR_B))
         u_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .k_tile_idx(k_tile_idx_for_load), .load_to_ping(load_ab_select_q), .load_busy(), .load_done(loader_done), .mem_req_valid(imem_read_enb), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_data_in), .mem_req_addr(imem_addr), .sram_a_addr(loader_sram_a_addr), .sram_a_wdata(loader_sram_a_wdata), .sram_a_we(loader_sram_a_we), .sram_b_addr(loader_sram_b_addr), .sram_b_wdata(loader_sram_b_wdata), .sram_b_we(loader_sram_b_we));
+
     // --- SRAMs ---
+    // Declare SRAM interface wires. In synthesis, these will become top-level ports.
+    // In simulation, they connect to the instantiated SRAM modules.
     logic sram_a_ping_we, sram_a_pong_we, sram_b_ping_we, sram_b_pong_we;
     logic [LOADER_SRAM_ADDR_WIDTH-1:0] sram_a_ping_waddr, sram_a_pong_waddr, sram_b_ping_waddr, sram_b_pong_waddr;
     logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_ping_wdata, sram_a_pong_wdata, sram_b_ping_wdata, sram_b_pong_wdata;
     logic [DF_SRAM_ADDR_WIDTH-1:0] sram_a_ping_raddr, sram_a_pong_raddr, sram_b_ping_raddr, sram_b_pong_raddr;
     logic [DF_SRAM_DATA_WIDTH-1:0] sram_a_ping_rdata, sram_a_pong_rdata, sram_b_ping_rdata, sram_b_pong_rdata;
+
+    logic sram_c_ping_we, sram_c_pong_we;
+    logic [$clog2(TILE_SIZE)-1:0] sram_c_ping_waddr, sram_c_pong_waddr, sram_c_ping_raddr_A, sram_c_pong_raddr_A;
+    logic [SA_SRAM_C_ROW_WIDTH-1:0] sram_c_ping_wdata, sram_c_pong_wdata, sram_c_ping_rdata_A, sram_c_pong_rdata_A;
+    logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] sram_c_ping_raddr_B, sram_c_pong_raddr_B;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_ping_rdata_B, sram_c_pong_rdata_B;
+
+`ifndef SYNTHESIS
+    // For simulation, instantiate the behavioral SRAM models
     sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_ping (.clk(clk), .we(sram_a_ping_we), .waddr(sram_a_ping_waddr), .wdata(sram_a_ping_wdata), .raddr(sram_a_ping_raddr), .rdata(sram_a_ping_rdata));
     sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_pong (.clk(clk), .we(sram_a_pong_we), .waddr(sram_a_pong_waddr), .wdata(sram_a_pong_wdata), .raddr(sram_a_pong_raddr), .rdata(sram_a_pong_rdata));
     sram_banked #(.IS_SRAM_A(1'b0), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_b_ping (.clk(clk), .we(sram_b_ping_we), .waddr(sram_b_ping_waddr), .wdata(sram_b_ping_wdata), .raddr(sram_b_ping_raddr), .rdata(sram_b_ping_rdata));
     sram_banked #(.IS_SRAM_A(1'b0), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_b_pong (.clk(clk), .we(sram_b_pong_we), .waddr(sram_b_pong_waddr), .wdata(sram_b_pong_wdata), .raddr(sram_b_pong_raddr), .rdata(sram_b_pong_rdata));
+    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_ping (.clk(clk), .rst_n(rst_n), .we(sram_c_ping_we), .waddr(sram_c_ping_waddr), .wdata(sram_c_ping_wdata), .raddr_A(sram_c_ping_raddr_A), .rdata_A(sram_c_ping_rdata_A), .raddr_B(sram_c_ping_raddr_B), .rdata_B(sram_c_ping_rdata_B));
+    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_pong (.clk(clk), .rst_n(rst_n), .we(sram_c_pong_we), .waddr(sram_c_pong_waddr), .wdata(sram_c_pong_wdata), .raddr_A(sram_c_pong_raddr_A), .rdata_A(sram_c_pong_rdata_A), .raddr_B(sram_c_pong_raddr_B), .rdata_B(sram_c_pong_rdata_B));
+`endif
+
     // --- Data Formatter ---
     logic [DF_SRAM_ADDR_WIDTH-1:0] df_sram_a_addr, df_sram_b_addr;
     logic [DF_SRAM_DATA_WIDTH-1:0] df_sram_a_rdata, df_sram_b_rdata, df_skewed_a_out, df_skewed_b_out;
     logic [TILE_SIZE-1:0] df_skewed_a_valid_out, df_skewed_b_valid_out;
     data_formatter #(.TILE_SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH)) u_data_formatter (.clk(clk), .rst_n(rst_n), .start_pass(df_start_pass_pulse), .pass_done(), .sram_a_addr(df_sram_a_addr), .sram_a_rdata(df_sram_a_rdata), .sram_b_addr(df_sram_b_addr), .sram_b_rdata(df_sram_b_rdata), .skewed_a_out(df_skewed_a_out), .skewed_b_out(df_skewed_b_out), .data_valid_out(), .skewed_a_valid_out(df_skewed_a_valid_out), .skewed_b_valid_out(df_skewed_b_valid_out));
+    
     // --- SA ---
     logic [$clog2(TILE_SIZE)-1:0] sa_sram_c_raddr_A, sa_sram_c_waddr;
     logic signed [SA_SRAM_C_ROW_WIDTH-1:0] sa_sram_c_rdata_A, sa_sram_c_wdata;
@@ -161,14 +284,7 @@ module accelerator #(
         .sram_c_wdata_to_sram(sa_sram_c_wdata), 
         .sram_c_we_to_sram(sa_sram_c_we)
     );
-    // --- SRAM C ---
-    logic sram_c_ping_we, sram_c_pong_we;
-    logic [$clog2(TILE_SIZE)-1:0] sram_c_ping_waddr, sram_c_pong_waddr, sram_c_ping_raddr_A, sram_c_pong_raddr_A;
-    logic [SA_SRAM_C_ROW_WIDTH-1:0] sram_c_ping_wdata, sram_c_pong_wdata, sram_c_ping_rdata_A, sram_c_pong_rdata_A;
-    logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] sram_c_ping_raddr_B, sram_c_pong_raddr_B;
-    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_ping_rdata_B, sram_c_pong_rdata_B;
-    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_ping (.clk(clk), .rst_n(rst_n), .we(sram_c_ping_we), .waddr(sram_c_ping_waddr), .wdata(sram_c_ping_wdata), .raddr_A(sram_c_ping_raddr_A), .rdata_A(sram_c_ping_rdata_A), .raddr_B(sram_c_ping_raddr_B), .rdata_B(sram_c_ping_rdata_B));
-    sram_c_accum #(.NUM_ROWS(TILE_SIZE), .ELEM_PER_ROW(TILE_SIZE), .ELEM_WIDTH(ACCUM_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_c_pong (.clk(clk), .rst_n(rst_n), .we(sram_c_pong_we), .waddr(sram_c_pong_waddr), .wdata(sram_c_pong_wdata), .raddr_A(sram_c_pong_raddr_A), .rdata_A(sram_c_pong_rdata_A), .raddr_B(sram_c_pong_raddr_B), .rdata_B(sram_c_pong_rdata_B));
+
     // --- Writer ---
     logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] writer_sram_c_addr;
     logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] writer_sram_c_rdata;

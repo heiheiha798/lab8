@@ -8,10 +8,38 @@ TOP_MODULE_RTL="accelerator"
 
 # RTL Source Files (paths relative to ~/lab8, but will be used with ../ from yosys-sta dir)
 PE_FILE="./pe.v"
-SYSTOLIC_ARRAY_FILE="./systolic_array.v"
+SYSTOLIC_ARRAY_FILE="./systolic_array.v" # This should be sa_enhanced.v
 ACCELERATOR_RTL_FILE="./accelerator.v"
-# Note: The makefile command will internally prepend "../" to these paths
-# when executed from the yosys-sta directory.
+
+# Updated list of all necessary RTL files for synthesis (excluding SRAM behavioral models)
+# These will be passed to Yosys for synthesis.
+LOADER_FILE="./loader.v"
+DATA_FORMATTER_FILE="./data_formatter.v"
+SA_ENHANCED_FILE="./sa_enhanced.v"
+WRITER_FILE="./writer.v"
+
+# IMPORTANT: sram_banked.v and sram_c_accum.v are behavioral SRAM models.
+# They are excluded from RTL_FILES because they are conditionally compiled out
+# in accelerator.v when SYNTHESIS is defined.
+# If these files were included here, Yosys would try to synthesize them into standard cells,
+# which is what we want to avoid for black-boxing SRAMs.
+RTL_FILES_LIST=(
+    "${ACCELERATOR_RTL_FILE}"
+    "${LOADER_FILE}"
+    "${DATA_FORMATTER_FILE}"
+    "${SA_ENHANCED_FILE}"
+    "${PE_FILE}"
+    "${WRITER_FILE}"
+)
+
+# Convert the array to a space-separated string, prepending "../" for make -C
+RTL_FILES=""
+for file in "${RTL_FILES_LIST[@]}"; do
+    RTL_FILES+="../${file} "
+done
+# Remove trailing space
+RTL_FILES=$(echo "${RTL_FILES}" | xargs)
+
 
 # Synthesis Output Directory (relative to ~/lab8)
 SYNTH_OUTPUT_DIR="./output_synth_wsl"
@@ -20,7 +48,7 @@ SYNTH_OUTPUT_DIR="./output_synth_wsl"
 SDC_FILE="./accelerator.sdc"
 
 # Clock Configuration
-CLK_FREQ_MHZ=885
+CLK_FREQ_MHZ=100 # Changed to 100MHz for initial test as per user request
 CLK_PORT_NAME="clk" # Clock port name in the top RTL module
 
 # --- Helper Functions ---
@@ -52,14 +80,37 @@ echocmd "Starting Logic Synthesis and Static Timing Analysis (STA)"
 rm -rf ${SYNTH_OUTPUT_DIR}
 mkdir -p ${SYNTH_OUTPUT_DIR} # Ensure base output directory exists, yosys-sta makefile will create subdir
 
-# Prepare SDC file if it doesn't exist (basic clock definition)
+# Prepare SDC file if it doesn't exist (basic clock definition and I/O delays)
 if [ ! -f "${SDC_FILE}" ]; then
-    echo "SDC file '${SDC_FILE}' not found. Creating a basic one with clock definition."
-    echo "create_clock -name ${CLK_PORT_NAME} -period [expr 1000.0/${CLK_FREQ_MHZ}] [get_ports ${CLK_PORT_NAME}]" > ${SDC_FILE}
-    # You might want to add:
-    # echo "set_input_delay 2.0 -clock ${CLK_PORT_NAME} [all_inputs]" >> ${SDC_FILE}
-    # echo "set_output_delay 2.0 -clock ${CLK_PORT_NAME} [all_outputs]" >> ${SDC_FILE}
-    echo "Basic SDC file created. Please review and customize if needed."
+    echo "SDC file '${SDC_FILE}' not found. Creating a basic one with clock and I/O definitions."
+    {
+        echo "# Clock Definition"
+        echo "create_clock -name ${CLK_PORT_NAME} -period [expr 1000.0/${CLK_FREQ_MHZ}] [get_ports ${CLK_PORT_NAME}]"
+        echo
+        echo "# --- Clock Uncertainty and Transition ---"
+        echo "# These are typical values, adjust if you have better estimates"
+        echo "set_clock_uncertainty 0.1 [get_clocks ${CLK_PORT_NAME}]"
+        echo "set_clock_transition 0.1 [get_clocks ${CLK_PORT_NAME}]"
+        echo
+        echo "# --- Input Delays ---"
+        echo "# Assume inputs change 30% after the clock edge at the driving chip"
+        echo "set clk_period [get_property period [get_clocks ${CLK_PORT_NAME}]]"
+        echo "set input_delay_val [expr 0.3 * \$clk_period]"
+        echo "set_input_delay \$input_delay_val -clock ${CLK_PORT_NAME} [all_inputs]"
+        echo "# Reset is often treated as asynchronous or has looser timing"
+        echo "set_input_delay [expr 0.5 * \$clk_period] -clock ${CLK_PORT_NAME} [get_ports rst_n]"
+        echo
+        echo "# --- Output Delays ---"
+        echo "# Assume the chip being driven by this output needs the data 30% before its clock edge"
+        echo "set output_delay_val [expr 0.3 * \$clk_period]"
+        echo "set_output_delay \$output_delay_val -clock ${CLK_PORT_NAME} [all_outputs]"
+        echo
+        echo "# --- Operating Conditions & Wire Load Models (Placeholder) ---"
+        echo "# These should be provided by your PDK/library, but if not, yosys-sta might have defaults."
+        echo "# Example: set_operating_conditions -max slow"
+        echo "# Example: set_wire_load_model -name 16000 -library slow"
+    } > ${SDC_FILE}
+    echo "Basic SDC file created. Please review and customize if needed, especially for SRAM ports."
 fi
 
 # Run the make command for STA (which includes synthesis)
@@ -72,7 +123,8 @@ make -C ./yosys-sta sta \
     CLK_FREQ_MHZ=${CLK_FREQ_MHZ} \
     CLK_PORT_NAME=${CLK_PORT_NAME} \
     O=../${SYNTH_OUTPUT_DIR} \
-    RTL_FILES="../${PE_FILE} ../${SYSTOLIC_ARRAY_FILE} ../${ACCELERATOR_RTL_FILE}"
+    RTL_FILES="${RTL_FILES}" \
+    VERILOG_DEFINES="SYNTHESIS" # <--- THIS IS THE KEY ADDITION to define SYNTHESIS macro
 
 # Check if synthesis was successful
 # The yosys-sta makefile is expected to create a subdirectory like accelerator-100MHz
