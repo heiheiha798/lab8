@@ -184,10 +184,10 @@ module loader #(
                         load_to_ping_reg <= load_to_ping;
                         a_base_addr      <= BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES);
                         b_base_addr      <= BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES);
-                        $display("%0t [LOADER] INFO: New request latched (i=%d, j=%d, k=%d). Load to %s.", $time, i_tile_idx, j_tile_idx, k_tile_idx, load_to_ping ? "PING" : "PONG");
-                        $display("%0t [LOADER] INFO: A-Tile Base Addr=0x%h, B-Tile Base Addr=0x%h", $time, 
-                            BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES), 
-                            BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES));
+                        // $display("%0t [LOADER] INFO: New request latched (i=%d, j=%d, k=%d). Load to %s.", $time, i_tile_idx, j_tile_idx, k_tile_idx, load_to_ping ? "PING" : "PONG");
+                        // $display("%0t [LOADER] INFO: A-Tile Base Addr=0x%h, B-Tile Base Addr=0x%h", $time, 
+                        //     BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES), 
+                        //     BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES));
                     end
                     // 在IDLE状态下重置计数器
                     req_cnt  <= 0;
@@ -198,11 +198,11 @@ module loader #(
                     // 流水化更新请求计数器
                     if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready && mem_req_valid) begin
                         req_cnt <= req_cnt + 1;
-                        if(req_cnt < WORDS_PER_TILE) begin
-                           $display("%0t [LOADER] INFO: Requesting A-Tile word %d.", $time, req_cnt);
-                        end else begin
-                           $display("%0t [LOADER] INFO: Requesting B-Tile word %d.", $time, req_cnt - WORDS_PER_TILE);
-                        end
+                        // if(req_cnt < WORDS_PER_TILE) begin
+                        //    $display("%0t [LOADER] INFO: Requesting A-Tile word %d.", $time, req_cnt);
+                        // end else begin
+                        //    $display("%0t [LOADER] INFO: Requesting B-Tile word %d.", $time, req_cnt - WORDS_PER_TILE);
+                        // end
                     end
                     
                     // 流水化更新响应计数器和数据显示
@@ -210,19 +210,19 @@ module loader #(
                         resp_cnt <= resp_cnt + 1;
                         // **重要调试信息**: 在时钟沿，当 mem_resp_valid有效时，打印loader模块准备驱动到其输出端口的值。
                         // 这里打印的值是基于 mem_resp_rdata 和 resp_cnt (更新前的值) 组合逻辑赋值的结果。
-                        if (resp_cnt < WORDS_PER_TILE) begin
-                            // 打印将要驱动到 SRAM A 输出端口的值
-                            $display("%0t [LOADER-DRV] Driving SRAM A: we=%b, addr=%d, wdata=0x%h", $time, sram_a_we, sram_a_addr, sram_a_wdata);
-                        end else begin
-                            // 打印将要驱动到 SRAM B 输出端口的值
-                            $display("%0t [LOADER-DRV] Driving SRAM B: we=%b, addr=%d, wdata=0x%h", $time, sram_b_we, sram_b_addr, sram_b_wdata);
-                        end
+                        // if (resp_cnt < WORDS_PER_TILE) begin
+                        //     // 打印将要驱动到 SRAM A 输出端口的值
+                        //     $display("%0t [LOADER-DRV] Driving SRAM A: we=%b, addr=%d, wdata=0x%h", $time, sram_a_we, sram_a_addr, sram_a_wdata);
+                        // end else begin
+                        //     // 打印将要驱动到 SRAM B 输出端口的值
+                        //     $display("%0t [LOADER-DRV] Driving SRAM B: we=%b, addr=%d, wdata=0x%h", $time, sram_b_we, sram_b_addr, sram_b_wdata);
+                        // end
                     end
 
                     // 如果所有请求都发完了，但响应还没收完，则停止发送请求但继续接收
-                    if (req_cnt == WORDS_PER_TILE * 2) begin
-                        $display("%0t [LOADER] INFO: All requests sent. Waiting for remaining responses.", $time);
-                    end
+                    // if (req_cnt == WORDS_PER_TILE * 2) begin
+                    //     $display("%0t [LOADER] INFO: All requests sent. Waiting for remaining responses.", $time);
+                    // end
                 end
                 
                 S_DONE: begin

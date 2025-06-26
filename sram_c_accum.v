@@ -43,14 +43,14 @@ module sram_c_accum #(
         if (we) begin
             memory[waddr] <= wdata;
             // Add this display, only for waddr = 0
-            if (waddr == 0) begin
-                $display("[%0t] [SRAM_C_WRITE] Addr: %d, WData[0]=%d, WData[1]=%d, WData[2]=%d, WData[3]=%d",
-                        $time, waddr,
-                        wdata[0*ELEM_WIDTH +: ELEM_WIDTH],
-                        wdata[1*ELEM_WIDTH +: ELEM_WIDTH],
-                        wdata[2*ELEM_WIDTH +: ELEM_WIDTH],
-                        wdata[3*ELEM_WIDTH +: ELEM_WIDTH]);
-            end
+            // if (waddr == 0) begin
+            //     $display("[%0t] [SRAM_C_WRITE] Addr: %d, WData[0]=%d, WData[1]=%d, WData[2]=%d, WData[3]=%d",
+            //             $time, waddr,
+            //             wdata[0*ELEM_WIDTH +: ELEM_WIDTH],
+            //             wdata[1*ELEM_WIDTH +: ELEM_WIDTH],
+            //             wdata[2*ELEM_WIDTH +: ELEM_WIDTH],
+            //             wdata[3*ELEM_WIDTH +: ELEM_WIDTH]);
+            // end
         end
     end
 
