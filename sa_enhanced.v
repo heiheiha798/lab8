@@ -16,6 +16,7 @@ module sa_enhanced #(
     // --- Control from Compute Controller ---
     input wire start_new_k_iteration,       // Starts a new K-iteration (calc + accum)
     input wire activate_pe_computation,    // Enables PE calculations during a K-iteration
+    input wire k_tile_is_first,             // *** NEW ***: High if this is k=0 for a new C tile
 
     // --- Data Input from Formatter/TB ---
     input wire [SIZE*INPUT_DATA_WIDTH-1:0] array_a_in,
@@ -52,6 +53,9 @@ module sa_enhanced #(
                                                          // chain[r][0] is input to PE(r,0)'s chain logic
                                                          // chain[r][c+1] is output from PE(r,c)'s chain logic
     wire last_column_done_signals [SIZE-1:0]; // Collects output from the last PE in each row
+    
+    // *** NEW ***: Register to hold the k_tile_is_first status for the duration of the FSM cycle
+    reg k_tile_is_first_reg;
 
     // --- Shadow Buffer for Pk ---
     reg signed [ROW_WIDTH_BITS-1:0] pk_shadow_buffer [0:SIZE-1];
@@ -178,10 +182,19 @@ module sa_enhanced #(
         if (!rst_n) begin
             all_pes_calc_done_for_pk_q <= 1'b0;
             pe_calculation_phase_complete_q <= 1'b0;
+            k_tile_is_first_reg <= 1'b0; // *** NEW *** Initialize register
         end else begin
             all_pes_calc_done_for_pk_q <= all_pes_calc_done_for_pk_comb; // Register the combinational signal
+            
+            // *** MODIFIED ***: Latch k_tile_is_first status at the beginning of the iteration
             if (start_new_k_iteration) begin
                 pe_calculation_phase_complete_q <= 1'b0;
+                k_tile_is_first_reg <= k_tile_is_first; // Latch status from accelerator
+                if (k_tile_is_first) begin
+                    $display("[%0t] [SA_SEQ] k_tile_is_first_reg latched to 1 (new C tile first K).", $time);
+                end else begin
+                    $display("[%0t] [SA_SEQ] k_tile_is_first_reg latched to 0 (subsequent K for C tile).", $time);
+                end
             end else if (all_pes_calc_done_for_pk_comb && sa_fsm_state_q == SA_FSM_CALCULATING_PK) begin
                 if (pe_calculation_phase_complete_q == 1'b0) begin
                     $display("[%0t] [PE_DONE] All PEs finished calculation for Pk (via chain). Asserting pe_calculation_phase_complete_q.", $time);
@@ -281,8 +294,8 @@ module sa_enhanced #(
 
         // <<< NEW/MODIFIED DISPLAY: Log FSM inputs and decisions >>>
         // Uncomment this for very verbose FSM decision logging
-        $display("[%0t] [SA_FSM_COMB] Current MainFSM: %s, Current PipeState: %s, accum_all_done: %b, pk_shadow_loaded: %b, pe_calc_complete: %b, start_new_k: %b",
-                  $time, sa_fsm_state_q.name(), accum_pipe_state_q.name(), accum_all_rows_done_for_current_pk_q, pk_shadow_buffer_loaded_q, pe_calculation_phase_complete_q, start_new_k_iteration);
+        // $display("[%0t] [SA_FSM_COMB] Current MainFSM: %s, Current PipeState: %s, accum_all_done: %b, pk_shadow_loaded: %b, pe_calc_complete: %b, start_new_k: %b, k_is_first: %b",
+        //           $time, sa_fsm_state_q.name(), accum_pipe_state_q.name(), accum_all_rows_done_for_current_pk_q, pk_shadow_buffer_loaded_q, pe_calculation_phase_complete_q, start_new_k_iteration, k_tile_is_first_reg);
 
         case (sa_fsm_state_q)
             SA_FSM_IDLE: begin
@@ -319,8 +332,8 @@ module sa_enhanced #(
             end
             SA_FSM_ACCUMULATING: begin
                 // <<< NEW/MODIFIED DISPLAY: Inside ACCUMULATING state >>>
-                $display("[%0t] [SA_FSM_COMB_ACCUM] Current PipeState: %s, Current Row: %d, accum_all_done: %b",
-                          $time, accum_pipe_state_q.name(), accum_current_row_q, accum_all_rows_done_for_current_pk_q);
+                // $display("[%0t] [SA_FSM_COMB_ACCUM] Current PipeState: %s, Current Row: %d, accum_all_done: %b",
+                //           $time, accum_pipe_state_q.name(), accum_current_row_q, accum_all_rows_done_for_current_pk_q);
 
                 if (accum_all_rows_done_for_current_pk_q) begin // Check overall completion first
                     sa_fsm_state_d = SA_FSM_IDLE;
@@ -336,20 +349,29 @@ module sa_enhanced #(
                             accum_pipe_state_d = ACCUM_PIPE_SRAM_READ_ISSUED;
                             sram_c_raddr_A_to_sram = accum_current_row_q;
                             // <<< NEW/MODIFIED DISPLAY >>>
-                            $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_IDLE] Next PipeState: READ_ISSUED, SRAM RdAddr: %d (for row %d)",
-                                      $time, sram_c_raddr_A_to_sram, accum_current_row_q);
+                            // $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_IDLE] Next PipeState: READ_ISSUED, SRAM RdAddr: %d (for row %d)",
+                            //           $time, sram_c_raddr_A_to_sram, accum_current_row_q);
                         end
                         ACCUM_PIPE_SRAM_READ_ISSUED: begin
                             // Waiting for SRAM data. Next cycle data will be valid.
                             accum_pipe_state_d = ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED;
                             // <<< NEW/MODIFIED DISPLAY >>>
-                            $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_READ_ISSUED] Next PipeState: DATA_BACK_ADD_WRITE_ISSUED.", $time);
+                            // $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_READ_ISSUED] Next PipeState: DATA_BACK_ADD_WRITE_ISSUED.", $time);
                         end
                         ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED: begin
+                            // *** CORE LOGIC CHANGE ***
                             // Data was read, adder calculated, SRAM write is now being issued.
                             sram_c_waddr_to_sram = accum_current_row_q;
-                            sram_c_wdata_to_sram = accumulated_row_val;
                             sram_c_we_to_sram    = 1'b1;
+                            
+                            if (k_tile_is_first_reg) begin // Check if this is the first K iteration
+                                sram_c_wdata_to_sram = pk_row_for_accum_q; // Directly write Pk
+                                $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_WRITE_K0] Row %d DIRECT write Pk (K_IS_FIRST). SRAM WE=1. Pk[0]=%d", $time, accum_current_row_q, pk_row_for_accum_q[PE_ACCUM_DATA_WIDTH-1:0]);
+                            end else begin
+                                sram_c_wdata_to_sram = accumulated_row_val; // Normal accumulation: Pk + C_prev
+                                $display("[%0t] [SA_FSM_COMB_ACCUM_PIPE_WRITE] Row %d ACCUM write Pk+C. SRAM WE=1. Pk[0]=%d, C_old[0]=%d, Result[0]=%d", $time, accum_current_row_q, pk_row_for_accum_q[PE_ACCUM_DATA_WIDTH-1:0], sram_old_row_for_accum_q[PE_ACCUM_DATA_WIDTH-1:0], accumulated_row_val[PE_ACCUM_DATA_WIDTH-1:0]);
+                            end
+                            
                             // Move to next row or finish
                             if (accum_current_row_q == SIZE - 1) begin
                                 accum_pipe_state_d = ACCUM_PIPE_IDLE; // Reset pipe for potential next K

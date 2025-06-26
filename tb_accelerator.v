@@ -13,7 +13,7 @@ module tb_accelerator;
     // Testbench Parameters
     //--------------------------------------------------------------------------
     // Match these with the DUT parameters
-    parameter P_MATRIX_SIZE               = 16;
+    parameter P_MATRIX_SIZE               = 32;
     parameter P_TILE_SIZE                 = 16;
     parameter P_MAIN_MEM_ADDR_WIDTH       = 32;
     parameter P_MAIN_MEM_DATA_WIDTH_BITS  = 64;

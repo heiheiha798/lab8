@@ -46,12 +46,13 @@ module writer #(
     localparam NUM_TILES_PER_DIM   = MATRIX_SIZE / TILE_SIZE;
     localparam C_TILE_BYTES        = TILE_SIZE * TILE_SIZE * 4; // 每个元素32位
     localparam MEM_WRITES_PER_TILE = C_TILE_BYTES / (MAIN_MEM_DATA_WIDTH_BITS / 8); // 1024 / 8 = 128
-    reg [$clog2(TILE_SIZE*TILE_SIZE*4/8)-1:0] prev_sram_c_addr_for_log;
 
     // 使用 typedef 定义FSM状态
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] { // Changed to [2:0] to accommodate 5 states
         S_IDLE,
-        S_WRITING,
+        S_REQ_SRAM,     // 新状态: 请求从 SRAM C 读取数据
+        S_WAIT_SRAM_DATA, // 新状态: 等待 SRAM C 数据有效
+        S_WRITE_MEM,    // 现有状态: 写入主存
         S_DONE
     } state_t;
 
@@ -61,9 +62,21 @@ module writer #(
     state_t current_state, next_state;
     
     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg;
-    reg [$clog2(MEM_WRITES_PER_TILE + 1)-1:0] mem_transaction_cnt;
+    // 用于组合逻辑中生成寄存器的下一状态值
+    reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg_d, j_reg_d; 
     
-    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_data_pipeline;
+    // sram_read_ptr: 指向当前Tile中SRAM C要读取的下一个64位字
+    reg [$clog2(MEM_WRITES_PER_TILE)-1:0] sram_read_ptr_q, sram_read_ptr_d;
+    // mem_write_ptr: 指向当前Tile要写入主存的下一个64位字
+    reg [$clog2(MEM_WRITES_PER_TILE)-1:0] mem_write_ptr_q, mem_write_ptr_d;
+
+    // data_to_write_to_mem_q: 保存从SRAM读取的数据，准备写入内存
+    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] data_to_write_to_mem_q; 
+
+    // 调试信号
+    reg [$clog2(TILE_SIZE*TILE_SIZE*4/8)-1:0] sram_c_addr_prev_log;
+    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0]   sram_c_rdata_prev_log;
+
 
     //--------------------------------------------------------------------------
     // FSM 状态转移逻辑 (Sequential)
@@ -71,11 +84,29 @@ module writer #(
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             current_state <= S_IDLE;
+            sram_read_ptr_q <= 0;
+            mem_write_ptr_q <= 0;
+            data_to_write_to_mem_q <= {MAIN_MEM_DATA_WIDTH_BITS{1'b0}};
+            i_reg <= 0; // Reset i_reg
+            j_reg <= 0; // Reset j_reg
         end else begin
-            current_state <= next_state;
-            // 锁存 sram_c_addr 以便在下一个周期打印 sram_c_rdata 时知道是哪个地址请求的数据
-            prev_sram_c_addr_for_log <= sram_c_addr; 
+            current_state   <= next_state;
+            sram_read_ptr_q   <= sram_read_ptr_d;
+            mem_write_ptr_q   <= mem_write_ptr_d;
+            i_reg <= i_reg_d; // 从下一状态寄存器更新i_reg
+            j_reg <= j_reg_d; // 从下一状态寄存器更新j_reg
+
+            // 在S_WAIT_SRAM_DATA状态下锁存SRAM数据
+            if (current_state == S_WAIT_SRAM_DATA) begin 
+                data_to_write_to_mem_q <= sram_c_rdata; // 锁存从SRAM读取的数据
+            end
+
+            // 调试日志
+            sram_c_addr_prev_log <= sram_c_addr; // sram_c_addr是组合输出
+            sram_c_rdata_prev_log <= sram_c_rdata; // sram_c_rdata是输入
         end
+        $display("[%0t] [WRITER_FF_START] 状态: %s, sram_rd_ptr: %d, mem_wr_ptr: %d, 待写入数据: %h",
+                     $time, current_state.name(), sram_read_ptr_q, mem_write_ptr_q, data_to_write_to_mem_q);
     end
 
     //--------------------------------------------------------------------------
@@ -84,103 +115,96 @@ module writer #(
     always @(*) begin
         // 默认输出值
         next_state    = current_state;
-        write_busy    = 1'b0;
+        write_busy    = (current_state != S_IDLE && current_state != S_DONE);
         write_done    = 1'b0;
         mem_req_valid = 1'b0;
-        mem_req_wdata = {MAIN_MEM_DATA_WIDTH_BITS{1'b0}}; // 显式初始化为0
-        mem_req_addr  = {MAIN_MEM_ADDR_WIDTH{1'b0}};      // 显式初始化为0
-        sram_c_addr   = 1'b0;
+        mem_req_wdata = data_to_write_to_mem_q; // 使用锁存的数据进行写入
+        mem_req_addr  = BASE_ADDR_C + 
+                        (i_reg * NUM_TILES_PER_DIM * C_TILE_BYTES) + 
+                        (j_reg * C_TILE_BYTES) + 
+                        (mem_write_ptr_q * (MAIN_MEM_DATA_WIDTH_BITS / 8)); // 地址基于 mem_write_ptr_q
+        sram_c_addr   = sram_read_ptr_q; // SRAM 地址基于 sram_read_ptr_q
+
+        sram_read_ptr_d = sram_read_ptr_q; // 默认: 不变
+        mem_write_ptr_d = mem_write_ptr_q; // 默认: 不变
+        i_reg_d = i_reg; // 默认: 保持当前值
+        j_reg_d = j_reg; // 默认: 保持当前值
+
+        // $display("[%0t] [WRITER_COMB_START] 状态(FSM): %s, sram_rd_ptr(reg): %d, mem_wr_ptr(reg): %d",
+        //              $time, current_state.name(), sram_read_ptr_q, mem_write_ptr_q);
+        // $display("[%0t] [WRITER_COMB_OUTS] sram_c_addr_out: %d, mem_req_addr_out: 0x%h, mem_req_wdata_out: %h, mem_req_valid_next: %b",
+        //              $time, sram_c_addr, mem_req_addr, mem_req_wdata, mem_req_valid);
 
         case (current_state)
             S_IDLE: begin
                 if (write_req) begin
-                    next_state = S_WRITING;
+                    next_state = S_REQ_SRAM;
+                    sram_read_ptr_d = 0; // 开始从SRAM C的Tile开头读取
+                    mem_write_ptr_d = 0; // 开始从主存的Tile开头写入
+                    i_reg_d = i_tile_idx; // 赋值给下一状态寄存器
+                    j_reg_d = j_tile_idx; // 赋值给下一状态寄存器
+                    $display("[%0t] [WRITER] 新的写入请求. i_tile=%d, j_tile=%d. 进入 S_REQ_SRAM 状态.", $time, i_tile_idx, j_tile_idx);
                 end
             end
 
-            S_WRITING: begin
-                write_busy = 1'b1;
-                sram_c_addr = mem_transaction_cnt; // 当前周期请求SRAM的地址
-                mem_req_wdata = sram_data_pipeline; // 写入的数据是上一周期从SRAM读出的数据
+            S_REQ_SRAM: begin // 发出SRAM读取请求
+                // sram_c_addr 已经设置为 sram_read_ptr_q
+                // 此状态确保 sram_c_addr 稳定一个周期，以便SRAM C锁存它。
+                next_state = S_WAIT_SRAM_DATA;
+                $display("[%0t] [WRITER] 在 S_REQ_SRAM 状态. sram_c_addr (用于SRAM读取) = %d.", $time, sram_c_addr);
+            end
 
-                mem_req_addr = BASE_ADDR_C + 
-                            (i_reg * NUM_TILES_PER_DIM * C_TILE_BYTES) + 
-                            (j_reg * C_TILE_BYTES) + 
-                            (mem_transaction_cnt * (MAIN_MEM_DATA_WIDTH_BITS / 8));
-                
-                if (mem_transaction_cnt < MEM_WRITES_PER_TILE) begin
-                    mem_req_valid = 1'b1; 
-
-                    // 打印即将写入主存的数据和地址 (组合逻辑值)
-                    if (i_reg == 0 && j_reg == 0 && mem_transaction_cnt < 2) begin
-                        $display("[%0t] [WRITER_MEM_WRITE] Addr: 0x%h, WData_Low32: %d, WData_High32: %d (Raw: 0x%h)",
-                                $time, mem_req_addr, 
-                                mem_req_wdata[31:0], mem_req_wdata[63:32], mem_req_wdata);
-                    end
-                end else begin 
-                    mem_req_valid = 1'b0; 
+            S_WAIT_SRAM_DATA: begin // 等待SRAM数据 (1周期延迟)
+                // 在此周期，sram_c_rdata (Writer的输入) 现在包含 sram_read_ptr_q 的数据
+                // 此数据将在时钟上升沿锁存到 data_to_write_to_mem_q。
+                // 如果还未到末尾，我们可以并行发出下一个SRAM读取请求。
+                if (sram_read_ptr_q < MEM_WRITES_PER_TILE - 1) begin // 如果该Tile还有更多数据要从SRAM读取
+                    sram_read_ptr_d = sram_read_ptr_q + 1; // 递增指针以进行下一次SRAM读取
                 end
-                
-                if (mem_transaction_cnt == MEM_WRITES_PER_TILE) begin
-                    next_state = S_DONE;
+                next_state = S_WRITE_MEM; // 在下一个周期写入主存
+                $display("[%0t] [WRITER] 在 S_WAIT_SRAM_DATA 状态. 地址 %d (上一周期请求) 的数据现在在 sram_c_rdata (%h) 上. 将被锁存. 下一个 sram_read_ptr_d=%d.",
+                             $time, sram_read_ptr_q, sram_c_rdata, sram_read_ptr_d);
+            end
+
+            S_WRITE_MEM: begin
+                // mem_req_wdata 已经设置为 data_to_write_to_mem_q (来自上一次SRAM读取的数据)
+                // mem_req_addr 已经基于 mem_write_ptr_q 设置
+                mem_req_valid = 1'b1; // 断言有效，写入主存
+
+                $display("[%0t] [WRITER] 在 S_WRITE_MEM 状态. 写入 mem_write_ptr %d 到地址 0x%h，数据 %h.",
+                             $time, mem_write_ptr_q, mem_req_addr, mem_req_wdata);
+
+                if (mem_req_ready) begin // 如果主存接受写入
+                    mem_write_ptr_d = mem_write_ptr_q + 1; // 递增主存写入指针
+
+                    if (mem_write_ptr_q == MEM_WRITES_PER_TILE - 1) begin // 该Tile的最后一次写入
+                        next_state = S_DONE;
+                        $display("[%0t] [WRITER] Tile的最后一次写入 (ptr %d) 已接受. 进入 S_DONE 状态.", $time, mem_write_ptr_q);
+                    end else begin
+                        // 我们需要返回请求SRAM的下一段数据，如果可用的话。
+                        // 或者如果下一个SRAM读取已经在进行中，则等待。
+                        // 由于我们对SRAM读取和内存写入进行了流水线处理，sram_read_ptr 领先。
+                        next_state = S_REQ_SRAM; 
+                        $display("[%0t] [WRITER] 写入 ptr %d 已接受. 下一个 mem_write_ptr_d=%d. 进入 S_REQ_SRAM 状态，sram_read_ptr 为 %d.",
+                                     $time, mem_write_ptr_q, mem_write_ptr_d, sram_read_ptr_q);
+                    end
+                end else begin
+                    // 内存未准备好，保持在 S_WRITE_MEM 状态以重试当前写入
+                    next_state = S_WRITE_MEM;
+                    // $display("[%0t] [WRITER] 主存未准备好. 重试写入 ptr %d.", $time, mem_write_ptr_q);
                 end
             end
 
             S_DONE: begin
-                $display("[%0t] [WRITER_FSM] Reached S_DONE state. Pulsing write_done.", $time);
-                write_done = 1'b1;
+                write_done = 1'b1; // 脉冲高一个周期
                 next_state = S_IDLE;
+                $display("[%0t] [WRITER] 在 S_DONE 状态. 脉冲 write_done. 进入 S_IDLE 状态.", $time);
             end
 
             default: begin
                 next_state = S_IDLE;
             end
         endcase
-    end
-
-    //--------------------------------------------------------------------------
-    // 内部寄存器更新逻辑 (Sequential)
-    //--------------------------------------------------------------------------
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            i_reg <= 0;
-            j_reg <= 0;
-            mem_transaction_cnt <= 0;
-            sram_data_pipeline <= {MAIN_MEM_DATA_WIDTH_BITS{1'b0}}; // 显式初始化为0
-        end else begin
-            // 打印 SRAM_C_RData_Now: 这是由 prev_sram_c_addr_for_log 在上一个周期请求的SRAM数据
-            if (current_state == S_WRITING && i_reg == 0 && j_reg == 0 && mem_transaction_cnt < 2) begin
-                $display("[%0t] [WRITER_SRAM_READ] SRAM_C_Addr_Req_Prev_Cycle: %d, SRAM_C_RData_Now: 0x%h (Low32: %d, High32: %d)",
-                            $time, prev_sram_c_addr_for_log, sram_c_rdata, sram_c_rdata[31:0], sram_c_rdata[63:32]);
-            end
-            sram_data_pipeline <= sram_c_rdata; // 锁存当前SRAM读取的数据，用于下一个周期写入主存
-
-            case (current_state)
-                S_IDLE: begin
-                    if (write_req) begin
-                        i_reg <= i_tile_idx;
-                        j_reg <= j_tile_idx;
-                        $display("[%0t] [WRITER] INFO: New request latched (i=%d, j=%d).", $time, i_tile_idx, j_tile_idx);
-                    end
-                    mem_transaction_cnt <= 0;
-                end
-                
-                S_WRITING: begin
-                    if (mem_req_valid && mem_req_ready) begin
-                        mem_transaction_cnt <= mem_transaction_cnt + 1;
-                        $display("[%0t] [WRITER] INFO: Writing to Mem, transaction %d (old_val). Addr 0x%h. mem_req_valid=%b, mem_req_ready=%b",
-                            $time, mem_transaction_cnt, mem_req_addr, mem_req_valid, mem_req_ready);
-                    end else if (current_state == S_WRITING) begin // Add an else if to see why it's not incrementing
-                        $display("[%0t] [WRITER_STALL] In S_WRITING, but mem_transaction_cnt NOT incrementing. mem_req_valid=%b, mem_req_ready=%b, mem_trans_cnt_curr=%d",
-                                $time, mem_req_valid, mem_req_ready, mem_transaction_cnt);
-                    end
-                end
-                
-                S_DONE: begin
-                    $display("[%0t] [WRITER] INFO: Write request completed. Returning to IDLE.", $time);
-                end
-            endcase
-        end
     end
 
 endmodule

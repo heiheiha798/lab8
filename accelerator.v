@@ -1,11 +1,10 @@
 //
 // Filename: accelerator.v
 // Description: A fully integrated matrix multiplication accelerator.
-//              (FINAL VERSION) This module contains a single, unified FSM that
-//              controls the entire GEMM computation flow. It includes a precise
-//              2-cycle delay between starting the Data Formatter and the Systolic
-//              Array to compensate for the DF's internal pipeline, ensuring
-//              correct data alignment and calculation.
+//              (FIXED VERSION) This version corrects the prefetch logic by
+//              providing the correct k-tile index to the loader, ensuring
+//              that the (k+1)th tile is fetched while the (k)th tile is being
+//              processed. It also retains the 2-cycle pipeline delay for DF-SA synchronization.
 //
 `timescale 1ns / 1ps
 
@@ -86,6 +85,9 @@ module accelerator #(
     logic [$clog2(I_ITER_MAX)-1:0] i_tile_idx_q, i_tile_idx_d;
     logic [$clog2(J_ITER_MAX)-1:0] j_tile_idx_q, j_tile_idx_d;
     logic [$clog2(K_ITER_MAX)-1:0] k_tile_idx_q, k_tile_idx_d;
+    
+    // *** ADDED ***: Signal for correct prefetch k-index
+    logic [$clog2(K_ITER_MAX)-1:0] k_tile_idx_for_load;
 
     logic load_ab_select_q,  load_ab_select_d;
     logic compute_ab_select_q, compute_ab_select_d;
@@ -98,6 +100,7 @@ module accelerator #(
     logic writer_req_pulse;
 
     logic sa_activate_pe_level;
+    logic k_tile_is_first_for_sa; // *** NEW *** Signal to SA
 
     logic loader_done;
     logic sa_k_iter_done;
@@ -116,9 +119,10 @@ module accelerator #(
     logic [LOADER_SRAM_ADDR_WIDTH-1:0] loader_sram_a_addr, loader_sram_b_addr;
     logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] loader_sram_a_wdata, loader_sram_b_wdata;
     logic loader_sram_a_we, loader_sram_b_we;
-
+    
+    // *** MODIFIED ***: Changed .k_tile_idx connection to use k_tile_idx_for_load
     loader #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_A(BASE_ADDR_A), .BASE_ADDR_B(BASE_ADDR_B))
-        u_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .k_tile_idx(k_tile_idx_q), .load_to_ping(load_ab_select_q), .load_busy(), .load_done(loader_done), .mem_req_valid(imem_read_enb), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_data_in), .mem_req_addr(imem_addr), .sram_a_addr(loader_sram_a_addr), .sram_a_wdata(loader_sram_a_wdata), .sram_a_we(loader_sram_a_we), .sram_b_addr(loader_sram_b_addr), .sram_b_wdata(loader_sram_b_wdata), .sram_b_we(loader_sram_b_we));
+        u_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .k_tile_idx(k_tile_idx_for_load), .load_to_ping(load_ab_select_q), .load_busy(), .load_done(loader_done), .mem_req_valid(imem_read_enb), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_data_in), .mem_req_addr(imem_addr), .sram_a_addr(loader_sram_a_addr), .sram_a_wdata(loader_sram_a_wdata), .sram_a_we(loader_sram_a_we), .sram_b_addr(loader_sram_b_addr), .sram_b_wdata(loader_sram_b_wdata), .sram_b_we(loader_sram_b_we));
     // --- SRAMs ---
     logic sram_a_ping_we, sram_a_pong_we, sram_b_ping_we, sram_b_pong_we;
     logic [LOADER_SRAM_ADDR_WIDTH-1:0] sram_a_ping_waddr, sram_a_pong_waddr, sram_b_ping_waddr, sram_b_pong_waddr;
@@ -138,7 +142,25 @@ module accelerator #(
     logic [$clog2(TILE_SIZE)-1:0] sa_sram_c_raddr_A, sa_sram_c_waddr;
     logic signed [SA_SRAM_C_ROW_WIDTH-1:0] sa_sram_c_rdata_A, sa_sram_c_wdata;
     logic sa_sram_c_we;
-    sa_enhanced #(.SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH), .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)) u_sa_enhanced (.clk(clk), .rst_n(rst_n), .start_new_k_iteration(sa_start_k_iter_pulse), .activate_pe_computation(sa_activate_pe_level), .array_a_in(df_skewed_a_out), .array_b_in(df_skewed_b_out), .array_a_valid_in_indywidual(df_skewed_a_valid_out), .array_b_valid_in_indywidual(df_skewed_b_valid_out), .sa_k_iteration_accum_done(sa_k_iter_done), .sa_busy(), .sram_c_raddr_A_to_sram(sa_sram_c_raddr_A), .sram_c_rdata_A_from_sram(sa_sram_c_rdata_A), .sram_c_waddr_to_sram(sa_sram_c_waddr), .sram_c_wdata_to_sram(sa_sram_c_wdata), .sram_c_we_to_sram(sa_sram_c_we));
+    // *** MODIFIED ***: Added .k_tile_is_first port connection
+    sa_enhanced #(.SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH), .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)) u_sa_enhanced (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .start_new_k_iteration(sa_start_k_iter_pulse), 
+        .activate_pe_computation(sa_activate_pe_level), 
+        .k_tile_is_first(k_tile_is_first_for_sa), // *** NEW ***
+        .array_a_in(df_skewed_a_out), 
+        .array_b_in(df_skewed_b_out), 
+        .array_a_valid_in_indywidual(df_skewed_a_valid_out), 
+        .array_b_valid_in_indywidual(df_skewed_b_valid_out), 
+        .sa_k_iteration_accum_done(sa_k_iter_done), 
+        .sa_busy(), 
+        .sram_c_raddr_A_to_sram(sa_sram_c_raddr_A), 
+        .sram_c_rdata_A_from_sram(sa_sram_c_rdata_A), 
+        .sram_c_waddr_to_sram(sa_sram_c_waddr), 
+        .sram_c_wdata_to_sram(sa_sram_c_wdata), 
+        .sram_c_we_to_sram(sa_sram_c_we)
+    );
     // --- SRAM C ---
     logic sram_c_ping_we, sram_c_pong_we;
     logic [$clog2(TILE_SIZE)-1:0] sram_c_ping_waddr, sram_c_pong_waddr, sram_c_ping_raddr_A, sram_c_pong_raddr_A;
@@ -176,6 +198,12 @@ module accelerator #(
     assign sram_c_ping_raddr_B = writer_sram_c_addr; assign sram_c_pong_raddr_B = writer_sram_c_addr;
     assign writer_sram_c_rdata = (write_c_select_q == 0) ? sram_c_ping_rdata_B : sram_c_pong_rdata_B;
 
+    // *** NEW ***: Logic to determine if it's the first K-iteration
+    assign k_tile_is_first_for_sa = (k_tile_idx_q == 0);
+    
+    // *** ADDED ***: Logic to calculate the correct k-index for prefetching
+    assign k_tile_idx_for_load = (current_state_q == S_LOAD_FIRST) ? '0 : k_tile_idx_q + 1;
+    
     //--------------------------------------------------------------------------
     // Main Accelerator FSM - Sequential Logic
     //--------------------------------------------------------------------------
@@ -229,6 +257,8 @@ module accelerator #(
             end
 
             S_LOAD_FIRST: begin
+                // For the very first load of a C_ij tile, k should be 0.
+                // The k_tile_idx_q is already 0 here.
                 loader_req_pulse = 1'b1;
                 load_done_flag_d = 1'b0;
                 next_state_d = S_WAIT_LOAD_FIRST;
@@ -238,7 +268,7 @@ module accelerator #(
                 if (load_done_flag_q) begin
                     compute_ab_select_d = load_ab_select_q;
                     load_ab_select_d = ~load_ab_select_q;
-                    k_tile_idx_d = 0;
+                    k_tile_idx_d = 0; // Reset K index for the new C_ij tile
                     next_state_d = S_START_DF;
                 end
             end
@@ -295,6 +325,7 @@ module accelerator #(
                         end else begin
                             j_tile_idx_d = j_tile_idx_q + 1;
                         end
+                        k_tile_idx_d = 0; // Prepare for the next C_ij tile
                         compute_c_select_d = ~compute_c_select_q;
                         next_state_d = S_LOAD_FIRST;
                     end
