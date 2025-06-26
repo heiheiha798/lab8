@@ -8,14 +8,14 @@ TOP_MODULE_RTL="accelerator"
 
 # RTL Source Files (paths relative to ~/lab8, but will be used with ../ from yosys-sta dir)
 PE_FILE="./pe.v"
-SYSTOLIC_ARRAY_FILE="./systolic_array.v" # This should be sa_enhanced.v
+# Removed: SYSTOLIC_ARRAY_FILE="./systolic_array.v" as it's replaced by sa_enhanced.v
 ACCELERATOR_RTL_FILE="./accelerator.v"
 
 # Updated list of all necessary RTL files for synthesis (excluding SRAM behavioral models)
 # These will be passed to Yosys for synthesis.
 LOADER_FILE="./loader.v"
 DATA_FORMATTER_FILE="./data_formatter.v"
-SA_ENHANCED_FILE="./sa_enhanced.v"
+SA_ENHANCED_FILE="./sa_enhanced.v" # This is your updated systolic array module
 WRITER_FILE="./writer.v"
 
 # IMPORTANT: sram_banked.v and sram_c_accum.v are behavioral SRAM models.
@@ -48,7 +48,7 @@ SYNTH_OUTPUT_DIR="./output_synth_wsl"
 SDC_FILE="./accelerator.sdc"
 
 # Clock Configuration
-CLK_FREQ_MHZ=100 # Changed to 100MHz for initial test as per user request
+CLK_FREQ_MHZ=909 # Changed to 100MHz for initial test as per user request
 CLK_PORT_NAME="clk" # Clock port name in the top RTL module
 
 # --- Helper Functions ---

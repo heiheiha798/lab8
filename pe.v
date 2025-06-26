@@ -158,37 +158,37 @@ always @(posedge clk or negedge rst_n) begin
         pe_calculation_done_latch_prev <= pe_calculation_done_latch;
 
         // --- 调试信息 ---
-        if ((ROW_IDX == 0 && COL_IDX == 0) || (ROW_IDX == 1 && COL_IDX == 1) || (ROW_IDX == 15 && COL_IDX == 15)) begin
-        // if (COL_IDX == 0) begin
-            if (start_new_systolic_pass) begin // Display on pass start
-                $strobe("[%0t] [PE(%0d,%0d)] NewPass: MAC_count_reset_to_0, pe_done_latch_reset_to_0, mul_valid_reset_to_0",
-                        $time, ROW_IDX, COL_IDX);
-            end
+        // if ((ROW_IDX == 0 && COL_IDX == 0) || (ROW_IDX == 1 && COL_IDX == 1) || (ROW_IDX == 15 && COL_IDX == 15)) begin
+        // // if (COL_IDX == 0) begin
+        //     if (start_new_systolic_pass) begin // Display on pass start
+        //         $strobe("[%0t] [PE(%0d,%0d)] NewPass: MAC_count_reset_to_0, pe_done_latch_reset_to_0, mul_valid_reset_to_0",
+        //                 $time, ROW_IDX, COL_IDX);
+        //     end
 
-            if (enable) begin // Only display when PE is supposed to be active
-                if (mul_valid_reg) begin // Display when a multiplication is considered valid for accumulation
-                    $strobe("[%0t] [PE(%0d,%0d)] MAC: count_prev=%0d, count_next=%0d, mul_val=%b, a_in=%d, b_in=%d, a_reg=%d, b_reg=%d, mul_res=%d, cur_sum=%d, next_sum_val_if_acc=%d, pe_done_latch=%b",
-                            $time, ROW_IDX, COL_IDX, performed_mac_count, next_performed_mac_count_w, mul_valid_reg,
-                            a_data_in, b_data_in, a_reg, b_reg, mul_result_reg, local_accumulator_reg, add_output_data, pe_calculation_done_latch);
-                end
+        //     if (enable) begin // Only display when PE is supposed to be active
+        //         if (mul_valid_reg) begin // Display when a multiplication is considered valid for accumulation
+        //             $strobe("[%0t] [PE(%0d,%0d)] MAC: count_prev=%0d, count_next=%0d, mul_val=%b, a_in=%d, b_in=%d, a_reg=%d, b_reg=%d, mul_res=%d, cur_sum=%d, next_sum_val_if_acc=%d, pe_done_latch=%b",
+        //                     $time, ROW_IDX, COL_IDX, performed_mac_count, next_performed_mac_count_w, mul_valid_reg,
+        //                     a_data_in, b_data_in, a_reg, b_reg, mul_result_reg, local_accumulator_reg, add_output_data, pe_calculation_done_latch);
+        //         end
 
-                // Display when the done latch condition is met OR when it changes
-                if ((performed_mac_count == (MAC_COUNT_TARGET-1) && mul_valid_reg) && !pe_calculation_done_latch) begin
-                       $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_AboutToSet: count=%0d (target-1=%0d), mul_valid=%b. Latch will be 1 next.",
-                               $time, ROW_IDX, COL_IDX, performed_mac_count, MAC_COUNT_TARGET-1, mul_valid_reg);
-                end
-                // 监测 done latch 的变化
-                if (pe_calculation_done_latch != pe_calculation_done_latch_prev) begin
-                    $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_Change: %b -> %b, MAC_count_at_change_moment=%d, mul_valid_reg=%b",
-                            $time, ROW_IDX, COL_IDX, pe_calculation_done_latch_prev, pe_calculation_done_latch, performed_mac_count, mul_valid_reg);
-                end
-            end
+        //         // Display when the done latch condition is met OR when it changes
+        //         if ((performed_mac_count == (MAC_COUNT_TARGET-1) && mul_valid_reg) && !pe_calculation_done_latch) begin
+        //                $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_AboutToSet: count=%0d (target-1=%0d), mul_valid=%b. Latch will be 1 next.",
+        //                        $time, ROW_IDX, COL_IDX, performed_mac_count, MAC_COUNT_TARGET-1, mul_valid_reg);
+        //         end
+        //         // 监测 done latch 的变化
+        //         if (pe_calculation_done_latch != pe_calculation_done_latch_prev) begin
+        //             $strobe("[%0t] [PE(%0d,%0d)] DoneLatch_Change: %b -> %b, MAC_count_at_change_moment=%d, mul_valid_reg=%b",
+        //                     $time, ROW_IDX, COL_IDX, pe_calculation_done_latch_prev, pe_calculation_done_latch, performed_mac_count, mul_valid_reg);
+        //         end
+        //     end
 
-            // Display for when enable goes low
-            if (enable_prev && !enable) begin
-                $strobe("[%0t] [PE(%0d,%0d)] PE_DISABLE: MAC_count=%0d, pe_done_latch=%b", $time, ROW_IDX, COL_IDX, performed_mac_count, pe_calculation_done_latch);
-            end
-        end
+        //     // Display for when enable goes low
+        //     if (enable_prev && !enable) begin
+        //         $strobe("[%0t] [PE(%0d,%0d)] PE_DISABLE: MAC_count=%0d, pe_done_latch=%b", $time, ROW_IDX, COL_IDX, performed_mac_count, pe_calculation_done_latch);
+        //     end
+        // end
     end
 end
     
