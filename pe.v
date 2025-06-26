@@ -158,8 +158,8 @@ always @(posedge clk or negedge rst_n) begin
         pe_calculation_done_latch_prev <= pe_calculation_done_latch;
 
         // --- 调试信息 ---
-        // if ((ROW_IDX == 0 && COL_IDX == 0) || (ROW_IDX == 1 && COL_IDX == 1) || (ROW_IDX == 15 && COL_IDX == 15)) begin
-        if (COL_IDX == 0) begin
+        if ((ROW_IDX == 0 && COL_IDX == 0) || (ROW_IDX == 1 && COL_IDX == 1) || (ROW_IDX == 15 && COL_IDX == 15)) begin
+        // if (COL_IDX == 0) begin
             if (start_new_systolic_pass) begin // Display on pass start
                 $strobe("[%0t] [PE(%0d,%0d)] NewPass: MAC_count_reset_to_0, pe_done_latch_reset_to_0, mul_valid_reset_to_0",
                         $time, ROW_IDX, COL_IDX);

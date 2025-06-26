@@ -47,9 +47,9 @@ module sram_banked #(
             for (i = 0; i < BYTES_PER_BUS_WORD; i = i + 1) begin
                 memory[bank_group_start + i][row_idx] <= wdata[i*BANK_DATA_WIDTH +: BANK_DATA_WIDTH];
                 // 替换 $display 为输出写入后的数据
-                $write("%0t [%s WRITE] waddr=%d, row_idx=%d, bank=%d, Written data=0x%h to memory[%d][%d]\n",
-                    $time, IS_SRAM_A ? "SRAM-A" : "SRAM-B", waddr, row_idx, bank_group_start + i, 
-                    wdata[i*BANK_DATA_WIDTH +: BANK_DATA_WIDTH], bank_group_start + i, row_idx);
+                // $write("%0t [%s WRITE] waddr=%d, row_idx=%d, bank=%d, Written data=0x%h to memory[%d][%d]\n",
+                //     $time, IS_SRAM_A ? "SRAM-A" : "SRAM-B", waddr, row_idx, bank_group_start + i, 
+                //     wdata[i*BANK_DATA_WIDTH +: BANK_DATA_WIDTH], bank_group_start + i, row_idx);
             end
         end
     end
