@@ -30,6 +30,32 @@ LOG_FILE="output.txt"
     echo "所有日志将同步输出到终端和文件: ${LOG_FILE}"
     echo "----------------------------------------"
 
+    # --- 检查 MATRIX_DIM 是否为 16 的倍数 ---
+    if (( MATRIX_DIM % 16 != 0 )); then
+        echo "错误：请把matrix宽度修改为16倍数。" >&2
+        exit 1
+    else
+        echo "提示：矩阵宽度 ${MATRIX_DIM} 是 16 的倍数。"
+    fi
+
+    echo ""
+    echo "步骤 0: 正在更新脚本和 Verilog 文件中的矩阵维度参数..."
+    echo "----------------------------------------"
+    # 使用 sed 命令修改 InputGen.py 中的 MATRIX_DIM_TB
+    # 注意：macOS 的 sed 命令需要 -i 后面跟一个空字符串（''）表示不创建备份文件
+    sed -i '' "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" InputGen.py
+    echo "已更新 InputGen.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
+
+    # 使用 sed 命令修改 CheckResult.py 中的 MATRIX_DIM_TB
+    sed -i '' "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" CheckResult.py
+    echo "已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
+
+    # --- 新增：修改 tb_accelerator.v 中的 P_MATRIX_SIZE ---
+    sed -i '' "s/\(parameter P_MATRIX_SIZE *= *\)[0-9]*;/\1${MATRIX_DIM};/" tb_accelerator.v
+    echo "已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 ${MATRIX_DIM}"
+    echo "----------------------------------------"
+
+
     echo ""
     echo "步骤 1: 正在生成输入文件 (input_mem.csv)..."
     echo "----------------------------------------"
