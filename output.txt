@@ -48,6 +48,10 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                             : ... Suggest add newline.
   268 | endmodule
       |          ^
+%Warning-EOFNEWLINE: sa_enhanced.v:283:10: Missing newline at end of file (POSIX 3.206).
+                                         : ... Suggest add newline.
+  283 | endmodule
+      |          ^
 %Warning-EOFNEWLINE: pe.v:198:10: Missing newline at end of file (POSIX 3.206).
                                 : ... Suggest add newline.
   198 | endmodule
@@ -95,9 +99,9 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |                          ^~
                      ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
                      ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
-%Warning-WIDTHEXPAND: sa_enhanced.v:274:53: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'accum_current_row_q' generates 4 bits.
+%Warning-WIDTHEXPAND: sa_enhanced.v:267:53: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'accum_current_row_q' generates 4 bits.
                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  274 |                             if (accum_current_row_q == SIZE - 1) begin
+  267 |                             if (accum_current_row_q == SIZE - 1) begin
       |                                                     ^~
 %Warning-WIDTHTRUNC: data_formatter.v:154:40: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 6 bits.
                                             : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
@@ -207,9 +211,9 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
    70 |     reg                                load_to_ping_reg;
       |                                        ^~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: sa_enhanced.v:46:45: Signal is not used: 'pe_result_valid_internal'
+%Warning-UNUSEDSIGNAL: sa_enhanced.v:49:45: Signal is not used: 'pe_result_valid_internal'
                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   46 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
+   49 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
       |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
 %Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
@@ -249,8 +253,8 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |                                                      ^~
                    ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.036
                    ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
-%Warning-CASEINCOMPLETE: sa_enhanced.v:246:21: Case values incompletely covered (example pattern 0x3)
-  246 |                     case (accum_pipe_state_q)
+%Warning-CASEINCOMPLETE: sa_enhanced.v:238:21: Case values incompletely covered (example pattern 0x3)
+  238 |                     case (accum_pipe_state_q)
       |                     ^~~~
                          ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.036
                          ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
@@ -333,19 +337,19 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |             ^~~~~~
                       ... For warning description see https://verilator.org/warn/MULTIDRIVEN?v=5.036
                       ... Use "/* verilator lint_off MULTIDRIVEN */" and lint_on around source to disable this message.
-%Warning-UNOPTFLAT: sa_enhanced.v:55:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
-   55 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
+%Warning-UNOPTFLAT: sa_enhanced.v:57:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
+   57 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~
                     ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.036
                     ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
-                    sa_enhanced.v:55:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
+                    sa_enhanced.v:57:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
                     pe.v:64:38:      Example path: ASSIGNW
                     pe.v:29:41:      Example path: tb_accelerator.dut.u_sa_enhanced.__Vcellout__pe_row_gen[0].pe_col_gen[0].u_pe_inst__pe_row_propagate_done_out
-                    sa_enhanced.v:138:22:      Example path: ASSIGNW
-                    sa_enhanced.v:55:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
+                    sa_enhanced.v:141:22:      Example path: ASSIGNW
+                    sa_enhanced.v:57:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
 - V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
-- Verilator: Built from 0.524 MB sources in 10 modules, into 5.987 MB in 11 C++ files needing 0.001 MB
-- Verilator: Walltime 1.222 s (elab=0.081, cvt=1.086, bld=0.000); cpu 1.204 s on 1 threads
+- Verilator: Built from 0.523 MB sources in 10 modules, into 6.005 MB in 11 C++ files needing 0.001 MB
+- Verilator: Walltime 1.199 s (elab=0.059, cvt=1.085, bld=0.000); cpu 1.197 s on 1 threads
 ### Compiling C++ simulation executable...
 /Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
 c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
@@ -382,39 +386,39 @@ SIM_CPP: Entering simulation loop...
 [65000] [TB] Waiting for accelerator to finish (tb_done=1)...
 745000 [LOADER] INFO: Load request completed. Returning to IDLE.
 1435000 [LOADER] INFO: Load request completed. Returning to IDLE.
-2315000 [LOADER] INFO: Load request completed. Returning to IDLE.
-5375000 [LOADER] INFO: Load request completed. Returning to IDLE.
-6065000 [LOADER] INFO: Load request completed. Returning to IDLE.
-6945000 [LOADER] INFO: Load request completed. Returning to IDLE.
-10005000 [LOADER] INFO: Load request completed. Returning to IDLE.
-10695000 [LOADER] INFO: Load request completed. Returning to IDLE.
-11575000 [LOADER] INFO: Load request completed. Returning to IDLE.
-14635000 [LOADER] INFO: Load request completed. Returning to IDLE.
-15325000 [LOADER] INFO: Load request completed. Returning to IDLE.
-16205000 [LOADER] INFO: Load request completed. Returning to IDLE.
-19265000 [LOADER] INFO: Load request completed. Returning to IDLE.
-19955000 [LOADER] INFO: Load request completed. Returning to IDLE.
-20835000 [LOADER] INFO: Load request completed. Returning to IDLE.
-23895000 [LOADER] INFO: Load request completed. Returning to IDLE.
-24585000 [LOADER] INFO: Load request completed. Returning to IDLE.
-25465000 [LOADER] INFO: Load request completed. Returning to IDLE.
-28525000 [LOADER] INFO: Load request completed. Returning to IDLE.
-29215000 [LOADER] INFO: Load request completed. Returning to IDLE.
-30095000 [LOADER] INFO: Load request completed. Returning to IDLE.
-33155000 [LOADER] INFO: Load request completed. Returning to IDLE.
-33845000 [LOADER] INFO: Load request completed. Returning to IDLE.
-34725000 [LOADER] INFO: Load request completed. Returning to IDLE.
-37785000 [LOADER] INFO: Load request completed. Returning to IDLE.
-38475000 [LOADER] INFO: Load request completed. Returning to IDLE.
-39355000 [LOADER] INFO: Load request completed. Returning to IDLE.
-[41735000] [TB] Accelerator finished (tb_done asserted).
-[41745000] [TB] Writing results from memory model to 'result_mem.csv'...
-[41745000] [TB] Results written to 'result_mem.csv'.
+2165000 [LOADER] INFO: Load request completed. Returning to IDLE.
+4925000 [LOADER] INFO: Load request completed. Returning to IDLE.
+5615000 [LOADER] INFO: Load request completed. Returning to IDLE.
+6345000 [LOADER] INFO: Load request completed. Returning to IDLE.
+9105000 [LOADER] INFO: Load request completed. Returning to IDLE.
+9795000 [LOADER] INFO: Load request completed. Returning to IDLE.
+10525000 [LOADER] INFO: Load request completed. Returning to IDLE.
+13285000 [LOADER] INFO: Load request completed. Returning to IDLE.
+13975000 [LOADER] INFO: Load request completed. Returning to IDLE.
+14705000 [LOADER] INFO: Load request completed. Returning to IDLE.
+17465000 [LOADER] INFO: Load request completed. Returning to IDLE.
+18155000 [LOADER] INFO: Load request completed. Returning to IDLE.
+18885000 [LOADER] INFO: Load request completed. Returning to IDLE.
+21645000 [LOADER] INFO: Load request completed. Returning to IDLE.
+22335000 [LOADER] INFO: Load request completed. Returning to IDLE.
+23065000 [LOADER] INFO: Load request completed. Returning to IDLE.
+25825000 [LOADER] INFO: Load request completed. Returning to IDLE.
+26515000 [LOADER] INFO: Load request completed. Returning to IDLE.
+27245000 [LOADER] INFO: Load request completed. Returning to IDLE.
+30005000 [LOADER] INFO: Load request completed. Returning to IDLE.
+30695000 [LOADER] INFO: Load request completed. Returning to IDLE.
+31425000 [LOADER] INFO: Load request completed. Returning to IDLE.
+34185000 [LOADER] INFO: Load request completed. Returning to IDLE.
+34875000 [LOADER] INFO: Load request completed. Returning to IDLE.
+35605000 [LOADER] INFO: Load request completed. Returning to IDLE.
+[37685000] [TB] Accelerator finished (tb_done asserted).
+[37695000] [TB] Writing results from memory model to 'result_mem.csv'...
+[37695000] [TB] Results written to 'result_mem.csv'.
 ==============================================
-[41745000] [TB] TEST SCENARIO COMPLETED.
+[37695000] [TB] TEST SCENARIO COMPLETED.
 ==============================================
 - tb_accelerator.v:257: Verilog $finish
-SIM_CPP: Exited simulation loop. Total steps: 41745001
+SIM_CPP: Exited simulation loop. Total steps: 37695001
 SIM_CPP: main() finished.
 ### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from inish or isplay).
 
@@ -429,45 +433,45 @@ SIM_CPP: main() finished.
 python3 CheckResult.py
 
 Matrix A (SINT8 loaded from .npy):
-[[       50       124       -40       -98        87        -5      -102       -37]
- [      -20       -79         9        -8        37       -60       -53        20]
- [      -24      -118        44       104        63        77        -8        51]
- [      100      -120       -39       -79        -8         7       -10        90]
- [     -123       -53        73        99       -69      -116        95       -77]
- [      -27      -100      -125       -58       -44        53        44       -58]
- [      122       -98       102         0       -19         0        57      -101]
- [      -40        -6       -45       -45      -122        35       -97       -83]]
+[[      -94       -10        32        92       -46        95        86       114]
+ [       48       127      -118        23        88        76        24        56]
+ [       99        92       126       124      -114       -64       -94        71]
+ [      -47       -23       -77       126      -104       -21        40       -10]
+ [      -70        42       122       109       -37       122         1        90]
+ [        2        -8        34       -45         4         5       -54        34]
+ [      -95       -90       127        62        86       -60       -49        74]
+ [      -16       -63        81       123      -104      -102        59       -99]]
 
 Matrix B (SINT8 loaded from .npy):
-[[      -54       125      -125        -8        96       -26        90         0]
- [       69       -55        47      -100       -36      -112       107        -5]
- [       58       -69       -31        84       113      -128       -41       110]
- [       52        11        47        31        69       -89        83        39]
- [     -126        -6       110       110        20        38        96      -125]
- [      -49       -56        58       -95       122      -114       -24       117]
- [       80       -17       -23       -72        67       -25       -93       116]
- [       63        35        65        24        87       102       -85       -91]]
+[[       97        83       -16        91        94       -23       -77       -89]
+ [      115       -37       -52       -42        30       110        15        72]
+ [     -125      -117        31       -93        92      -111       -19       107]
+ [       -7         5       -34      -103       122       -86        69        81]
+ [     -112        33       -66        95       -92        95        67      -104]
+ [        7        69       -20       -22       -67        69        57       123]
+ [       35       -40        62       -41        89       -24       -86        92]
+ [     -111        27        33       -70       -50      -109       -76        26]]
 
 Golden Result C (SINT32 loaded from .npy):
-[[   -33528     82851    -21860     30118    -38923     -9155     53780    -37991]
- [   -19274    -12173     27744     33266    -55115     92576    -10712    -36207]
- [    14804    -16367    -12734       760    -21425    -75592     12348    -39604]
- [    47772     16597     -3522    -24172    -11772     27653    -36869    -35697]
- [    39270    -28353    -38305     24231      1774    -44892    -59669     38929]
- [    17164    -11837    -44129     17586     -5315     -5439      -355     56689]
- [    11603    -14450    -53782     27797      3087    -47061     37392     58463]
- [    32935     25984      5673    -41076     39507    -45922     63705     41754]]
+[[    18010    -73885     -1879    -64160     95373    -21785    -58526     38092]
+ [    27066     35525    -42406     67191    -65587     34180     34635     -3407]
+ [   -41732    -68112    -11690    -31637     36953    -25607     -2219     67306]
+ [   153751    -27718     38345     37545     -9921     39467    -63638     27928]
+ [    -8512     31195     21590     -8336     37319     10732    -27150     29583]
+ [    -7202    -79784     92168    -16493    -56459     26703     48650     29825]
+ [  -108401     16027     16865     21191      3406     -3644      -260     63996]
+ [    31031    -47806    -63951    -81754      2409     29183     68141     20712]]
 ----------------------------------------
 
 HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[   -33528     82851    -21860     30118    -38923     -9155     53780    -37991]
- [   -19274    -12173     27744     33266    -55115     92576    -10712    -36207]
- [    14804    -16367    -12734       760    -21425    -75592     12348    -39604]
- [    47772     16597     -3522    -24172    -11772     27653    -36869    -35697]
- [    39270    -28353    -38305     24231      1774    -44892    -59669     38929]
- [    17164    -11837    -44129     17586     -5315     -5439      -355     56689]
- [    11603    -14450    -53782     27797      3087    -47061     37392     58463]
- [    32935     25984      5673    -41076     39507    -45922     63705     41754]]
+[[    18010    -73885     -1879    -64160     95373    -21785    -58526     38092]
+ [    27066     35525    -42406     67191    -65587     34180     34635     -3407]
+ [   -41732    -68112    -11690    -31637     36953    -25607     -2219     67306]
+ [   153751    -27718     38345     37545     -9921     39467    -63638     27928]
+ [    -8512     31195     21590     -8336     37319     10732    -27150     29583]
+ [    -7202    -79784     92168    -16493    -56459     26703     48650     29825]
+ [  -108401     16027     16865     21191      3406     -3644      -260     63996]
+ [    31031    -47806    -63951    -81754      2409     29183     68141     20712]]
 
 >> Accuracy Metrics (vs SINT32 Golden):
 >> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00
