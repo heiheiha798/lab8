@@ -422,7 +422,7 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                     sa_enhanced.v:52:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
 - V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
 - Verilator: Built from 0.540 MB sources in 10 modules, into 5.951 MB in 11 C++ files needing 0.002 MB
-- Verilator: Walltime 1.347 s (elab=0.058, cvt=1.231, bld=0.000); cpu 1.335 s on 1 threads
+- Verilator: Walltime 1.226 s (elab=0.058, cvt=1.111, bld=0.000); cpu 1.221 s on 1 threads
 ### Compiling C++ simulation executable...
 /Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
 c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
@@ -480,45 +480,45 @@ SIM_CPP: main() finished.
 python3 CheckResult.py
 
 Matrix A (SINT8 loaded from .npy):
-[[      -76       -65        18      -118       -87        70        45       -98]
- [       95        22      -107       -19       -23         9        64        48]
- [      -71       -72       118       -82       -18        -2       -10       -21]
- [      103      -124        74        88      -112        67       -73        74]
- [       50       -34       -82      -109        -5      -113        56         2]
- [       46       -74       100       119       -49       -40       -22       102]
- [       63       -64         2       -98       -35        86        42        68]
- [      -74        96        46       -83       -60      -114        72       -80]]
+[[       20         8       -15        67       -33       124       -54       -84]
+ [      -94        64      -114        87      -125       -99       -13       -76]
+ [       82      -126        69        60        83       122       -32       122]
+ [      106        40       112        36      -126       -85       124        85]
+ [       76       -53        59        97       -18        37       107        72]
+ [       61         2        40         4       -10        70       113        56]
+ [      106       -43       -24        76      -109      -115       -23        95]
+ [      -60        91      -106       -22       -84       -51       -51        84]]
 
 Matrix B (SINT8 loaded from .npy):
-[[       83       -16       -66        71       121       109        -6       -28]
- [      -87        66        84      -124        64        96       -89       -41]
- [     -106        90       -77        93      -128        -3        27       -26]
- [       -9       124       -84       -30        44       109        11       -89]
- [      -71       113        53       -82        31       113       -62      -102]
- [      -11       112       -56       -69        30       -47       -82       123]
- [       55       -50         2        62       -85       112        53       111]
- [       -3        89        49        93        24        10        48        84]]
+[[       51       -40         1       -26       -77         8       -92       105]
+ [     -108       111      -118        72      -120       -83        99       -42]
+ [       42       -64        28       -71       -67        43       109        -3]
+ [       60       -21        94       -71        83       -79        89        74]
+ [       16       -34        94        61      -109       -78        78        36]
+ [      -11        26       101        30        55        85       -25       -83]
+ [       92        25       100       115       -84       -48      -115       -71]
+ [      -28        86        55        45        48      -106        41       -88]]
 
 Golden Result C (SINT32 loaded from .npy):
-[[    21247     -4738      2954    -20926    -30078    -40265     -3367     30734]
- [    14840    -36274    -25974     29980     52415     21574      9235    -10121]
- [   -27765     12134      1856      3263    -19201    -52056      7458     18353]
- [   -13432      3906    -40455     42262     -6078    -42809     40187     17186]
- [    12374    -30787     55668     26044      9488      2732    -16155     27137]
- [     8704     12836    -24319     33627    -24988      1332     30755    -14450]
- [    18755    -23257    -23104      7053    -27000     -5444     14143     24597]
- [   -28570    -40071     22626    -15381    -41338    -21260      8204     -4143]]
+[[   -24382     -2888      3098      4132    -20034     11399    -16567      6600]
+ [   -13891     40410    -51092    -36168     40591     -4854     33742     -8689]
+ [    15511    -15339     71691    -20857     36728     15657       614      8185]
+ [    24856      2150       455     12788    -19876    -10594    -21436     24371]
+ [    11591      6752     46490       687      3868     -7747      1271     -9845]
+ [    12325     16323     48982     -5223     12857       548       848     -5600]
+ [    14900    -27047    -21776      5771      -845    -15800    -37805     22662]
+ [   -10445     39109    -24461      2125     48488      6325     38532    -32024]]
 ----------------------------------------
 
 HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[    21247     -4738      2954    -20926    -30078    -40265     -3367     30734]
- [    14840    -36274    -25974     29980     52415     21574      9235    -10121]
- [   -27765     12134      1856      3263    -19201    -52056      7458     18353]
- [   -13432      3906    -40455     42262     -6078    -42809     40187     17186]
- [    12374    -30787     55668     26044      9488      2732    -16155     27137]
- [     8704     12836    -24319     33627    -24988      1332     30755    -14450]
- [    18755    -23257    -23104      7053    -27000     -5444     14143     24597]
- [   -28570    -40071     22626    -15381    -41338    -21260      8204     -4143]]
+[[   -24382     -2888      3098      4132    -20034     11399    -16567      6600]
+ [   -13891     40410    -51092    -36168     40591     -4854     33742     -8689]
+ [    15511    -15339     71691    -20857     36728     15657       614      8185]
+ [    24856      2150       455     12788    -19876    -10594    -21436     24371]
+ [    11591      6752     46490       687      3868     -7747      1271     -9845]
+ [    12325     16323     48982     -5223     12857       548       848     -5600]
+ [    14900    -27047    -21776      5771      -845    -15800    -37805     22662]
+ [   -10445     39109    -24461      2125     48488      6325     38532    -32024]]
 
 >> Accuracy Metrics (vs SINT32 Golden):
 >> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00
