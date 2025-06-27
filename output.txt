@@ -1,24 +1,24 @@
 ----------------------------------------
 脚本开始执行
-矩阵维度: 16x16
+矩阵维度: 48x48
 线程数: 8
 Verilator 警告标志: '-Wall'
 所有日志将同步输出到终端和文件: output.txt
 ----------------------------------------
-提示：矩阵宽度 16 是 16 的倍数。
+提示：矩阵宽度 48 是 16 的倍数。
 
 步骤 0: 正在更新脚本和 Verilog 文件中的矩阵维度参数...
 ----------------------------------------
-已更新 InputGen.py 中的 MATRIX_DIM_TB 为 16
-已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 16
-已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 16
+已更新 InputGen.py 中的 MATRIX_DIM_TB 为 48
+已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 48
+已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 48
 ----------------------------------------
 
 步骤 1: 正在生成输入文件 (input_mem.csv)...
 ----------------------------------------
 ### Generating input_mem.csv for simulation...
-python3 InputGen.py --matrix_dim 16
-Generating 16x16 SINT8 matrices for testbench.
+python3 InputGen.py --matrix_dim 48
+Generating 48x48 SINT8 matrices for testbench.
 
 Processing Matrix A tiles (Row-Major)...
 Processing Matrix B tiles (Column-Major)...
@@ -69,20 +69,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                  : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
   135 |                         local_accumulator_reg <= mul_result_reg;
       |                                               ^~
-%Warning-ASCRANGE: writer.v:28:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   28 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    i_tile_idx,
-      |                ^
-                   ... For warning description see https://verilator.org/warn/ASCRANGE?v=5.036
-                   ... Use "/* verilator lint_off ASCRANGE */" and lint_on around source to disable this message.
-%Warning-ASCRANGE: writer.v:29:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   29 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: writer.v:64:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_writer'
-   64 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg_q, j_reg_q;
-      |         ^
 %Warning-WIDTHEXPAND: sram_banked.v:44:29: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'waddr' generates 5 bits.
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    44 |             row_idx = waddr / (NUM_BANKS / BYTES_PER_BUS_WORD);
@@ -95,22 +81,36 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
       |                    ^
-%Warning-ASCRANGE: loader.v:26:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   26 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      i_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:27:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   27 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:28:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   28 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      k_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:69:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |         ^
+%Warning-WIDTHEXPAND: sram_c_accum.v:74:33: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
+                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
+   74 |             row_idx_b = raddr_B / WORDS_PER_ROW_B;
+      |                                 ^
+%Warning-WIDTHEXPAND: sram_c_accum.v:75:44: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
+                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
+   75 |             word_offset_in_row_b = raddr_B % WORDS_PER_ROW_B;
+      |                                            ^
+%Warning-WIDTHTRUNC: sram_c_accum.v:79:26: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 512 bits.
+                                         : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
+   79 |                  rdata_B <= memory[row_idx_b] >> (word_offset_in_row_b * BUS_DATA_WIDTH);
+      |                          ^~
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: sa_enhanced.v:274:53: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'accum_current_row_q' generates 4 bits.
+                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+  274 |                             if (accum_current_row_q == SIZE - 1) begin
+      |                                                     ^~
+%Warning-WIDTHTRUNC: data_formatter.v:154:40: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 6 bits.
+                                            : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
+  154 |             assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
+      |                                        ^
+%Warning-WIDTHEXPAND: data_formatter.v:155:103: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'calculated_row_addr' generates 4 bits.
+                                              : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
+  155 |             assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
+      |                                                                                                       ^
+%Warning-WIDTHEXPAND: data_formatter.v:217:48: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'time_cnt_q' generates 6 bits.
+                                             : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
+  217 |                 t_feed_equivalent = time_cnt_q - PIPELINE_COMPENSATION;
+      |                                                ^
 %Warning-WIDTHEXPAND: loader.v:125:64: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   125 |                         mem_req_addr = b_base_addr + ((req_cnt - WORDS_PER_TILE) * (MAIN_MEM_DATA_WIDTH_BITS / 8));
@@ -127,8 +127,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
   136 |                         sram_a_addr = resp_cnt;  
       |                                     ^
-                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
-                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
 %Warning-WIDTHTRUNC: loader.v:141:37: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 7 bits.
                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
   141 |                         sram_b_addr = resp_cnt - WORDS_PER_TILE;  
@@ -153,71 +151,27 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   199 |                     if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready && mem_req_valid) begin
       |                                 ^
-%Warning-WIDTHEXPAND: sram_c_accum.v:74:33: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   74 |             row_idx_b = raddr_B / WORDS_PER_ROW_B;
-      |                                 ^
-%Warning-WIDTHEXPAND: sram_c_accum.v:75:44: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   75 |             word_offset_in_row_b = raddr_B % WORDS_PER_ROW_B;
-      |                                            ^
-%Warning-WIDTHTRUNC: sram_c_accum.v:79:26: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 512 bits.
-                                         : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   79 |                  rdata_B <= memory[row_idx_b] >> (word_offset_in_row_b * BUS_DATA_WIDTH);
-      |                          ^~
-%Warning-WIDTHEXPAND: sa_enhanced.v:274:53: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'accum_current_row_q' generates 4 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  274 |                             if (accum_current_row_q == SIZE - 1) begin
-      |                                                     ^~
-%Warning-WIDTHTRUNC: data_formatter.v:154:40: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 6 bits.
-                                            : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  154 |             assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
-      |                                        ^
-%Warning-WIDTHEXPAND: data_formatter.v:155:103: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'calculated_row_addr' generates 4 bits.
-                                              : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  155 |             assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
-      |                                                                                                       ^
-%Warning-WIDTHEXPAND: data_formatter.v:217:48: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'time_cnt_q' generates 6 bits.
-                                             : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  217 |                 t_feed_equivalent = time_cnt_q - PIPELINE_COMPENSATION;
-      |                                                ^
-%Warning-ASCRANGE: accelerator.v:84:11: Ascending bit range vector: left < right of bit range: [-1:0]
-                                      : ... note: In instance 'tb_accelerator.dut'
-   84 |     logic [$clog2(I_ITER_MAX)-1:0] i_tile_idx_q, i_tile_idx_d;
-      |           ^
-%Warning-ASCRANGE: accelerator.v:85:11: Ascending bit range vector: left < right of bit range: [-1:0]
-                                      : ... note: In instance 'tb_accelerator.dut'
-   85 |     logic [$clog2(J_ITER_MAX)-1:0] j_tile_idx_q, j_tile_idx_d;
-      |           ^
-%Warning-ASCRANGE: accelerator.v:86:11: Ascending bit range vector: left < right of bit range: [-1:0]
-                                      : ... note: In instance 'tb_accelerator.dut'
-   86 |     logic [$clog2(K_ITER_MAX)-1:0] k_tile_idx_q, k_tile_idx_d;
-      |           ^
-%Warning-ASCRANGE: accelerator.v:88:11: Ascending bit range vector: left < right of bit range: [-1:0]
-                                      : ... note: In instance 'tb_accelerator.dut'
-   88 |     logic [$clog2(K_ITER_MAX)-1:0] k_tile_idx_for_load;
-      |           ^
-%Warning-WIDTHEXPAND: accelerator.v:267:34: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:267:34: Operator LT expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   267 |                 if (k_tile_idx_q < K_ITER_MAX - 1) loader_req_pulse = 1'b1;
       |                                  ^
-%Warning-WIDTHEXPAND: accelerator.v:288:58: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:288:58: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   288 |                 logic load_task_finished = (k_tile_idx_q == K_ITER_MAX - 1) ? 1'b1 : load_done_flag_q;
       |                                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:290:39: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:290:39: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   290 |                      if (k_tile_idx_q == K_ITER_MAX - 1) begin
       |                                       ^~
-%Warning-WIDTHEXPAND: accelerator.v:316:42: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:316:42: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   316 |                         if (j_tile_idx_q == J_ITER_MAX - 1) begin
       |                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:312:38: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:312:38: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   312 |                     if (i_tile_idx_q == I_ITER_MAX - 1 && j_tile_idx_q == J_ITER_MAX - 1) begin
       |                                      ^~
-%Warning-WIDTHEXPAND: accelerator.v:312:72: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:312:72: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   312 |                     if (i_tile_idx_q == I_ITER_MAX - 1 && j_tile_idx_q == J_ITER_MAX - 1) begin
       |                                                                        ^~
@@ -237,22 +191,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |          ^~~~~~~~
                        ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.036
                        ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
-%Warning-UNUSEDSIGNAL: sa_enhanced.v:46:45: Signal is not used: 'pe_result_valid_internal'
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   46 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
-      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
-                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   10 |     parameter IS_SRAM_A     = 1'b1,  
-      |               ^~~~~~~~~
-%Warning-UNUSEDSIGNAL: sram_banked.v:35:13: Bits of signal are not used: 'row_idx'[31:4]
-                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   35 |     integer row_idx;
-      |             ^~~~~~~
-%Warning-UNUSEDSIGNAL: sram_banked.v:39:13: Signal is not used: 'addr_bank0'
-                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   39 |     integer addr_bank0;  
-      |             ^~~~~~~~~~
 %Warning-UNUSEDSIGNAL: loader.v:69:41: Signal is not used: 'i_reg'
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
    69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
@@ -269,6 +207,22 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
    70 |     reg                                load_to_ping_reg;
       |                                        ^~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: sa_enhanced.v:46:45: Signal is not used: 'pe_result_valid_internal'
+                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+   46 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
+                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
+   10 |     parameter IS_SRAM_A     = 1'b1,  
+      |               ^~~~~~~~~
+%Warning-UNUSEDSIGNAL: sram_banked.v:35:13: Bits of signal are not used: 'row_idx'[31:4]
+                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
+   35 |     integer row_idx;
+      |             ^~~~~~~
+%Warning-UNUSEDSIGNAL: sram_banked.v:39:13: Signal is not used: 'addr_bank0'
+                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
+   39 |     integer addr_bank0;  
+      |             ^~~~~~~~~~
 %Warning-UNUSEDPARAM: pe.v:7:15: Parameter is not used: 'ROW_IDX'
                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
     7 |     parameter ROW_IDX = 0,  
@@ -295,10 +249,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |                                                      ^~
                    ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.036
                    ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
-%Warning-UNSIGNED: accelerator.v:267:34: Comparison is constant due to unsigned arithmetic
-                                       : ... note: In instance 'tb_accelerator.dut'
-  267 |                 if (k_tile_idx_q < K_ITER_MAX - 1) loader_req_pulse = 1'b1;
-      |                                  ^
 %Warning-CASEINCOMPLETE: sa_enhanced.v:246:21: Case values incompletely covered (example pattern 0x3)
   246 |                     case (accum_pipe_state_q)
       |                     ^~~~
@@ -394,8 +344,8 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                     sa_enhanced.v:138:22:      Example path: ASSIGNW
                     sa_enhanced.v:55:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
 - V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
-- Verilator: Built from 0.524 MB sources in 10 modules, into 5.989 MB in 11 C++ files needing 0.001 MB
-- Verilator: Walltime 1.157 s (elab=0.058, cvt=1.043, bld=0.000); cpu 1.155 s on 1 threads
+- Verilator: Built from 0.524 MB sources in 10 modules, into 5.987 MB in 11 C++ files needing 0.001 MB
+- Verilator: Walltime 1.222 s (elab=0.081, cvt=1.086, bld=0.000); cpu 1.204 s on 1 threads
 ### Compiling C++ simulation executable...
 /Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
 c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
@@ -431,14 +381,40 @@ SIM_CPP: Entering simulation loop...
 [55000] [TB] Asserting comp_enb to start accelerator.
 [65000] [TB] Waiting for accelerator to finish (tb_done=1)...
 745000 [LOADER] INFO: Load request completed. Returning to IDLE.
-[2935000] [TB] Accelerator finished (tb_done asserted).
-[2945000] [TB] Writing results from memory model to 'result_mem.csv'...
-[2945000] [TB] Results written to 'result_mem.csv'.
+1435000 [LOADER] INFO: Load request completed. Returning to IDLE.
+2315000 [LOADER] INFO: Load request completed. Returning to IDLE.
+5375000 [LOADER] INFO: Load request completed. Returning to IDLE.
+6065000 [LOADER] INFO: Load request completed. Returning to IDLE.
+6945000 [LOADER] INFO: Load request completed. Returning to IDLE.
+10005000 [LOADER] INFO: Load request completed. Returning to IDLE.
+10695000 [LOADER] INFO: Load request completed. Returning to IDLE.
+11575000 [LOADER] INFO: Load request completed. Returning to IDLE.
+14635000 [LOADER] INFO: Load request completed. Returning to IDLE.
+15325000 [LOADER] INFO: Load request completed. Returning to IDLE.
+16205000 [LOADER] INFO: Load request completed. Returning to IDLE.
+19265000 [LOADER] INFO: Load request completed. Returning to IDLE.
+19955000 [LOADER] INFO: Load request completed. Returning to IDLE.
+20835000 [LOADER] INFO: Load request completed. Returning to IDLE.
+23895000 [LOADER] INFO: Load request completed. Returning to IDLE.
+24585000 [LOADER] INFO: Load request completed. Returning to IDLE.
+25465000 [LOADER] INFO: Load request completed. Returning to IDLE.
+28525000 [LOADER] INFO: Load request completed. Returning to IDLE.
+29215000 [LOADER] INFO: Load request completed. Returning to IDLE.
+30095000 [LOADER] INFO: Load request completed. Returning to IDLE.
+33155000 [LOADER] INFO: Load request completed. Returning to IDLE.
+33845000 [LOADER] INFO: Load request completed. Returning to IDLE.
+34725000 [LOADER] INFO: Load request completed. Returning to IDLE.
+37785000 [LOADER] INFO: Load request completed. Returning to IDLE.
+38475000 [LOADER] INFO: Load request completed. Returning to IDLE.
+39355000 [LOADER] INFO: Load request completed. Returning to IDLE.
+[41735000] [TB] Accelerator finished (tb_done asserted).
+[41745000] [TB] Writing results from memory model to 'result_mem.csv'...
+[41745000] [TB] Results written to 'result_mem.csv'.
 ==============================================
-[2945000] [TB] TEST SCENARIO COMPLETED.
+[41745000] [TB] TEST SCENARIO COMPLETED.
 ==============================================
 - tb_accelerator.v:257: Verilog $finish
-SIM_CPP: Exited simulation loop. Total steps: 2945001
+SIM_CPP: Exited simulation loop. Total steps: 41745001
 SIM_CPP: main() finished.
 ### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from inish or isplay).
 
@@ -453,45 +429,45 @@ SIM_CPP: main() finished.
 python3 CheckResult.py
 
 Matrix A (SINT8 loaded from .npy):
-[[       46      -125       -53        33       -62       111        12       -63]
- [      -30        -3        -6       -36      -118        61       -59       -24]
- [     -117      -121       -65        20       -61       -96        36      -117]
- [     -103       -29        -7        12      -106        60       -91       104]
- [       97        43       -34       -44       -38        41      -123       -12]
- [       57         0       -85        98       -18       -51        91        57]
- [      -40        17      -127        12        80       -51        79        67]
- [       47        58       -93        73        78        73       -75        23]]
+[[       50       124       -40       -98        87        -5      -102       -37]
+ [      -20       -79         9        -8        37       -60       -53        20]
+ [      -24      -118        44       104        63        77        -8        51]
+ [      100      -120       -39       -79        -8         7       -10        90]
+ [     -123       -53        73        99       -69      -116        95       -77]
+ [      -27      -100      -125       -58       -44        53        44       -58]
+ [      122       -98       102         0       -19         0        57      -101]
+ [      -40        -6       -45       -45      -122        35       -97       -83]]
 
 Matrix B (SINT8 loaded from .npy):
-[[      -51        69        -6       -96        83       118        94        84]
- [     -120       -38        42      -100        98        82        39        29]
- [       42       -61       -91      -104        95       -77       -65       127]
- [      -13      -106         2         5       -89       121         9         5]
- [      -65       -42       -31       -20       -58       -12       -52       -14]
- [      -93       -48       -86       115      -110       -10        62        43]
- [      127       -26       -66        33       -56       -39        51        18]
- [      126        51       -16       -16        40       -77       107       -87]]
+[[      -54       125      -125        -8        96       -26        90         0]
+ [       69       -55        47      -100       -36      -112       107        -5]
+ [       58       -69       -31        84       113      -128       -41       110]
+ [       52        11        47        31        69       -89        83        39]
+ [     -126        -6       110       110        20        38        96      -125]
+ [      -49       -56        58       -95       122      -114       -24       117]
+ [       80       -17       -23       -72        67       -25       -93       116]
+ [       63        35        65        24        87       102       -85       -91]]
 
 Golden Result C (SINT32 loaded from .npy):
-[[   -13656     19967    -19170     30756    -30424       323       913    -18218]
- [   -10722     35079      7806     -5249     15549    -18259     17942      7170]
- [    56658    -17209     37917     33594    -56186     19571    -29681    -33000]
- [    15062     -8076     17326     31307    -15800    -29429     22217     13098]
- [   -27545     31899     20749     -7217     52503     15524     21212      4842]
- [    30043     -8714       787    -11838    -19619     34031     16951    -24680]
- [    20158     19870     14618    -19856     11931     23418     15770    -30484]
- [   -17528     -1274     29915      9318     -6079      1913      1552    -12513]]
+[[   -33528     82851    -21860     30118    -38923     -9155     53780    -37991]
+ [   -19274    -12173     27744     33266    -55115     92576    -10712    -36207]
+ [    14804    -16367    -12734       760    -21425    -75592     12348    -39604]
+ [    47772     16597     -3522    -24172    -11772     27653    -36869    -35697]
+ [    39270    -28353    -38305     24231      1774    -44892    -59669     38929]
+ [    17164    -11837    -44129     17586     -5315     -5439      -355     56689]
+ [    11603    -14450    -53782     27797      3087    -47061     37392     58463]
+ [    32935     25984      5673    -41076     39507    -45922     63705     41754]]
 ----------------------------------------
 
 HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[   -13656     19967    -19170     30756    -30424       323       913    -18218]
- [   -10722     35079      7806     -5249     15549    -18259     17942      7170]
- [    56658    -17209     37917     33594    -56186     19571    -29681    -33000]
- [    15062     -8076     17326     31307    -15800    -29429     22217     13098]
- [   -27545     31899     20749     -7217     52503     15524     21212      4842]
- [    30043     -8714       787    -11838    -19619     34031     16951    -24680]
- [    20158     19870     14618    -19856     11931     23418     15770    -30484]
- [   -17528     -1274     29915      9318     -6079      1913      1552    -12513]]
+[[   -33528     82851    -21860     30118    -38923     -9155     53780    -37991]
+ [   -19274    -12173     27744     33266    -55115     92576    -10712    -36207]
+ [    14804    -16367    -12734       760    -21425    -75592     12348    -39604]
+ [    47772     16597     -3522    -24172    -11772     27653    -36869    -35697]
+ [    39270    -28353    -38305     24231      1774    -44892    -59669     38929]
+ [    17164    -11837    -44129     17586     -5315     -5439      -355     56689]
+ [    11603    -14450    -53782     27797      3087    -47061     37392     58463]
+ [    32935     25984      5673    -41076     39507    -45922     63705     41754]]
 
 >> Accuracy Metrics (vs SINT32 Golden):
 >> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00
