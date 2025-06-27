@@ -1,114 +1,144 @@
-当然！这是一个基于你的设计精心绘制的Markdown架构图，它清晰地展示了数据流、控制流和关键模块。
-
-### 矩阵乘法加速器架构
+**一、 矩阵乘法加速器架构**
 
 这是一个用于执行通用矩阵乘法（GEMM）的高性能、可综合的硬件加速器。其核心设计思想是利用脉动阵列（Systolic Array）进行大规模并行计算，并通过深度流水线和双缓冲（Ping-Pong Buffering）机制来隐藏内存访问延迟，最大化计算单元的利用率。
 
-```mermaid
-graph TD
-    subgraph "外部接口 (External Interfaces)"
-        direction LR
-        IMEM(Input Memory<br>主输入内存<br>64-bit)
-        OMEM(Output Memory<br>主输出内存<br>64-bit)
-    end
++-----------------------------------------------------------------------------------------------------------------------------------------+
+|                                                                                                                                         |
+|  (imem) <---------------------------------------------------------------------+                           +---------------------------+ |
+|   Input <----[imem_addr, imem_read_enb]-------------------------------------+ |                           |                           | |
+|  Memory ------[imem_data_in, imem_resp]-----------------------------------> | |                           |      Control FSM          | |
+|                                                                           | |<----------[loader_done]-----|     (in accelerator.v)    | |
+|                                                                           V V                             |                           | |
+|                                                                    +--------------+ <----[load_req]-------|                           | |
+|                                                                    |    loader    |                       +---------------------------+ |
+|                                                                    +------|-------+                             ^      ^      ^       | |
+|                                                                           | (Write A/B Tile)                    |      |      |       | |
+|                                                                           V                                     |      |      |       | |
+|      +----------------------------------------------------------------------------------+ <---[ab_selects]---(FSM)     |      |       | |
+|      |                             SRAM A/B Banks (Ping-Pong)                         |                         |      |      |       | |
+|      +--------------------------------------------|-----------------------------------+                         |      |      |       | |
+|                                                   | (Read A/B Tile)                                             |      |      |       | |
+|                                                   V                                                             |      |      |       | |
+|                                           +------------------+ <------------------[df_start]--------------------+      |      |       | |
+|                                           | data_formatter   |                                                  |      |      |       | |
+|                                           +--------|---------+                                                  |      |      |       | |
+|                                                    | (Skewed A/B Data)                                          |      |      |       | |
+|                                                    V                                                            |      |      |       | |
+|      +----------------------------------------------------------------------------------+ <----[sa_start]-------+      |      |       | |
+|      |                           sa_enhanced (Systolic Array)                           |-----[sa_k_iter_done]---------+      |       | |
+|      +----------------------------------------------|-----------------------------------+                              |      |       | |
+|                                                   ^ |                                                                  |      |       | |
+|                                      [Read Accum] | V    [Write Accum]                                                 |      |       | |
+|      +--------------------------------------------------------------------------------+ <------[c_selects]-------------+      |       | |
+|      |                              SRAM C Banks (Ping-Pong)                          |                                |      |       | |
+|      +--------------------------------------------------------------------|-----------+                                |      |       | |
+|                                                                           | (Read C Tile Result)                       |      |       | |
+|                                                                           V                                            |      |       | |
+|                                                                    +--------------+ <----[writer_req]------------------+      |       | |
+|                                                                    |    writer    |-----[writer_done]-------------------------+       | |
+|                                                                    +------|-------+                                                   | |
+|                                                                           |                                                           | |
+|  (omem) <-----[omem_addr, omem_wdata, omem_we]----------------------------+-----------------------------------------------------------+ |
+|  Output                                                                                                                                 |
+|  Memory                                                                                                                                 |
+|                                                                                                                                         |
++-----------------------------------------------------------------------------------------------------------------------------------------+
 
-    subgraph "加速器核心 (Accelerator Core)"
-        direction TB
-        
-        subgraph "数据加载与预处理 (Data Loading & Pre-processing)"
-            direction LR
-            LOADER[fa:fa-truck-loading Loader Module<br>加载器]
-            SRAM_AB[fa:fa-server SRAM A & B<br>Ping-Pong 双缓冲]
-            DF[fa:fa-sitemap Data Formatter<br>数据格式化器]
-        end
+<img src="/Users/user1/Documents/image-20250627083103862_副本.png" alt="image-20250627083103862_副本" style="zoom:33%;" />
 
-        subgraph "计算引擎 (Compute Engine)"
-            direction LR
-            SA[fa:fa-th Systolic Array<br>16x16 脉动阵列<br>SINT8 -> SINT32]
-            SRAM_C[fa:fa-database SRAM C<br>Ping-Pong 累加缓冲]
-        end
+**二、 架构组件与流水线设计详解**
 
-        subgraph "结果写回 (Result Write-back)"
-            direction LR
-            WRITER[fa:fa-file-export Writer Module<br>写回器]
-        end
+本加速器的性能核心在于其三级深度流水线设计，实现了**加载（Load）**、**计算（Compute）**和**写回（Write-back）**三个阶段在不同数据粒度上的高度重叠。
 
-        subgraph "中央控制器 (Central Controller)"
-            FSM[fa:fa-cogs Top-Level FSM<br>顶层状态机]
-        end
+**1. 中央控制器 (Central Controller - FSM)**
 
-        %% --- 数据流定义 (Data Flow) ---
-        IMEM -- "imem_addr / imem_data_in" --> LOADER
-        LOADER -- "写入A/B瓦片" --> SRAM_AB
-        SRAM_AB -- "读取A/B瓦片" --> DF
-        DF -- "歪斜数据流<br>Skewed Dataflow" --> SA
-        SA -- "部分和<br>Partial Sums" --> SRAM_C
-        SRAM_C -- "读取累加结果" --> SA
-        SRAM_C -- "读取最终瓦片" --> WRITER
-        WRITER -- "omem_addr / omem_wdata" --> OMEM
+*   **角色**: 作为加速器的“大脑”，`accelerator.v`顶层的有限状态机（FSM）是所有流水线操作的调度核心。
+*   **功能与实现**:
+    *   **三层循环管理**: FSM通过`i_tile_idx_q`, `j_tile_idx_q`, `k_tile_idx_q`三个寄存器，精确控制计算C矩阵单个瓦片（`C_ij`）所需的`k`次迭代，以及遍历所有`C_ij`瓦片的`i`和`j`循环。
+    *   **流水线阶段控制**: FSM的状态（如`S_LOAD_FIRST`, `S_START_DF`, `S_PIPE_DELAY`, `S_START_SA`, `S_WAIT_SA_AND_LOAD`, `S_WRITE_TILE`）直接对应流水线的不同阶段。它通过发出单周期脉冲信号（`loader_req_pulse`, `df_start_pass_pulse`, `sa_start_k_iter_pulse`, `writer_req_pulse`）来精确触发下游模块，并等待`_done`信号以进行状态转移。
+    *   **资源调度**: FSM通过控制一系列`_select`信号（`load_ab_select`, `compute_ab_select`, `compute_c_select`, `write_c_select`）来管理A/B/C三组SRAM的Ping-Pong缓冲，是实现数据通路无缝切换、避免冲突的关键。
 
-        %% --- 控制流定义 (Control Flow) ---
-        FSM -- "loader_req_pulse<br><i>i,j,k 索引</i>" --> LOADER
-        FSM -- "df_start_pass_pulse" --> DF
-        FSM -- "sa_start_k_iter_pulse<br>k_tile_is_first" --> SA
-        FSM -- "writer_req_pulse" --> WRITER
-        
-        LOADER -- "loader_done" --> FSM
-        SA -- "sa_k_iter_done" --> FSM
-        WRITER -- "writer_done" --> FSM
-        
-        FSM -- "Ping/Pong Selects" --> SRAM_AB
-        FSM -- "Ping/Pong Selects" --> SRAM_C
-    end
+**2. K级迭代流水线：加载与计算的并行**
 
-    style FSM fill:#e6f3ff,stroke:#36c,stroke-width:2px
-    style LOADER fill:#f9f,stroke:#f0f,stroke-width:2px
-    style DF fill:#f9f,stroke:#f0f,stroke-width:2px
-    style WRITER fill:#f9f,stroke:#f0f,stroke-width:2px
-    style SA fill:#cfc,stroke:#393,stroke-width:2px
-    style SRAM_AB fill:#ffe,stroke:#cc0,stroke-width:2px
-    style SRAM_C fill:#ffe,stroke:#cc0,stroke-width:2px
-```
+这是加速器最重要的微架构流水线，旨在完全隐藏DRAM访问延迟。当计算单元（SA）在处理第`k`个瓦片时，加载单元（Loader）已经提前在为第`k+1`个瓦片做准备。
 
-### 架构组件详解
+*   **预取机制 (Prefetching)**:
+    *   **触发**: 在FSM的`S_START_DF`状态，当`data_formatter`开始处理当前已加载的第`k`个A/B瓦片时，FSM会立即向`loader`发出一个新的`loader_req_pulse`。
+    *   **地址计算**: `loader`模块接收的k索引是`k_tile_idx_for_load`，该信号在RTL中被赋值为`k_tile_idx_q + 1`。这意味着`loader`总是在为**下一个**k迭代获取数据。
+    *   **缓冲写入**: `loader`将预取到的`A(i, k+1)`和`B(k+1, j)`瓦片写入当前空闲的SRAM A/B缓冲（由`load_ab_select`信号指定，与计算单元正在读取的缓冲相反）。
 
-1.  **中央控制器 (Central Controller - FSM)**
-    *   **角色**: 整个加速器的大脑，通过一个精心设计的有限状态机（FSM）来协调所有模块的工作。
-    *   **功能**:
-        *   实现 `C = A * B` 的三重瓦片循环（i-j-k loops）。
-        *   生成控制信号（`_req`、`_start` 脉冲）来启动各个数据通路模块。
-        *   根据 `_done` 状态信号来推进流水线和循环。
-        *   管理所有SRAM Ping-Pong缓冲区的读写选择，确保数据在加载、计算和写回之间无缝切换。
+*   **计算与同步**:
+    *   **数据格式化**: `data_formatter`从SRAM A/B的“计算”缓冲中读取数据，进行歪斜（Skewing）处理，为脉动阵列准备数据流。
+    *   **DF-SA同步延迟**: RTL中的`S_PIPE_DELAY`状态引入了一个固定的2周期延迟。这是为了精确匹配`data_formatter`的数据输出时序与`sa_enhanced`的输入时序，确保数据在正确的时间到达脉动阵列的每一个PE。
+    *   **脉动计算**: `sa_enhanced`模块接收歪斜后的数据，执行`16x16`的乘加运算。对于`k>0`的迭代，它会先从SRAM C读出上一次的累加结果，与本次计算值相加后再写回，通过`k_tile_is_first_for_sa`信号控制首次迭代的清零操作。
 
-2.  **数据加载与预处理 (Data Loading & Pre-processing)**
-    *   **加载器 (Loader)**: 负责从主输入内存（`Input Memory`）中根据顶层FSM提供的瓦片索引（`i,j,k`）读取`A`和`B`矩阵的瓦片数据。
-    *   **SRAM A & B**: 两组（A和B）Ping-Pong双缓冲SRAM。每组包含一个Ping和一个Pong缓冲。
-        *   **工作模式**: 当计算单元正在从Pong缓冲中读取第`k`个瓦片时，Loader可以同时将第`k+1`个瓦片写入Ping缓冲，实现了加载和计算的并行，这是隐藏内存延迟的关键。
-        *   **数据布局**: SRAM被设计为Banked Memory，以支持`Data Formatter`一次性读取一整行或一整列数据。
-    *   **数据格式化器 (Data Formatter)**: 从SRAM A/B中读取瓦片数据，并将其转换为脉动阵列所需的歪斜（Skewed）格式。它为每个PE在正确的时钟周期送上正确的数据，是脉动阵列正常工作的前提。
+*   **流水线握手**:
+    *   FSM进入`S_WAIT_SA_AND_LOAD`状态，等待两个关键事件：`sa_k_iter_done`（表示第`k`次迭代计算完成）和`load_done_flag_q`（表示第`k+1`个瓦片加载完成）。
+    *   当两者都为真时，流水线向前推进一格。FSM会翻转Ping-Pong选择位（`compute_ab_select_d <= load_ab_select_q`），让计算单元切换到刚加载好的新数据上，同时释放出旧的缓冲给`loader`使用。这个切换过程实现了计算和加载的无缝重叠。
 
-3.  **计算引擎 (Compute Engine)**
-    *   **脉动阵列 (Systolic Array)**: 加速器的核心计算单元。一个 `16x16` 的二维阵列，由256个处理单元（PE）组成。
-        *   **数据流**: 矩阵`A`的数据从上到下流动，矩阵`B`的数据从左到右流动，部分和（Partial Sums）则固定在每个PE内部进行累加。
-        *   **计算**: 每个PE在一个周期内执行一次 `SINT8 * SINT8 + SINT32 -> SINT32` 的乘加（MAC）操作。
-    *   **SRAM C**: 用于存储中间和最终累加结果的Ping-Pong缓冲。
-        *   **累加反馈**: 在计算一个C瓦片（需要多次k迭代）时，脉动阵列会将`k`次迭代计算出的部分和写回SRAM C，然后在下一次（`k+1`）迭代开始时，再从SRAM C中读出之前的结果进行累加。`k_tile_is_first`信号用于控制在第一次迭代时是清零还是累加。
+**3. 瓦片级流水线：计算与写回的并行**
 
-4.  **结果写回 (Result Write-back)**
-    *   **写回器 (Writer)**: 当一个C瓦片的计算完全结束后（所有k次迭代完成），该模块负责从SRAM C中读取最终的`16x16xSINT32`结果，并将其通过64位总线写回到主输出内存（`Output Memory`）。
-    *   **高性能设计**: 采用深度流水线设计，能够实现每个周期向主存写入一个64位字，确保写回阶段不会成为性能瓶颈。
+在更高的粒度上，当一个`C_ij`瓦片的计算（所有k次迭代）与另一个`C_ij-1`瓦片的写回也可以重叠。
 
-### 工作流程与流水线
+*   **触发**: 当一个C瓦片的所有k次迭代完成后（`k_tile_idx_q == K_ITER_MAX - 1`），FSM从`S_WAIT_SA_AND_LOAD`状态转移到`S_WRITE_TILE`。
+*   **缓冲切换**: FSM会翻转C-SRAM的选择信号。`writer`模块将从刚刚计算完成的C缓冲（由`write_c_select`指定）中读取结果，而脉动阵列则可以开始使用另一个空的C缓冲（由`compute_c_select`指定）来计算下一个C瓦片`C_i,j+1`。
+*   **并行操作**: `writer`模块通过其内部流水线高效地将`16x16x32bit`的瓦片数据打包成64位字，写入主存。与此同时，FSM已经回到`S_LOAD_FIRST`状态，为下一个C瓦片的计算启动了`loader`，实现了瓦片计算和瓦片写回的并行。
 
-整个加速器的工作流程被组织成一个三级流水线：**加载 (Load) - 计算 (Compute) - 写回 (Write-back)**。
+通过这套精密的、跨越不同数据粒度的流水线设计，本加速器最大限度地减少了空闲周期，使得核心的脉动阵列计算单元能够持续满载运行，从而实现极高的计算吞吐率。
 
-1.  **初始阶段**: FSM启动`Loader`加载第一个C瓦片所需的第一组A、B瓦片（例如 A<sub>i,0</sub> 和 B<sub>0,j</sub>）。
-2.  **流水线稳定阶段**:
-    *   **计算单元 (SA)** 正在处理第 `k` 次迭代（使用 A<sub>i,k</sub> 和 B<sub>k,j</sub>）。
-    *   **加载单元 (Loader)** **同时**在主存中预取第 `k+1` 次迭代所需的数据（A<sub>i,k+1</sub> 和 B<sub>k+1,j</sub>），并存入空闲的Ping/Pong缓冲。
-    *   这个过程不断重复，直到一个C瓦片的所有k次迭代完成。
-3.  **收尾阶段**:
-    *   最后一个C瓦片计算完成后，FSM启动`Writer`模块，将SRAM C中的最终结果写回主存。
-    *   在写回C<sub>i,j</sub>的同时，FSM可以启动下一组C瓦片（如C<sub>i,j+1</sub>）的初始加载，实现了瓦片间的流水线操作。
+**三、 性能、功耗与面积 (PPA) 分析**
 
-这个架构通过在空间（脉动阵列）和时间（流水线、双缓冲）上实现高度并行，从而高效地完成了大规模矩阵乘法任务。
+以下分析基于`MATRIX_SIZE=512`, `TILE_SIZE=16`的配置。经过以总功耗为目标的细致筛选，我们确定采用单一类型的SRAM宏（宏#7）作为所有片上存储的统一构建模块，以实现最优的PPA。
+
+**1. 性能 - 延迟 (Latency)**
+
+SRAM选型不影响设计的逻辑和时序，因此延迟保持不变。
+
+* **仿真周期数**: 3,152,898 cycles
+* **真实延迟**:
+    * 逻辑综合最大频率: 909 MHz
+    * 对应最小运行时钟周期: 1.10 ns
+    * 最终延迟: 3,152,898 cycles × 1.10 ns/cycle ≈ **3468 µs**
+
+**2. SRAM 资源分析与最终选型**
+
+* **统一选型**: **宏#7** (`32x128`, 4Kbits)
+    * 单宏面积: 2034.22 µm²
+    * 单宏功耗 (@909MHz): **15,735 µW** (310.31 µW 漏电 + 15,425 µW 动态)
+
+* **SRAM A/B (模块 `sram_banked`)**
+    * **需求**: 每个缓冲需 2 Kbits 容量及 128-bit 读端口。
+    * **最终配置**: 每个缓冲使用 **1个 宏#7**。总计 **4个** 宏#7。
+
+* **SRAM C (模块 `sram_c_accum`)**
+    * **需求**: 每个缓冲需 8 Kbits 容量及 512-bit 读写端口。
+    * **最终配置**: 每个512-bit端口由 **4个 宏#7** 并行构成。总计 `2个缓冲 × 4个/缓冲` = **8个** 宏#7。
+
+**3. 面积 (Area)**
+
+* **逻辑单元面积**: **384,708.09 µm²** (不变)
+* **SRAM 宏单元面积**:
+    * 总共使用 `4 (A/B) + 8 (C) = 12` 个宏#7。
+    * SRAM总面积: 12 × 2034.22 µm² = **24,410.64 µm²**
+* **加速器总面积**:
+    * 总面积 = 逻辑面积 + SRAM面积 = 384,708.09 + 24,410.64 = **409,118.73 µm²**
+
+**4. 功耗 (Power)**
+
+* **逻辑单元功耗**: **156.2 mW** (不变)
+* **SRAM 宏单元功耗** (在909 MHz频率下):
+    * SRAM总功耗 = 12 × 15,735 µW = 188,820 µW = **188.82 mW**
+* **加速器总功耗**:
+    * 总功耗 = 逻辑功耗 + SRAM功耗 = 156.2 mW + 188.82 mW = **345.02 mW**
+
+---
+
+**四、 最终PPA总结**
+
+通过对不同SRAM宏及其组合方式进行全面的功耗评估，我们最终确定了全局最优的配置方案。该方案在不牺牲性能的前提下，有效控制了芯片的功耗与面积。最终PPA指标如下：
+
+| 指标 | 值 | 备注 |
+| :--- | :--- | :--- |
+| **延迟** | **3468 µs** | 512x512矩阵乘法 @ 909 MHz |
+| **面积** | **409,118.73 µm²** | 逻辑 (384,708.09) + SRAM (24,410.64) |
+| **功耗** | **345.02 mW** | 逻辑 (156.2) + SRAM (188.82) |
