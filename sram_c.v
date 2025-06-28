@@ -42,6 +42,13 @@ module sram_c #(
         end
     end
 
+    // --- Display Written Data ---
+    always @(posedge clk) begin
+        if (we) begin
+            $display("Time: %0t ns | Write Data: waddr = %d, wdata = %h", $time, waddr, wdata);
+        end
+    end
+
     // --- Read Logic (Synchronous) ---
     always @(posedge clk) begin
         if (!rst_n) begin

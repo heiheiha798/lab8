@@ -90,7 +90,7 @@ module loader #(
     // 核心状态机及组合逻辑
     //--------------------------------------------------------------------------
     always @(*) begin
-        // 默认输出值
+        // Default output values
         next_state    = current_state;
         load_busy     = 1'b0;
         load_done     = 1'b0;
@@ -113,37 +113,37 @@ module loader #(
             S_LOADING: begin
                 load_busy = 1'b1;
 
-                // --- 请求逻辑 (Request Logic) ---
-                // 只要请求尚未发完，就持续尝试发送
+                // Request Logic
+                // Keep sending requests as long as not all requests have been sent
                 if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready) begin
                     mem_req_valid = 1'b1;
                     if (req_cnt < WORDS_PER_TILE) begin
-                        // 正在请求 A 瓦片
+                        // Requesting A tile
                         mem_req_addr = a_base_addr + (req_cnt * (MAIN_MEM_DATA_WIDTH_BITS / 8));
                     end else begin
-                        // 正在请求 B 瓦片
+                        // Requesting B tile
                         mem_req_addr = b_base_addr + ((req_cnt - WORDS_PER_TILE) * (MAIN_MEM_DATA_WIDTH_BITS / 8));
                     end
                 end
 
-                // --- 响应与SRAM写入逻辑 (Response & SRAM Write Logic) ---
-                // 只要有内存响应，就写入SRAM
+                // Response & SRAM Write Logic
+                // Write to SRAM as long as there is a memory response
                 if (mem_resp_valid) begin
                     if (resp_cnt < WORDS_PER_TILE) begin
-                        // 响应对应的是 A 瓦片
+                        // Response corresponds to A tile
                         sram_a_we = 1'b1;
                         sram_a_wdata = mem_resp_rdata;
-                        sram_a_addr = resp_cnt; // 地址是 0 to 31
+                        sram_a_addr = resp_cnt; // Address is 0 to 31
                     end else begin
-                        // 响应对应的是 B 瓦片
+                        // Response corresponds to B tile
                         sram_b_we = 1'b1;
                         sram_b_wdata = mem_resp_rdata;
-                        sram_b_addr = resp_cnt - WORDS_PER_TILE; // 地址是 0 to 31
+                        sram_b_addr = resp_cnt - WORDS_PER_TILE; // Address is 0 to 31
                     end
                 end
 
-                // --- 状态转移逻辑 ---
-                // 当所有响应都已接收并处理完毕时，任务完成
+                // State transition logic
+                // Task is done when all responses have been received and processed
                 if (resp_cnt == (WORDS_PER_TILE * 2) - 1 && mem_resp_valid) begin
                     next_state = S_DONE;
                 end
@@ -177,56 +177,35 @@ module loader #(
             case (current_state)
                 S_IDLE: begin
                     if (load_req) begin
-                        // 锁存输入并计算基地址
+                        // Latch inputs and calculate base addresses
                         i_reg            <= i_tile_idx;
                         j_reg            <= j_tile_idx;
                         k_reg            <= k_tile_idx;
                         load_to_ping_reg <= load_to_ping;
                         a_base_addr      <= BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES);
                         b_base_addr      <= BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES);
-                        // $display("%0t [LOADER] INFO: New request latched (i=%d, j=%d, k=%d). Load to %s.", $time, i_tile_idx, j_tile_idx, k_tile_idx, load_to_ping ? "PING" : "PONG");
-                        // $display("%0t [LOADER] INFO: A-Tile Base Addr=0x%h, B-Tile Base Addr=0x%h", $time, 
-                        //     BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES), 
-                        //     BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES));
                     end
-                    // 在IDLE状态下重置计数器
+                    // Reset counters in IDLE state
                     req_cnt  <= 0;
                     resp_cnt <= 0;
                 end
                 
                 S_LOADING: begin
-                    // 流水化更新请求计数器
+                    // Pipelined update of request counter
                     if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready && mem_req_valid) begin
                         req_cnt <= req_cnt + 1;
-                        // if(req_cnt < WORDS_PER_TILE) begin
-                        //    $display("%0t [LOADER] INFO: Requesting A-Tile word %d.", $time, req_cnt);
-                        // end else begin
-                        //    $display("%0t [LOADER] INFO: Requesting B-Tile word %d.", $time, req_cnt - WORDS_PER_TILE);
-                        // end
                     end
                     
-                    // 流水化更新响应计数器和数据显示
+                    // Pipelined update of response counter and data display
                     if (mem_resp_valid) begin
                         resp_cnt <= resp_cnt + 1;
-                        // **重要调试信息**: 在时钟沿，当 mem_resp_valid有效时，打印loader模块准备驱动到其输出端口的值。
-                        // 这里打印的值是基于 mem_resp_rdata 和 resp_cnt (更新前的值) 组合逻辑赋值的结果。
-                        // if (resp_cnt < WORDS_PER_TILE) begin
-                        //     // 打印将要驱动到 SRAM A 输出端口的值
-                        //     $display("%0t [LOADER-DRV] Driving SRAM A: we=%b, addr=%d, wdata=0x%h", $time, sram_a_we, sram_a_addr, sram_a_wdata);
-                        // end else begin
-                        //     // 打印将要驱动到 SRAM B 输出端口的值
-                        //     $display("%0t [LOADER-DRV] Driving SRAM B: we=%b, addr=%d, wdata=0x%h", $time, sram_b_we, sram_b_addr, sram_b_wdata);
-                        // end
+                        // Display what is loaded in each FSM cycle
+                        $display("%0t [LOADER] FSM周期中第%d个加载的数据, 具体数值是0x%h", $time, resp_cnt + 1, mem_resp_rdata);
                     end
-
-                    // 如果所有请求都发完了，但响应还没收完，则停止发送请求但继续接收
-                    // if (req_cnt == WORDS_PER_TILE * 2) begin
-                    //     $display("%0t [LOADER] INFO: All requests sent. Waiting for remaining responses.", $time);
-                    // end
                 end
                 
                 S_DONE: begin
-                     $display("%0t [LOADER] INFO: Load request completed. Returning to IDLE.", $time);
+                    // Empty for now, as per request to remove specific display here
                 end
             endcase
         end

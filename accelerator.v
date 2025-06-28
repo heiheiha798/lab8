@@ -110,6 +110,10 @@ module accelerator #(
     logic loader_done;
     logic tile_computation_done;
     logic writer_done;
+
+    // --- NEW: 用于生成延时清零脉冲的信号 ---
+    logic delayed_clear_sa_pulse_d; // 组合逻辑输出
+    reg  delayed_clear_sa_pulse_q;  // 寄存器输出，实现一周期脉冲
     
     // Wires connecting SA to SRAM C (widths are now parametric)
     logic                               sram_c_we;
@@ -153,7 +157,7 @@ module accelerator #(
     ) u_sa_enhanced (
         .clk(clk), 
         .rst_n(rst_n), 
-        .start_tile_computation(start_tile_computation_pulse), 
+        .start_tile_computation(delayed_clear_sa_pulse_q), 
         .activate_pe_computation(sa_activate_pe_level), 
         .array_a_in(df_skewed_a_out), 
         .array_b_in(df_skewed_b_out), 
@@ -214,6 +218,7 @@ module accelerator #(
             k_tile_idx_q      <= '0; // NEW
             load_ab_select_q  <= 1'b0;
             compute_ab_select_q <= 1'b1;
+            delayed_clear_sa_pulse_q <= 1'b0;
         end else begin
             current_state_q   <= next_state_d;
             i_tile_idx_q      <= i_tile_idx_d;
@@ -221,6 +226,7 @@ module accelerator #(
             k_tile_idx_q      <= k_tile_idx_d; // NEW
             load_ab_select_q  <= load_ab_select_d;
             compute_ab_select_q <= compute_ab_select_d;
+            delayed_clear_sa_pulse_q <= delayed_clear_sa_pulse_d;
         end
     end
 
@@ -239,6 +245,7 @@ module accelerator #(
         df_start_pass_pulse = 1'b0;
         start_tile_computation_pulse = 1'b0;
         writer_req_pulse = 1'b0;
+        delayed_clear_sa_pulse_d = 1'b0;
         
         // SA is active during the entire computation phase of a tile
         sa_activate_pe_level = (current_state_q inside {S_START_TILE_COMP, S_LOAD_K_SLICE, S_WAIT_LOAD_DONE, S_START_DF, S_WAIT_TILE_DONE});
@@ -257,7 +264,7 @@ module accelerator #(
 
             // Start a new C(i,j) tile calculation. Reset SA and k-counter.
             S_START_TILE_COMP: begin
-                start_tile_computation_pulse = 1'b1;
+                // start_tile_computation_pulse = 1'b1;
                 k_tile_idx_d = 0;
                 next_state_d = S_LOAD_K_SLICE;
             end
@@ -270,6 +277,9 @@ module accelerator #(
 
             S_WAIT_LOAD_DONE: begin
                 if (loader_done) begin
+                    if (k_tile_idx_q == 0) begin // 确保只在每个瓦片的第一次 loader_done 时清零
+                        delayed_clear_sa_pulse_d = 1'b1; 
+                    end
                     // Flip ping-pong buffers for compute to use the newly loaded data
                     compute_ab_select_d = load_ab_select_q;
                     load_ab_select_d = ~load_ab_select_q;

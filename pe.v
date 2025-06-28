@@ -117,6 +117,19 @@ module pe #(
                         end
                     end
                 end
+
+                // Display for PE(0,0) - Only display when a valid multiplication occurs
+                if (ROW_IDX == 0 && COL_IDX == 0 && mul_valid_reg) begin
+                    $display("%0t [PE(0,0)] Input A:0x%h, Input B:0x%h, Latched A:0x%h, Latched B:0x%h, Acc:0x%h",
+                             $time, a_data_in, b_data_in, a_reg, b_reg, local_accumulator_reg);
+                end
+
+                // Display for PE(15,15) - Only display when a valid multiplication occurs
+                if (ROW_IDX == 15 && COL_IDX == 15 && mul_valid_reg) begin
+                    $display("%0t [PE(15,15)] Input A:0x%h, Input B:0x%h, Latched A:0x%h, Latched B:0x%h, Acc:0x%h",
+                             $time, a_data_in, b_data_in, a_reg, b_reg, local_accumulator_reg);
+                end
+
             end else begin // if (!enable AND not start_new_systolic_pass)
                 mul_valid_reg <= 1'b0;
             end

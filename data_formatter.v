@@ -185,18 +185,6 @@ module data_formatter #(
         // The SRAM itself introduces the other stage.
         sram_a_rdata_reg_q <= sram_a_rdata;
         sram_b_rdata_reg_q <= sram_b_rdata;
-
-        // if (current_state_q == S_STREAMING) begin
-        //     // This $display shows what's coming *from* SRAM *into* the first pipeline register.
-        //     // The addresses that generated this data were calculated two cycles prior if PIPELINE_COMPENSATION is 2
-        //     // and sram_x_rdata_reg_q is the point of use.
-        //     // More accurately, if address is gen at T, data is on sram_x_rdata at T+1, in _reg_q at T+2.
-        //     $display("%0t [DF READ] time_cnt_q=%d. SRAM_A_ADDRS[0]=%x,...,%x. SRAM_B_ADDRS[0]=%x,...,%x. sram_a_rdata=%h, sram_b_rdata=%h",
-        //              $time, time_cnt_q,
-        //              sram_a_addr_internal[0], sram_a_addr_internal[TILE_SIZE-1],
-        //              sram_b_addr_internal[0], sram_b_addr_internal[TILE_SIZE-1],
-        //              sram_a_rdata, sram_b_rdata);
-        // end
     end
 
     // --- Skewed Output Generation (REVISED data selection for B) ---
@@ -228,10 +216,6 @@ module data_formatter #(
                         // (where i_out_ch = t_feed_at_addr_gen - target_col_A, and t_feed_at_addr_gen = t_feed_equivalent)
                         skewed_a_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_a_rdata_reg_q[target_col_A*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
                         skewed_a_valid_out[i_out_ch]                                <= 1'b1;
-                        // if (time_cnt_q >= PIPELINE_COMPENSATION) begin // Only display when t_feed_equivalent is non-negative
-                        //     $display("%0t [DF SEND A] @t_f=%d, SA_ch=%d (A_row %d), needs A[%d][%d], from sram_a_rdata_reg_q[bank_A_col %d]=%h",
-                        //              $time, t_feed_equivalent, i_out_ch, i_out_ch, i_out_ch, target_col_A, target_col_A, sram_a_rdata_reg_q[target_col_A*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH]);
-                        // end
                     end else begin
                         skewed_a_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= {INPUT_DATA_WIDTH{1'b0}};
                         skewed_a_valid_out[i_out_ch]                                <= 1'b0;
@@ -247,14 +231,19 @@ module data_formatter #(
                         // due to the revised address generation: sram_b_addr_internal[target_row_B] was set to 'i_out_ch'
                         skewed_b_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= sram_b_rdata_reg_q[target_row_B*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH];
                         skewed_b_valid_out[i_out_ch]                                <= 1'b1;
-                        // if (time_cnt_q >= PIPELINE_COMPENSATION) begin
-                        //     $display("%0t [DF SEND B] @t_f=%d, SA_ch=%d (B_col %d), needs B[%d][%d], from sram_b_rdata_reg_q[bank_B_row %d]=%h",
-                        //             $time, t_feed_equivalent, i_out_ch, i_out_ch, target_row_B, i_out_ch, target_row_B, sram_b_rdata_reg_q[target_row_B*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH]);
-                        // end
                     end else begin
                         skewed_b_out[i_out_ch*INPUT_DATA_WIDTH +: INPUT_DATA_WIDTH] <= {INPUT_DATA_WIDTH{1'b0}};
                         skewed_b_valid_out[i_out_ch]                                <= 1'b0;
                     end
+                end
+
+                // Display when data is being sent out for this time step (after all channels are processed)
+                if (t_feed_equivalent >= 0) begin
+                    $display("%0t [DF SEND] 时间步t_f=%d: 发送A数据=0x%h, 发送B数据=0x%h", 
+                             $time, 
+                             t_feed_equivalent, 
+                             skewed_a_out,
+                             skewed_b_out);
                 end
             end else begin // if not data_valid_out (i.e., not S_STREAMING)
                 skewed_a_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
