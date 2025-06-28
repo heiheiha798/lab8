@@ -1,44 +1,50 @@
-// sa_enhanced.v
-// Description: Enhanced Systolic Array with C-SRAM accumulation.
-// REVISED: Implements a "blind-start" strategy for the accumulation pipeline.
-//          It waits only for the first row to be computed, then runs the
-//          high-throughput 2-cycle/row accumulation pipeline, trusting
-//          the architectural determinism.
-
 `timescale 1ns / 1ps
+
+//
+// Filename: sa_enhanced.v
+// REVISED FOR PARAMETRIC WRITE-BACK:
+// Description: This version of the Systolic Array (SA) includes a parametric
+// write-back path to SRAM C, controlled by the SRAM_C_WRITE_WIDTH parameter.
+// It uses a 'generate' block to instantiate one of two hardware implementations:
+// 1. A wide-bus, single-cycle-per-row write-back for high performance.
+// 2. A narrow-bus, multi-cycle-per-row write-back for PPA optimization.
+// The module still manages the K-iteration loop internally.
+//
 
 module sa_enhanced #(
     parameter SIZE = 16,
+    parameter K_ITER_COUNT = 16,
+    // --- NEW PARAMETER to control SRAM C write path ---
+    parameter SRAM_C_WRITE_WIDTH = 512, 
     parameter INPUT_DATA_WIDTH = 8,
-    parameter PE_ACCUM_DATA_WIDTH = 32,
-    parameter ROW_WIDTH_BITS = SIZE * PE_ACCUM_DATA_WIDTH // Typically 16*32 = 512
+    parameter PE_ACCUM_DATA_WIDTH = 32
 )(
     // --- Clock and Reset ---
     input wire clk,
     input wire rst_n,
 
-    // --- Control from Compute Controller (Interface Unchanged) ---
-    input wire start_new_k_iteration,
+    // --- Control from Compute Controller ---
+    input wire start_tile_computation,
     input wire activate_pe_computation,
-    input wire k_tile_is_first,
 
-    // --- Data Input from Formatter/TB (Interface Unchanged) ---
+    // --- Data Input from Formatter/TB ---
     input wire [SIZE*INPUT_DATA_WIDTH-1:0] array_a_in,
     input wire [SIZE*INPUT_DATA_WIDTH-1:0] array_b_in,
     input wire [SIZE-1:0] array_a_valid_in_indywidual,
     input wire [SIZE-1:0] array_b_valid_in_indywidual,
 
-    // --- Status to Compute Controller (Interface Unchanged) ---
-    output reg sa_k_iteration_accum_done,
+    // --- Status to Compute Controller ---
+    output reg tile_computation_done,
     output reg sa_busy,
 
-    // --- SRAM C Port A Interface (SA is master, Interface Unchanged) ---
-    output reg [$clog2(SIZE)-1:0]               sram_c_raddr_A_to_sram,
-    input wire [ROW_WIDTH_BITS-1:0]             sram_c_rdata_A_from_sram,
-    output reg [$clog2(SIZE)-1:0]               sram_c_waddr_to_sram,
-    output reg signed [ROW_WIDTH_BITS-1:0]      sram_c_wdata_to_sram,
-    output reg                                  sram_c_we_to_sram
+    // --- SRAM C Interface (SA is master) ---
+    // Port widths are now parametric based on SRAM_C_WRITE_WIDTH
+    output reg [$clog2( (SIZE*SIZE*PE_ACCUM_DATA_WIDTH)/SRAM_C_WRITE_WIDTH )-1:0] sram_c_waddr_to_sram,
+    output reg signed [SRAM_C_WRITE_WIDTH-1:0]                                   sram_c_wdata_to_sram,
+    output reg                                                                   sram_c_we_to_sram
 );
+    // --- Local Parameters ---
+    localparam ROW_WIDTH_BITS = SIZE * PE_ACCUM_DATA_WIDTH;
 
     // --- Internal Wires for PE Array (Unchanged) ---
     wire signed [INPUT_DATA_WIDTH-1:0]      a_data_wires [SIZE-1:0][SIZE:0];
@@ -48,55 +54,37 @@ module sa_enhanced #(
     wire signed [PE_ACCUM_DATA_WIDTH-1:0]   pe_result_out_internal [SIZE-1:0][SIZE-1:0];
     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
 
-    // --- Row-wise Status Tracking (Unchanged structure, but accum logic will differ) ---
-    reg  [SIZE-1:0] row_calc_done_q;
-    reg  [SIZE-1:0] row_accum_done_q;
-    wire all_rows_accumulated = &row_accum_done_q;
+    // --- Internal Control Wires (Unchanged) ---
+    wire clear_for_new_tile_pulse;
+    wire start_systolic_pass_pulse;
 
     // --- Wires for Done Propagation (Unchanged) ---
     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
     wire last_column_done_signals [SIZE-1:0];
+    wire all_rows_calculated = last_column_done_signals[SIZE-1];
 
-    // --- Register for k_tile_is_first status (Unchanged) ---
-    reg k_tile_is_first_reg;
-
-    // --- Shadow Buffer for Pk (Unchanged) ---
-    reg signed [ROW_WIDTH_BITS-1:0] pk_shadow_buffer [0:SIZE-1];
-
-    // --- Main SA Control FSM (Unchanged) ---
-    typedef enum logic [0:0] {
-        SA_FSM_IDLE             = 1'b0,
-        SA_FSM_COMPUTE_AND_ACCUM = 1'b1
+    // --- FSM State and Common Counters ---
+    typedef enum logic [1:0] {
+        SA_FSM_IDLE,
+        SA_FSM_COMPUTE_START_K,
+        SA_FSM_COMPUTE_WAIT_K,
+        SA_FSM_WRITE_BACK
     } sa_fsm_state_e;
     sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+    
+    reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+    reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
 
-    // --- Accumulation Sub-control (Unchanged) ---
-    reg [$clog2(SIZE)-1:0] accum_current_row_q, accum_current_row_d;
-    typedef enum logic [1:0] {
-        ACCUM_PIPE_IDLE = 2'b00,
-        ACCUM_PIPE_SRAM_READ_ISSUED = 2'b01,
-        ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED = 2'b10
-    } accum_pipe_state_e;
-    accum_pipe_state_e accum_pipe_state_q, accum_pipe_state_d;
-
-    reg signed [ROW_WIDTH_BITS-1:0] pk_row_for_accum_q;
-    reg signed [ROW_WIDTH_BITS-1:0] sram_old_row_for_accum_q;
-
-    // --- Row Adder (Unchanged) ---
-    wire signed [ROW_WIDTH_BITS-1:0] accumulated_row_val;
-    genvar r_add_gen_local;
-    generate
-        for (r_add_gen_local = 0; r_add_gen_local < SIZE; r_add_gen_local = r_add_gen_local + 1) begin : row_adder_elements
-            assign accumulated_row_val[r_add_gen_local*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] =
-                   pk_row_for_accum_q[r_add_gen_local*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] +
-                   sram_old_row_for_accum_q[r_add_gen_local*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH];
-        end
-    endgenerate
+    // --- Pulse generation logic ---
+    assign clear_for_new_tile_pulse = (sa_fsm_state_q == SA_FSM_IDLE) && (sa_fsm_state_d == SA_FSM_COMPUTE_START_K);
+    // -- MODIFIED --
+    // Changed from (sa_fsm_state_d == SA_FSM_COMPUTE_WAIT_K) to fix deadlock.
+    // This now generates a pulse when the FSM is in the START_K state for one cycle.
+    assign start_systolic_pass_pulse = (sa_fsm_state_q == SA_FSM_COMPUTE_START_K);
 
     //===============================================================
     //== PE Array Instantiation and Boundary Connections (Unchanged)
     //===============================================================
-    // ... (This entire section is identical, so it is omitted for brevity) ...
     genvar r_gen_local, c_gen_local;
     generate
         for (r_gen_local = 0; r_gen_local < SIZE; r_gen_local = r_gen_local + 1) begin : connect_a_to_pe_boundary
@@ -121,22 +109,15 @@ module sa_enhanced #(
                     .ROW_IDX(r_gen_local),
                     .COL_IDX(c_gen_local)
                 ) u_pe_inst (
-                    .clk(clk),
-                    .rst_n(rst_n),
-                    .enable(activate_pe_computation),
-                    .clear_accumulator(1'b0),
-                    .conditionally_clear_sum(1'b1),
-                    .a_valid_in(a_valid_wires[r_gen_local][c_gen_local]),
-                    .a_data_in(a_data_wires[r_gen_local][c_gen_local]),
-                    .a_valid_out(a_valid_wires[r_gen_local][c_gen_local+1]),
-                    .a_data_out(a_data_wires[r_gen_local][c_gen_local+1]),
-                    .b_valid_in(b_valid_wires[r_gen_local][c_gen_local]),
-                    .b_data_in(b_data_wires[r_gen_local][c_gen_local]),
-                    .b_valid_out(b_valid_wires[r_gen_local+1][c_gen_local]),
-                    .b_data_out(b_data_wires[r_gen_local+1][c_gen_local]),
+                    .clk(clk), .rst_n(rst_n), .enable(activate_pe_computation),
+                    .clear_for_new_tile(clear_for_new_tile_pulse),
+                    .start_new_systolic_pass(start_systolic_pass_pulse),
+                    .a_valid_in(a_valid_wires[r_gen_local][c_gen_local]), .a_data_in(a_data_wires[r_gen_local][c_gen_local]),
+                    .a_valid_out(a_valid_wires[r_gen_local][c_gen_local+1]), .a_data_out(a_data_wires[r_gen_local][c_gen_local+1]),
+                    .b_valid_in(b_valid_wires[r_gen_local][c_gen_local]), .b_data_in(b_data_wires[r_gen_local][c_gen_local]),
+                    .b_valid_out(b_valid_wires[r_gen_local+1][c_gen_local]), .b_data_out(b_data_wires[r_gen_local+1][c_gen_local]),
                     .result_out(pe_result_out_internal[r_gen_local][c_gen_local]),
                     .result_valid(pe_result_valid_internal[r_gen_local][c_gen_local]),
-                    .start_new_systolic_pass(start_new_k_iteration),
                     .pe_row_propagate_done_in(pe_row_propagate_done_chain[r_gen_local][c_gen_local]),
                     .pe_row_propagate_done_out(pe_row_propagate_done_chain[r_gen_local][c_gen_local+1])
                 );
@@ -146,138 +127,156 @@ module sa_enhanced #(
     endgenerate
 
 
-    // --- Row-wise Calculation Done Latching and Status Update (Unchanged) ---
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            row_calc_done_q <= 0;
-        end else begin
-            if (start_new_k_iteration) begin
-                row_calc_done_q <= 0;
-            end else if (sa_fsm_state_q == SA_FSM_COMPUTE_AND_ACCUM) begin
-                for (integer i = 0; i < SIZE; i = i + 1) begin
-                    if (last_column_done_signals[i] && !row_calc_done_q[i]) begin
-                        row_calc_done_q[i] <= 1'b1;
-                        for (integer c_idx = 0; c_idx < SIZE; c_idx = c_idx + 1) begin
-                            pk_shadow_buffer[i][c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] <= pe_result_out_internal[i][c_idx];
+    //======================================================================
+    //== Parametric FSM and Write-Back Logic
+    //======================================================================
+    generate
+        //----------------------------------------------------------------------
+        // IMPLEMENTATION 1: WIDE/FAST PATH (e.g., 512-bit)
+        //----------------------------------------------------------------------
+        if (SRAM_C_WRITE_WIDTH == ROW_WIDTH_BITS) begin: gen_wide_writeback
+
+            // --- Main SA Control FSM (Sequential Part) ---
+            always @(posedge clk or negedge rst_n) begin
+                if (!rst_n) begin
+                    sa_fsm_state_q <= SA_FSM_IDLE;
+                    sa_busy <= 1'b0;
+                    tile_computation_done <= 1'b0;
+                    k_iter_count_q <= 0;
+                    wb_row_count_q <= 0;
+                end else begin
+                    sa_fsm_state_q <= sa_fsm_state_d;
+                    sa_busy <= (sa_fsm_state_d != SA_FSM_IDLE);
+                    k_iter_count_q <= k_iter_count_d;
+                    wb_row_count_q <= wb_row_count_d;
+                    
+                    // Generate single-cycle done pulse for WIDE path
+                    tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1);
+                end
+            end
+
+            // --- Main SA Control FSM (Combinational Part) ---
+            always @(*) begin
+                sa_fsm_state_d = sa_fsm_state_q;
+                k_iter_count_d = k_iter_count_q;
+                wb_row_count_d = wb_row_count_q;
+
+                sram_c_waddr_to_sram   = 0;
+                sram_c_wdata_to_sram   = 0;
+                sram_c_we_to_sram      = 1'b0;
+
+                case (sa_fsm_state_q)
+                    SA_FSM_IDLE: if (start_tile_computation) begin sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = 0; end
+                    SA_FSM_COMPUTE_START_K: sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
+                    SA_FSM_COMPUTE_WAIT_K: begin
+                        if (all_rows_calculated) begin
+                            if (k_iter_count_q == K_ITER_COUNT - 1) begin
+                                sa_fsm_state_d = SA_FSM_WRITE_BACK; wb_row_count_d = 0;
+                            end else begin
+                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = k_iter_count_q + 1;
+                            end
                         end
                     end
-                end
+                    SA_FSM_WRITE_BACK: begin
+                        sram_c_we_to_sram = 1'b1;
+                        sram_c_waddr_to_sram = wb_row_count_q;
+                        
+                        for (integer c_idx = 0; c_idx < SIZE; c_idx = c_idx + 1) begin
+                            sram_c_wdata_to_sram[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] = pe_result_out_internal[wb_row_count_q][c_idx];
+                        end
+
+                        if (wb_row_count_q == SIZE - 1) begin
+                            sa_fsm_state_d = SA_FSM_IDLE;
+                        end else begin
+                            wb_row_count_d = wb_row_count_q + 1;
+                        end
+                    end
+                endcase
             end
-        end
-    end
+        end 
+        //----------------------------------------------------------------------
+        // IMPLEMENTATION 2: NARROW/EFFICIENT PATH (e.g., 64-bit)
+        //----------------------------------------------------------------------
+        else begin: gen_narrow_writeback
 
-    // --- Row-wise Accumulation Done Status Update (Unchanged) ---
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            row_accum_done_q <= 0;
-        end else begin
-            if (start_new_k_iteration) begin
-                row_accum_done_q <= 0;
-            end else if (sram_c_we_to_sram) begin
-                row_accum_done_q[sram_c_waddr_to_sram] <= 1'b1;
-            end
-        end
-    end
+            localparam CHUNKS_PER_ROW = ROW_WIDTH_BITS / SRAM_C_WRITE_WIDTH;
 
-    // --- Main SA Control FSM (Sequential Part, Unchanged) ---
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            sa_fsm_state_q <= SA_FSM_IDLE;
-            sa_busy <= 1'b0;
-            sa_k_iteration_accum_done <= 1'b0;
-            accum_current_row_q <= 0;
-            accum_pipe_state_q <= ACCUM_PIPE_IDLE;
-            k_tile_is_first_reg <= 1'b0;
-        end else begin
-            sa_fsm_state_q <= sa_fsm_state_d;
-            sa_busy <= (sa_fsm_state_d != SA_FSM_IDLE);
+            // NEW state for the narrow write-back path
+            reg [$clog2(CHUNKS_PER_ROW)-1:0] wb_chunk_count_q, wb_chunk_count_d;
+            reg signed [ROW_WIDTH_BITS-1:0] latched_pe_row_data_q; // Latch for the row being written in chunks
 
-            accum_current_row_q <= accum_current_row_d;
-            accum_pipe_state_q <= accum_pipe_state_d;
-            
-            if (start_new_k_iteration) begin
-                k_tile_is_first_reg <= k_tile_is_first;
-            end
-
-            if (accum_pipe_state_q == ACCUM_PIPE_SRAM_READ_ISSUED && accum_pipe_state_d == ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED) begin
-                 sram_old_row_for_accum_q <= sram_c_rdata_A_from_sram;
-                 pk_row_for_accum_q       <= pk_shadow_buffer[accum_current_row_q];
-            end
-
-            sa_k_iteration_accum_done <= (sa_fsm_state_q == SA_FSM_COMPUTE_AND_ACCUM) && (sa_fsm_state_d == SA_FSM_IDLE);
-        end
-    end
-
-    // --- [REVISED] Main SA Control FSM (Combinational Part) ---
-    always @(*) begin
-        sa_fsm_state_d = sa_fsm_state_q;
-        // Default SRAM signals
-        sram_c_raddr_A_to_sram = accum_current_row_q;
-        sram_c_waddr_to_sram   = accum_current_row_q;
-        sram_c_wdata_to_sram   = 0;
-        sram_c_we_to_sram      = 1'b0;
-
-        // Default next state for control registers
-        accum_current_row_d = accum_current_row_q;
-        accum_pipe_state_d = accum_pipe_state_q;
-
-        case (sa_fsm_state_q)
-            SA_FSM_IDLE: begin
-                if (start_new_k_iteration) begin
-                    sa_fsm_state_d = SA_FSM_COMPUTE_AND_ACCUM;
-                    accum_current_row_d = 0;
-                    accum_pipe_state_d = ACCUM_PIPE_IDLE;
-                end
-            end
-
-            SA_FSM_COMPUTE_AND_ACCUM: begin
-                if (all_rows_accumulated) begin
-                    sa_fsm_state_d = SA_FSM_IDLE;
-                    accum_pipe_state_d = ACCUM_PIPE_IDLE;
+            // --- Main SA Control FSM (Sequential Part) ---
+            always @(posedge clk or negedge rst_n) begin
+                if (!rst_n) begin
+                    sa_fsm_state_q <= SA_FSM_IDLE;
+                    sa_busy <= 1'b0;
+                    tile_computation_done <= 1'b0;
+                    k_iter_count_q <= 0;
+                    wb_row_count_q <= 0;
+                    wb_chunk_count_q <= 0;
+                    latched_pe_row_data_q <= 0;
                 end else begin
-                    case (accum_pipe_state_q)
-                        ACCUM_PIPE_IDLE: begin
-                            // **BLIND-START HANDSHAKE**: Only check the very first row.
-                            // The `row_accum_done_q[0]` check prevents re-starting if we loop back to this state for some reason.
-                            if (last_column_done_signals[0] && !row_accum_done_q[0]) begin
-                                accum_pipe_state_d = ACCUM_PIPE_SRAM_READ_ISSUED;
-                                sram_c_raddr_A_to_sram = 0; // Start with row 0
-                            end
-                            // Once started, we never return to IDLE until the entire K-iter is done.
-                        end
+                    sa_fsm_state_q <= sa_fsm_state_d;
+                    sa_busy <= (sa_fsm_state_d != SA_FSM_IDLE);
+                    k_iter_count_q <= k_iter_count_d;
+                    wb_row_count_q <= wb_row_count_d;
+                    wb_chunk_count_q <= wb_chunk_count_d;
 
-                        ACCUM_PIPE_SRAM_READ_ISSUED: begin
-                            // Wait for SRAM data, then move to write stage.
-                            accum_pipe_state_d = ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED;
+                    // Latch the PE result row only at the beginning of writing its chunks
+                    if ((sa_fsm_state_q == SA_FSM_COMPUTE_WAIT_K && sa_fsm_state_d == SA_FSM_WRITE_BACK) ||
+                        (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_chunk_count_q == CHUNKS_PER_ROW-1 && wb_row_count_q != SIZE-1) ) begin
+                        for (integer c_idx = 0; c_idx < SIZE; c_idx = c_idx + 1) begin
+                            latched_pe_row_data_q[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] <= pe_result_out_internal[wb_row_count_d][c_idx];
                         end
-
-                        ACCUM_PIPE_SRAM_DATA_BACK_ADD_WRITE_ISSUED: begin
-                            // **HIGH-THROUGHPUT 2-CYCLE LOGIC**
-                            // Action 1: Issue write for the current row (`accum_current_row_q`)
-                            sram_c_waddr_to_sram = accum_current_row_q;
-                            sram_c_we_to_sram    = 1'b1;
-                            
-                            if (k_tile_is_first_reg) begin
-                                sram_c_wdata_to_sram = pk_row_for_accum_q;
-                            end else begin
-                                sram_c_wdata_to_sram = accumulated_row_val;
-                            end
-                            
-                            // Action 2: Simultaneously issue read for the next row
-                            if (accum_current_row_q == SIZE - 1) begin
-                                // Last row's write is issued. Pipeline is done.
-                                accum_pipe_state_d = ACCUM_PIPE_IDLE; 
-                            end else begin
-                                // Fire and forget: move to next row and issue its read immediately.
-                                accum_current_row_d = accum_current_row_q + 1;
-                                accum_pipe_state_d = ACCUM_PIPE_SRAM_READ_ISSUED;
-                                sram_c_raddr_A_to_sram = accum_current_row_q + 1;
-                            end
-                        end
-                    endcase
+                    end
+                    
+                    // Generate single-cycle done pulse for NARROW path
+                    tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1 && wb_chunk_count_q == CHUNKS_PER_ROW-1);
                 end
             end
-        endcase
-    end
+
+            // --- Main SA Control FSM (Combinational Part) ---
+            always @(*) begin
+                sa_fsm_state_d = sa_fsm_state_q;
+                k_iter_count_d = k_iter_count_q;
+                wb_row_count_d = wb_row_count_q;
+                wb_chunk_count_d = wb_chunk_count_q;
+
+                sram_c_waddr_to_sram   = 0;
+                sram_c_wdata_to_sram   = 0;
+                sram_c_we_to_sram      = 1'b0;
+
+                case (sa_fsm_state_q)
+                    SA_FSM_IDLE: if (start_tile_computation) begin sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = 0; end
+                    SA_FSM_COMPUTE_START_K: sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
+                    SA_FSM_COMPUTE_WAIT_K: begin
+                        if (all_rows_calculated) begin
+                            if (k_iter_count_q == K_ITER_COUNT - 1) begin
+                                sa_fsm_state_d = SA_FSM_WRITE_BACK; wb_row_count_d = 0; wb_chunk_count_d = 0;
+                            end else begin
+                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = k_iter_count_q + 1;
+                            end
+                        end
+                    end
+                    SA_FSM_WRITE_BACK: begin
+                        sram_c_we_to_sram = 1'b1;
+                        sram_c_waddr_to_sram = (wb_row_count_q * CHUNKS_PER_ROW) + wb_chunk_count_q;
+                        sram_c_wdata_to_sram = latched_pe_row_data_q >> (wb_chunk_count_q * SRAM_C_WRITE_WIDTH);
+
+                        if (wb_chunk_count_q == CHUNKS_PER_ROW - 1) begin // End of a row
+                            wb_chunk_count_d = 0;
+                            if (wb_row_count_q == SIZE - 1) begin // End of all rows
+                                sa_fsm_state_d = SA_FSM_IDLE;
+                            end else begin
+                                wb_row_count_d = wb_row_count_q + 1; // Move to next row
+                            end
+                        end else begin
+                            wb_chunk_count_d = wb_chunk_count_q + 1; // Move to next chunk
+                        end
+                    end
+                endcase
+            end
+        end
+    endgenerate
 
 endmodule

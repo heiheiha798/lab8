@@ -81,7 +81,7 @@ def main():
         print("Error: matrix_a.npy, matrix_b.npy, or matrix_c_expected_sint32.npy not found. Run data generation script first.")
         return
 
-    DISPLAY_SUB_DIM = min(MATRIX_DIM_TB, 8)
+    DISPLAY_SUB_DIM = MATRIX_DIM_TB
     original_print_options = np.get_printoptions()
     np.set_printoptions(threshold=max(1024, DISPLAY_SUB_DIM*DISPLAY_SUB_DIM + 1),
                         linewidth=max(400, DISPLAY_SUB_DIM * 10), # Wider for SINT32

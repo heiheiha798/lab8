@@ -73,6 +73,8 @@ def main():
     # --- 2. Generate Matrix B (Random SINT8 values) ---
     # 生成范围在 -128 到 127 之间的随机整数
     matrix_b_orig = np.random.randint(-128, 128, size=(MATRIX_DIM_TB, MATRIX_DIM_TB), dtype=DATA_TYPE_IN)
+    # matrix_b_orig = np.random.randint(0, 1, size=(MATRIX_DIM_TB, MATRIX_DIM_TB), dtype=DATA_TYPE_IN)
+    # matrix_b_orig[16][0] = 1
 
     # --- 3. Convert Matrices to SRAM memory file format ---
     # As per your request:

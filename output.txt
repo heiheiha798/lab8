@@ -37,10 +37,10 @@ Script finished successfully.
 verilator -Wno-fatal -Wall --top-module tb_accelerator \
 		-cc --timing -O3 --x-assign fast --x-initial fast --noassert --Mdir obj_dir \
 		--threads 8 \
-		tb_accelerator.v accelerator.v loader.v writer.v data_formatter.v sa_enhanced.v pe.v sram_banked.v sram_c_accum.v  --exe sim_main.cpp 
-%Warning-EOFNEWLINE: accelerator.v:338:10: Missing newline at end of file (POSIX 3.206).
+		tb_accelerator.v accelerator.v loader.v writer.v data_formatter.v sa_enhanced.v pe.v sram_banked.v sram_c.v  --exe sim_main.cpp 
+%Warning-EOFNEWLINE: accelerator.v:333:10: Missing newline at end of file (POSIX 3.206).
                                          : ... Suggest add newline.
-  338 | endmodule
+  333 | endmodule
       |          ^
                      ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.036
                      ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
@@ -48,31 +48,35 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                             : ... Suggest add newline.
   268 | endmodule
       |          ^
-%Warning-EOFNEWLINE: sa_enhanced.v:283:10: Missing newline at end of file (POSIX 3.206).
-                                         : ... Suggest add newline.
-  283 | endmodule
-      |          ^
-%Warning-EOFNEWLINE: pe.v:198:10: Missing newline at end of file (POSIX 3.206).
-                                : ... Suggest add newline.
-  198 | endmodule
-      |          ^
-%Warning-PINCONNECTEMPTY: accelerator.v:121:196: Cell pin connected by name with empty reference: 'load_busy'
+%Warning-PINCONNECTEMPTY: accelerator.v:127:189: Cell pin connected by name with empty reference: 'load_busy'
                           ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.036
                           ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
-%Warning-PINCONNECTEMPTY: accelerator.v:138:161: Cell pin connected by name with empty reference: 'pass_done'
-%Warning-PINCONNECTEMPTY: accelerator.v:138:363: Cell pin connected by name with empty reference: 'data_valid_out'
-%Warning-PINCONNECTEMPTY: accelerator.v:144:503: Cell pin connected by name with empty reference: 'sa_busy'
-%Warning-PINCONNECTEMPTY: accelerator.v:161:308: Cell pin connected by name with empty reference: 'write_busy'
-%Warning-WIDTHEXPAND: pe.v:51:45: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'mul_result_reg' generates 16 bits.
+%Warning-PINCONNECTEMPTY: accelerator.v:144:161: Cell pin connected by name with empty reference: 'pass_done'
+%Warning-PINCONNECTEMPTY: accelerator.v:144:363: Cell pin connected by name with empty reference: 'data_valid_out'
+%Warning-PINCONNECTEMPTY: accelerator.v:163:10: Cell pin connected by name with empty reference: 'sa_busy'
+  163 |         .sa_busy(), 
+      |          ^~~~~~~
+%Warning-PINCONNECTEMPTY: accelerator.v:188:130: Cell pin connected by name with empty reference: 'write_busy'
+  188 |         u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .write_busy(), .write_done(writer_done), .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(sram_c_rdata_to_writer));
+      |                                                                                                                                  ^~~~~~~~~~
+%Warning-WIDTHEXPAND: pe.v:50:45: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'mul_result_reg' generates 16 bits.
                                 : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-   51 |     assign add_output_data = mul_result_reg + local_accumulator_reg;
+   50 |     assign add_output_data = mul_result_reg + local_accumulator_reg;
       |                                             ^
                       ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.036
                       ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
-%Warning-WIDTHEXPAND: pe.v:135:47: Operator ASSIGNDLY expects 32 bits on the Assign RHS, but Assign RHS's VARREF 'mul_result_reg' generates 16 bits.
-                                 : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-  135 |                         local_accumulator_reg <= mul_result_reg;
-      |                                               ^~
+%Warning-WIDTHEXPAND: sa_enhanced.v:154:101: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'wb_row_count_q' generates 4 bits.
+                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+  154 |                     tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1);
+      |                                                                                                     ^~
+%Warning-WIDTHEXPAND: sa_enhanced.v:173:48: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'k_iter_count_q' generates 2 bits.
+                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+  173 |                             if (k_iter_count_q == K_ITER_COUNT - 1) begin
+      |                                                ^~
+%Warning-WIDTHEXPAND: sa_enhanced.v:188:44: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'wb_row_count_q' generates 4 bits.
+                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+  188 |                         if (wb_row_count_q == SIZE - 1) begin
+      |                                            ^~
 %Warning-WIDTHEXPAND: sram_banked.v:44:29: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'waddr' generates 5 bits.
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    44 |             row_idx = waddr / (NUM_BANKS / BYTES_PER_BUS_WORD);
@@ -85,24 +89,20 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
       |                    ^
-%Warning-WIDTHEXPAND: sram_c_accum.v:74:33: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   74 |             row_idx_b = raddr_B / WORDS_PER_ROW_B;
+%Warning-WIDTHEXPAND: sram_c.v:51:31: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'raddr' generates 7 bits.
+                                    : ... note: In instance 'tb_accelerator.dut.u_sram_c'
+   51 |             entry_idx = raddr / WORDS_PER_ENTRY;
+      |                               ^
+%Warning-WIDTHEXPAND: sram_c.v:52:33: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'raddr' generates 7 bits.
+                                    : ... note: In instance 'tb_accelerator.dut.u_sram_c'
+   52 |             word_offset = raddr % WORDS_PER_ENTRY;
       |                                 ^
-%Warning-WIDTHEXPAND: sram_c_accum.v:75:44: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'raddr_B' generates 7 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   75 |             word_offset_in_row_b = raddr_B % WORDS_PER_ROW_B;
-      |                                            ^
-%Warning-WIDTHTRUNC: sram_c_accum.v:79:26: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 512 bits.
-                                         : ... note: In instance 'tb_accelerator.dut.sram_c_ping'
-   79 |                  rdata_B <= memory[row_idx_b] >> (word_offset_in_row_b * BUS_DATA_WIDTH);
-      |                          ^~
+%Warning-WIDTHTRUNC: sram_c.v:56:24: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 512 bits.
+                                   : ... note: In instance 'tb_accelerator.dut.u_sram_c'
+   56 |                  rdata <= memory[entry_idx] >> (word_offset * BUS_DATA_WIDTH);
+      |                        ^~
                      ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
                      ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
-%Warning-WIDTHEXPAND: sa_enhanced.v:267:53: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'accum_current_row_q' generates 4 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  267 |                             if (accum_current_row_q == SIZE - 1) begin
-      |                                                     ^~
 %Warning-WIDTHTRUNC: data_formatter.v:154:40: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 6 bits.
                                             : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
   154 |             assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
@@ -155,43 +155,35 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   199 |                     if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready && mem_req_valid) begin
       |                                 ^
-%Warning-WIDTHEXPAND: accelerator.v:267:34: Operator LT expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:283:34: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
-  267 |                 if (k_tile_idx_q < K_ITER_MAX - 1) loader_req_pulse = 1'b1;
-      |                                  ^
-%Warning-WIDTHEXPAND: accelerator.v:288:58: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
+  283 |                 if (k_tile_idx_q == K_ITER_COUNT - 1) begin
+      |                                  ^~
+%Warning-WIDTHEXPAND: accelerator.v:313:42: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
-  288 |                 logic load_task_finished = (k_tile_idx_q == K_ITER_MAX - 1) ? 1'b1 : load_done_flag_q;
-      |                                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:290:39: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 2 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  290 |                      if (k_tile_idx_q == K_ITER_MAX - 1) begin
-      |                                       ^~
-%Warning-WIDTHEXPAND: accelerator.v:316:42: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  316 |                         if (j_tile_idx_q == J_ITER_MAX - 1) begin
+  313 |                         if (j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:312:38: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:309:38: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
-  312 |                     if (i_tile_idx_q == I_ITER_MAX - 1 && j_tile_idx_q == J_ITER_MAX - 1) begin
+  309 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                      ^~
-%Warning-WIDTHEXPAND: accelerator.v:312:72: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
+%Warning-WIDTHEXPAND: accelerator.v:309:79: Operator EQ expects 32 or 6 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 2 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
-  312 |                     if (i_tile_idx_q == I_ITER_MAX - 1 && j_tile_idx_q == J_ITER_MAX - 1) begin
-      |                                                                        ^~
-%Warning-UNUSEDPARAM: tb_accelerator.v:28:15: Parameter is not used: 'TIMEOUT_CYCLES'
+  309 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
+      |                                                                               ^~
+%Warning-UNUSEDPARAM: tb_accelerator.v:29:15: Parameter is not used: 'TIMEOUT_CYCLES'
                                             : ... note: In instance 'tb_accelerator'
-   28 |     parameter TIMEOUT_CYCLES              = P_MATRIX_SIZE * P_MATRIX_SIZE * P_MATRIX_SIZE * 2;  
+   29 |     parameter TIMEOUT_CYCLES              = P_MATRIX_SIZE * P_MATRIX_SIZE * P_MATRIX_SIZE * 2;  
       |               ^~~~~~~~~~~~~~
                       ... For warning description see https://verilator.org/warn/UNUSEDPARAM?v=5.036
                       ... Use "/* verilator lint_off UNUSEDPARAM */" and lint_on around source to disable this message.
-%Warning-UNUSEDPARAM: tb_accelerator.v:33:16: Parameter is not used: 'NUM_TILES_PER_DIM'
+%Warning-UNUSEDPARAM: tb_accelerator.v:34:16: Parameter is not used: 'NUM_TILES_PER_DIM'
                                             : ... note: In instance 'tb_accelerator'
-   33 |     localparam NUM_TILES_PER_DIM  = P_MATRIX_SIZE / P_TILE_SIZE;
+   34 |     localparam NUM_TILES_PER_DIM  = P_MATRIX_SIZE / P_TILE_SIZE;
       |                ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: tb_accelerator.v:56:10: Signal is not used: 'tb_busyb'
+%Warning-UNUSEDSIGNAL: tb_accelerator.v:57:10: Signal is not used: 'tb_busyb'
                                              : ... note: In instance 'tb_accelerator'
-   56 |     wire tb_busyb;
+   57 |     wire tb_busyb;
       |          ^~~~~~~~
                        ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.036
                        ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
@@ -211,10 +203,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
    70 |     reg                                load_to_ping_reg;
       |                                        ^~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: sa_enhanced.v:49:45: Signal is not used: 'pe_result_valid_internal'
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   49 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
-      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
 %Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    10 |     parameter IS_SRAM_A     = 1'b1,  
@@ -227,78 +215,61 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                           : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    39 |     integer addr_bank0;  
       |             ^~~~~~~~~~
+%Warning-UNUSEDSIGNAL: sa_enhanced.v:55:45: Signal is not used: 'pe_result_valid_internal'
+                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
+   55 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
 %Warning-UNUSEDPARAM: pe.v:7:15: Parameter is not used: 'ROW_IDX'
                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-    7 |     parameter ROW_IDX = 0,  
+    7 |     parameter ROW_IDX = 0, 
       |               ^~~~~~~
 %Warning-UNUSEDPARAM: pe.v:8:15: Parameter is not used: 'COL_IDX'
                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-    8 |     parameter COL_IDX = 0   
+    8 |     parameter COL_IDX = 0  
       |               ^~~~~~~
-%Warning-UNUSEDSIGNAL: pe.v:13:41: Signal is not used: 'clear_accumulator'
-                                 : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-   13 |     input wire                          clear_accumulator,
-      |                                         ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: pe.v:67:9: Signal is not used: 'pe_calculation_done_latch_prev'
-                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-   67 |     reg pe_calculation_done_latch_prev;
-      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: pe.v:68:9: Signal is not used: 'enable_prev'
-                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-   68 |     reg enable_prev;
-      |         ^~~~~~~~~~~
 %Warning-UNSIGNED: data_formatter.v:155:54: Comparison is constant due to unsigned arithmetic
                                           : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
   155 |             assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
       |                                                      ^~
                    ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.036
                    ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
-%Warning-CASEINCOMPLETE: sa_enhanced.v:238:21: Case values incompletely covered (example pattern 0x3)
-  238 |                     case (accum_pipe_state_q)
-      |                     ^~~~
-                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.036
-                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
 %Warning-CASEINCOMPLETE: writer.v:136:9: Case values incompletely covered (example pattern 0x3)
   136 |         case (current_state)
       |         ^~~~
-%Warning-BLKSEQ: tb_accelerator.v:142:30: Blocking assignment '=' in sequential logic process
+                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.036
+                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
+%Warning-BLKSEQ: tb_accelerator.v:144:30: Blocking assignment '=' in sequential logic process
                                         : ... Suggest using delayed assignment '<='
-  142 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
+  144 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
       |                              ^
                  ... For warning description see https://verilator.org/warn/BLKSEQ?v=5.036
                  ... Use "/* verilator lint_off BLKSEQ */" and lint_on around source to disable this message.
-%Warning-BLKSEQ: tb_accelerator.v:146:30: Blocking assignment '=' in sequential logic process
+%Warning-BLKSEQ: tb_accelerator.v:148:30: Blocking assignment '=' in sequential logic process
                                         : ... Suggest using delayed assignment '<='
-  146 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_B) / BYTES_PER_WORD;
+  148 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_B) / BYTES_PER_WORD;
       |                              ^
-%Warning-INITIALDLY: tb_accelerator.v:199:21: Non-blocking assignment '<=' in initial/final block
+%Warning-INITIALDLY: tb_accelerator.v:201:21: Non-blocking assignment '<=' in initial/final block
                                             : ... This will be executed as a blocking assignment '='!
-  199 |         rst_n       <= 1'b0;
+  201 |         rst_n       <= 1'b0;
       |                     ^~
                      ... For warning description see https://verilator.org/warn/INITIALDLY?v=5.036
                      ... Use "/* verilator lint_off INITIALDLY */" and lint_on around source to disable this message.
-%Warning-INITIALDLY: tb_accelerator.v:200:21: Non-blocking assignment '<=' in initial/final block
+%Warning-INITIALDLY: tb_accelerator.v:202:21: Non-blocking assignment '<=' in initial/final block
                                             : ... This will be executed as a blocking assignment '='!
-  200 |         tb_comp_enb <= 1'b0;
+  202 |         tb_comp_enb <= 1'b0;
       |                     ^~
-%Warning-INITIALDLY: tb_accelerator.v:213:15: Non-blocking assignment '<=' in initial/final block
+%Warning-INITIALDLY: tb_accelerator.v:215:15: Non-blocking assignment '<=' in initial/final block
                                             : ... This will be executed as a blocking assignment '='!
-  213 |         rst_n <= 1'b1;
+  215 |         rst_n <= 1'b1;
       |               ^~
-%Warning-INITIALDLY: tb_accelerator.v:220:21: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  220 |         tb_comp_enb <= 1'b1;
-      |                     ^~
 %Warning-INITIALDLY: tb_accelerator.v:222:21: Non-blocking assignment '<=' in initial/final block
                                             : ... This will be executed as a blocking assignment '='!
-  222 |         tb_comp_enb <= 1'b0;
+  222 |         tb_comp_enb <= 1'b1;
       |                     ^~
-%Warning-LATCH: accelerator.v:218:5: Latch inferred for signal 'tb_accelerator.dut.unnamedblk1.load_task_finished' (not all control paths of combinational always assign a value)
-                                   : ... Suggest use of always_latch for intentional latches
-  218 |     always_comb begin
-      |     ^~~~~~~~~~~
-                ... For warning description see https://verilator.org/warn/LATCH?v=5.036
-                ... Use "/* verilator lint_off LATCH */" and lint_on around source to disable this message.
+%Warning-INITIALDLY: tb_accelerator.v:224:21: Non-blocking assignment '<=' in initial/final block
+                                            : ... This will be executed as a blocking assignment '='!
+  224 |         tb_comp_enb <= 1'b0;
+      |                     ^~
 %Warning-BLKSEQ: sram_banked.v:44:21: Blocking assignment '=' in sequential logic process
                                     : ... Suggest using delayed assignment '<='
    44 |             row_idx = waddr / (NUM_BANKS / BYTES_PER_BUS_WORD);
@@ -311,45 +282,45 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                     : ... Suggest using delayed assignment '<='
    59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
       |                    ^
-%Warning-BLKSEQ: sram_c_accum.v:74:23: Blocking assignment '=' in sequential logic process
-                                     : ... Suggest using delayed assignment '<='
-   74 |             row_idx_b = raddr_B / WORDS_PER_ROW_B;
+%Warning-BLKSEQ: sram_c.v:51:23: Blocking assignment '=' in sequential logic process
+                               : ... Suggest using delayed assignment '<='
+   51 |             entry_idx = raddr / WORDS_PER_ENTRY;
       |                       ^
-%Warning-BLKSEQ: sram_c_accum.v:75:34: Blocking assignment '=' in sequential logic process
-                                     : ... Suggest using delayed assignment '<='
-   75 |             word_offset_in_row_b = raddr_B % WORDS_PER_ROW_B;
-      |                                  ^
-%Warning-SYNCASYNCNET: tb_accelerator.v:53:10: Signal flopped as both synchronous and async: 'tb_accelerator.rst_n'
-                       tb_accelerator.v:118:14: ... Location of async usage
-  118 |         if (!rst_n) begin
+%Warning-BLKSEQ: sram_c.v:52:25: Blocking assignment '=' in sequential logic process
+                               : ... Suggest using delayed assignment '<='
+   52 |             word_offset = raddr % WORDS_PER_ENTRY;
+      |                         ^
+%Warning-SYNCASYNCNET: tb_accelerator.v:54:10: Signal flopped as both synchronous and async: 'tb_accelerator.rst_n'
+                       tb_accelerator.v:120:14: ... Location of async usage
+  120 |         if (!rst_n) begin
       |              ^~~~~
-                       sram_c_accum.v:61:14: ... Location of sync usage
-   61 |         if (!rst_n) begin
+                       sram_c.v:47:14: ... Location of sync usage
+   47 |         if (!rst_n) begin
       |              ^~~~~
                        ... For warning description see https://verilator.org/warn/SYNCASYNCNET?v=5.036
                        ... Use "/* verilator lint_off SYNCASYNCNET */" and lint_on around source to disable this message.
-%Warning-MULTIDRIVEN: sram_c_accum.v:34:30: Signal has multiple driving blocks with different clocking: 'tb_accelerator.dut.sram_c_ping.memory'
-                      sram_c_accum.v:90:17: ... Location of first driving block
-   90 |                 memory[i] <= {(ELEM_PER_ROW*ELEM_WIDTH){1'b0}};
+%Warning-MULTIDRIVEN: sram_c.v:30:27: Signal has multiple driving blocks with different clocking: 'tb_accelerator.dut.u_sram_c.memory'
+                      sram_c.v:67:17: ... Location of first driving block
+   67 |                 memory[i] <= {ENTRY_WIDTH{1'b0}};
       |                 ^~~~~~
-                      sram_c_accum.v:44:13: ... Location of other driving block
-   44 |             memory[waddr] <= wdata;
+                      sram_c.v:41:13: ... Location of other driving block
+   41 |             memory[waddr] <= wdata;
       |             ^~~~~~
                       ... For warning description see https://verilator.org/warn/MULTIDRIVEN?v=5.036
                       ... Use "/* verilator lint_off MULTIDRIVEN */" and lint_on around source to disable this message.
-%Warning-UNOPTFLAT: sa_enhanced.v:57:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
-   57 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
+%Warning-UNOPTFLAT: sa_enhanced.v:62:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
+   62 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~
                     ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.036
                     ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
-                    sa_enhanced.v:57:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
-                    pe.v:64:38:      Example path: ASSIGNW
-                    pe.v:29:41:      Example path: tb_accelerator.dut.u_sa_enhanced.__Vcellout__pe_row_gen[0].pe_col_gen[0].u_pe_inst__pe_row_propagate_done_out
-                    sa_enhanced.v:141:22:      Example path: ASSIGNW
-                    sa_enhanced.v:57:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
+                    sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
+                    pe.v:60:38:      Example path: ASSIGNW
+                    pe.v:28:42:      Example path: tb_accelerator.dut.u_sa_enhanced.__Vcellout__pe_row_gen[0].pe_col_gen[0].u_pe_inst__pe_row_propagate_done_out
+                    sa_enhanced.v:122:22:      Example path: ASSIGNW
+                    sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
 - V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
-- Verilator: Built from 0.523 MB sources in 10 modules, into 6.005 MB in 11 C++ files needing 0.001 MB
-- Verilator: Walltime 1.199 s (elab=0.059, cvt=1.085, bld=0.000); cpu 1.197 s on 1 threads
+- Verilator: Built from 0.508 MB sources in 10 modules, into 5.515 MB in 11 C++ files needing 0.000 MB
+- Verilator: Walltime 1.149 s (elab=0.054, cvt=1.040, bld=0.000); cpu 1.142 s on 1 threads
 ### Compiling C++ simulation executable...
 /Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
 c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
@@ -384,41 +355,41 @@ SIM_CPP: Entering simulation loop...
 [50000] [TB] Reset released.
 [55000] [TB] Asserting comp_enb to start accelerator.
 [65000] [TB] Waiting for accelerator to finish (tb_done=1)...
-745000 [LOADER] INFO: Load request completed. Returning to IDLE.
-1435000 [LOADER] INFO: Load request completed. Returning to IDLE.
-2165000 [LOADER] INFO: Load request completed. Returning to IDLE.
-4925000 [LOADER] INFO: Load request completed. Returning to IDLE.
-5615000 [LOADER] INFO: Load request completed. Returning to IDLE.
-6345000 [LOADER] INFO: Load request completed. Returning to IDLE.
-9105000 [LOADER] INFO: Load request completed. Returning to IDLE.
-9795000 [LOADER] INFO: Load request completed. Returning to IDLE.
-10525000 [LOADER] INFO: Load request completed. Returning to IDLE.
-13285000 [LOADER] INFO: Load request completed. Returning to IDLE.
-13975000 [LOADER] INFO: Load request completed. Returning to IDLE.
-14705000 [LOADER] INFO: Load request completed. Returning to IDLE.
-17465000 [LOADER] INFO: Load request completed. Returning to IDLE.
-18155000 [LOADER] INFO: Load request completed. Returning to IDLE.
-18885000 [LOADER] INFO: Load request completed. Returning to IDLE.
-21645000 [LOADER] INFO: Load request completed. Returning to IDLE.
-22335000 [LOADER] INFO: Load request completed. Returning to IDLE.
-23065000 [LOADER] INFO: Load request completed. Returning to IDLE.
-25825000 [LOADER] INFO: Load request completed. Returning to IDLE.
-26515000 [LOADER] INFO: Load request completed. Returning to IDLE.
-27245000 [LOADER] INFO: Load request completed. Returning to IDLE.
-30005000 [LOADER] INFO: Load request completed. Returning to IDLE.
-30695000 [LOADER] INFO: Load request completed. Returning to IDLE.
-31425000 [LOADER] INFO: Load request completed. Returning to IDLE.
-34185000 [LOADER] INFO: Load request completed. Returning to IDLE.
-34875000 [LOADER] INFO: Load request completed. Returning to IDLE.
-35605000 [LOADER] INFO: Load request completed. Returning to IDLE.
-[37685000] [TB] Accelerator finished (tb_done asserted).
-[37695000] [TB] Writing results from memory model to 'result_mem.csv'...
-[37695000] [TB] Results written to 'result_mem.csv'.
+755000 [LOADER] INFO: Load request completed. Returning to IDLE.
+1445000 [LOADER] INFO: Load request completed. Returning to IDLE.
+2135000 [LOADER] INFO: Load request completed. Returning to IDLE.
+4825000 [LOADER] INFO: Load request completed. Returning to IDLE.
+5515000 [LOADER] INFO: Load request completed. Returning to IDLE.
+6205000 [LOADER] INFO: Load request completed. Returning to IDLE.
+8895000 [LOADER] INFO: Load request completed. Returning to IDLE.
+9585000 [LOADER] INFO: Load request completed. Returning to IDLE.
+10275000 [LOADER] INFO: Load request completed. Returning to IDLE.
+12965000 [LOADER] INFO: Load request completed. Returning to IDLE.
+13655000 [LOADER] INFO: Load request completed. Returning to IDLE.
+14345000 [LOADER] INFO: Load request completed. Returning to IDLE.
+17035000 [LOADER] INFO: Load request completed. Returning to IDLE.
+17725000 [LOADER] INFO: Load request completed. Returning to IDLE.
+18415000 [LOADER] INFO: Load request completed. Returning to IDLE.
+21105000 [LOADER] INFO: Load request completed. Returning to IDLE.
+21795000 [LOADER] INFO: Load request completed. Returning to IDLE.
+22485000 [LOADER] INFO: Load request completed. Returning to IDLE.
+25175000 [LOADER] INFO: Load request completed. Returning to IDLE.
+25865000 [LOADER] INFO: Load request completed. Returning to IDLE.
+26555000 [LOADER] INFO: Load request completed. Returning to IDLE.
+29245000 [LOADER] INFO: Load request completed. Returning to IDLE.
+29935000 [LOADER] INFO: Load request completed. Returning to IDLE.
+30625000 [LOADER] INFO: Load request completed. Returning to IDLE.
+33315000 [LOADER] INFO: Load request completed. Returning to IDLE.
+34005000 [LOADER] INFO: Load request completed. Returning to IDLE.
+34695000 [LOADER] INFO: Load request completed. Returning to IDLE.
+[36695000] [TB] Accelerator finished (tb_done asserted).
+[36705000] [TB] Writing results from memory model to 'result_mem.csv'...
+[36705000] [TB] Results written to 'result_mem.csv'.
 ==============================================
-[37695000] [TB] TEST SCENARIO COMPLETED.
+[36705000] [TB] TEST SCENARIO COMPLETED.
 ==============================================
-- tb_accelerator.v:257: Verilog $finish
-SIM_CPP: Exited simulation loop. Total steps: 37695001
+- tb_accelerator.v:259: Verilog $finish
+SIM_CPP: Exited simulation loop. Total steps: 36705001
 SIM_CPP: main() finished.
 ### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from inish or isplay).
 
@@ -433,45 +404,397 @@ SIM_CPP: main() finished.
 python3 CheckResult.py
 
 Matrix A (SINT8 loaded from .npy):
-[[      -94       -10        32        92       -46        95        86       114]
- [       48       127      -118        23        88        76        24        56]
- [       99        92       126       124      -114       -64       -94        71]
- [      -47       -23       -77       126      -104       -21        40       -10]
- [      -70        42       122       109       -37       122         1        90]
- [        2        -8        34       -45         4         5       -54        34]
- [      -95       -90       127        62        86       -60       -49        74]
- [      -16       -63        81       123      -104      -102        59       -99]]
+[[      -15        12        55       -83       -22       107       122       -19       -67        66       -86       -37       -63        10       115       -87        73       -58      -124       -35         8        71        -7        77       -38        38       -71       -85       -48        56        31      -109       -92        23      -107       -49        18        18       101       -15       122        58      -103       -82       108        66       -34
+         92]
+ [       55       -95        97       -53       -93       -89        98         3       119        71        73       112       -19        94       -35       -14       -59      -114       -86        28      -118       -11       105       -20        52       118      -120        -4       -99       -69      -108       104      -101        54      -105       -33        93       -23       -84        15       126      -113       -33       -74      -113        65      -121
+        -35]
+ [      -22        68        52        49       -47       -34        15       -53       -34      -122       -72       -61       -65       -60      -106       -51       -99       -10        44      -116         2       110         5       -39       108       -19       -88        98       -93       -69      -101        43       -68       -57       -62       -16        87      -128        19        76        83       -92      -122      -127        32       119       111
+        109]
+ [      -69        21      -124        72       -88        18       124       112        93       -73       -16       -79        -9       104       -63       -51       -42       -99        25      -101        54        64       -64        92        34      -124        96        60        88        96       116        -1       117        95        54      -111      -124       -64         4        14        79       100         9        31       107       -83       102
+        -87]
+ [       12      -114       124      -123        99        69        77      -117         2      -124       100        59      -104        90      -121       -69        89      -109       -38       -52        48        35       124       -31      -117      -104        73       -82       -86      -122      -106        12       -71       -60        53       115       -59        94        66      -110        -3      -109       116        29       -22       -71        44
+       -111]
+ [      -76         6        76      -107       -86       -42       -56       118       119        12      -118        60        59       120       -15         3       -33      -104       -41       -39        -4       -94        -7        91       -62       115        91       -45       -94        73       -66        69       -42       -97        15        11        80       -65        43      -101        94         3        85       -30        22      -105        24
+        119]
+ [       45        32       -55        93        89       -56       120       -54        42        78        86        40       120       124        67       -31        95         8        87        51        10       -11      -125       -83        19        43       -31        -1        90       -22       -65       -21         7        48        67      -124       -34        77       -49        59       -50        82        70      -123         9        51        83
+          4]
+ [       40       -84         4       -66        50        76       -11         4        14         0        95      -103        17       -72        -9        -1       -56        10        55        78        51        50        39       -99       -30       -40       117      -118      -107       -30        13       121       -41       -64       118        38       105       -84       -39       -70      -124         0       -79      -100       -31       -35       121
+        -59]
+ [      -70      -105       -46       -45       -22        27       112        20        40       -68      -119       -63        70       -16       -57        35       -18        70       118        -8         6        16        27       -95        -1        29        -9        53        93      -123        69       110       -35        37        10       -80      -105       -80      -117        47       -56         0        45        75        11      -117      -101
+        -94]
+ [       61      -126       -55       -60         8       -22         5       -56      -117       -28       -45       -73        42        90         0        17        86      -108       115       -63       -10        64       115       -64       -80       -45        42        39       -81        23       -50      -127       117         3       -83      -113       -73        51      -112       -78       -16         1       -58      -114       126        47       -90
+         27]
+ [      -32      -111      -113        83        17      -103       -38       -73      -120       119         3       102       -92         1       -93        83        25       -68        73        67       -19       -20        72       -28       -98       118        93       124        -4       -35      -103       105        13        63       -22       -34       -67       121      -111        22       -31       -37       -89      -124        20       -76       -52
+        -37]
+ [      -25       -33       -28      -127       -50      -108       -80       -69       -13        62       102        51       -61       -44       -43       -45       -35       -79        24       -95        40       -44      -112       -13       -42       -95       126        44       -55        61      -123       106      -117       -11       -87       105       -18       -64        84       -57       -73        -3        12       -73        20        57        37
+        -28]
+ [      123       -93       -53      -122       -11      -119        95       -90       112      -105        30        21       -16        48        17        74       -83       121        95       -95       102       -64         2        80        -9       -79        27      -118        34        29        71       125        45       -73      -127       -67        53        77       -10       -66       -85       117      -114       -68        52       117       -62
+         45]
+ [      -85        90       -77        71        20        17        70       -22        60       -16       -58        -5       -40        30         9       -85        95       -48       -47       -53       125       -42       -13       -47       104        80       -42        60        80        21      -107       -11        71       -73       117      -113        24       -34       125      -116       -61        53       -16        12        88       -56      -119
+       -122]
+ [      -80        76        88        30      -125       -39        20       107      -120       114        -3       -74       -88       -12        12         0      -113      -106        17       -30       108        44       -51       -21       -12        60       114       -65       -43      -115        58       -99       114        29      -103        62        32       108        -1        20        52       -77         1         2        55       -94       -16
+          2]
+ [      102         7       -13       -63       102        83        80       -44        59       -75       -24        60        51        59       -71       112        21       -75        51       -11        64        45        81        22       -82        99        38       -72        42       -66       -99        22        75        61        59      -124        32       -57      -102        68       -85        67       -62       -49      -102        26      -122
+         41]
+ [      -54        -8       -37        57       -33        65       -12        86       -94        -8        59       -86       -16         5        -8       -67       -51        74       -90       -98        23       -61       -76         8        30        14        32        86       121       -72       -61      -106        80       -93      -103        -5       111       121       -89      -120        45       -82        32        27        39       -80       105
+       -108]
+ [       51        71      -124         0        98       122      -103        84       -97       126       -96       -17        27        22       -69       -87        75        64       -79        -1       -79       -29      -126         1        85       -13      -122        51       119       -51       109        -7       -98         0        98        53        80      -120       -70       -52        -3       -47       120        -5       116      -122       -24
+        -44]
+ [      -29       -96        -1        72       -22       -36        39        53        36        76       104         8       -27         3        77       -30       104        49       111       -30        13        36        66        82       -41       -96       -89       109       104       -26       -93         0       -75        59       -17       -18       -28        62        79        46         3       112      -103        40       102       127        99
+       -120]
+ [      -72       -85        60        73        36        94       -55      -120       -32       -71       -86       -58        84       -76         8        55        32       -15        65        92        -5         4      -126        54        38         6      -105       -26        59       -42        65       -85       -82        34       122        46       -20      -127       -94       -96         3        -3       -79         5        18        66        86
+        -33]
+ [      -74       -94       -18        33       -43        78        -6         8        95         3        30      -125       -51       -51       -75      -122        95        29       119      -106       -66      -122       -40      -109      -127       125        38         1        12        21      -103        71       -23        -3       -88       -50        50        -7       106       -98       -25       -76        30       103      -112       -44       -50
+         58]
+ [      112        -5       -41        28        99        54      -125        62       -43       114        -2       -36       -31       122      -118         0        86         5        86       117       101        37       -72       -48        32        24      -101         0      -110       111        32        20        58       124       -66         5       -10        70        84       122        53        48       -93       -88        34        92       -83
+         84]
+ [        8        79       -32      -120        80      -122       -58      -105        95       -32        92       -88        22       -91        88       103       112       100        71       -75        46        41       -52        56        -3        -6        66       109       -34        84       112       -37      -104       104      -122       110        -8       124       116       -36       -41       -35       -88       125       -46         5        95
+         94]
+ [      -95        -4        74       -66       116       123      -128       -93       -91        88       -24      -106      -118       115       -39        93        94       -49       100      -100       -30       -43        41        -9        55       -35       106       -18       -68       -47        35      -126        17       -82        -5       127      -122        35        31      -103       -80       -68         7       117         4         3       -31
+        -78]
+ [      -75       -57        53       -38        97        89      -113         9       -13        86        85       -44        72      -110       120        14        71      -116      -111       -38       -29       -76        -5       118       -34       -74         6       115       -16      -118        55       -51        -8        38       -64       -63        10       -54       -87        -1        25       -75        93       118       -16         3        75
+        -30]
+ [       71      -121       105         6       -14        60        67        66       -16       -48        40        73      -109        95        75       -74        67         5       -20        55       -53        -9        49      -111        32       -57      -115       -16      -108       122       100       -85        97      -107       127       -97        84       -64        13        15       -71      -113       -30        95       -12        77       122
+       -105]
+ [      -92      -124       -96       120       -75       -71       -93        35       -82        88       -81       -13         5       -91      -117      -113       126      -118        82       -62       -29        29        32       -30       -15        41      -106       -95       -58         5       -96       -71        69        56        61       -31        52       -47       -28       -61       -46         8        70         9        23        46        71
+         32]
+ [     -105       -31       -71        71       -61        48        32      -113       102        83       -64       -72        24        25         6         0       -23       -54        94        86        56       -86       -20        68       -50       127        97       -82       -79       -45       -17        16       118       123       118       -81       118      -117       -21        63        58       -72      -111       -58        62       125      -114
+        -73]
+ [      -50      -113        78        56      -122       -13        17       -97        -8       -23       -59        82        32        84       -14       -38       -40       -73       -35        -2       -40        87        -8       -60      -106        13        41       -43        60        26       -29        65        -9        84        88         0       -36        -5       -45       -36       -48        91       -32       -15       -53       -15        50
+        -88]
+ [       75       -46       100       106       113        69        65        96       108       -79       -50      -117        14        -4      -109       -73        34       -57       -82        93        55        47       -73        91        91        96        79        29        84        43       -30       -48        93      -103      -106        63        70       -30       117         2        49         2      -101       -35       -34         2        22
+        -89]
+ [      -90        73      -116        28       110      -100       -53       -63         1        87       -80       107        54       -95       -94      -111        39       -82       107       -70      -107      -110        83       -64        39       116       -27        60         3        97       -67       -71        -3      -120       -37       -59        94       -77       -20       -49        82       -40       -35        10      -101       -92       127
+         94]
+ [      126         2       -86       -92         9      -124       -46        87        37      -124      -125        10       -24        21        66        96        69        45        96        73       -31        18       -72        34       -89       -21        46         1      -111       -43        83       -78        45      -128       -98        38      -126        87        42        12        79        19       -51        94       -87      -108       -87
+         18]
+ [      124      -112        83        28        86       -89        47       -94         3       -65       -51       -69       -82      -110       -44        75        54       -15       -13       -76        96        77       -90        13         7       112        45       -48       -92        72        20        -6        12      -111        87       -76         9      -120       -77       -26       -98        88       -17       -61        93       125        52
+        -64]
+ [       81       124       123       -70       -91      -104      -117       -13        75        86       -63       -75        -5       -67        72      -112        75       125       -90       -67       120        35        78       -74       122        16       -75        75       -79       -29      -121        66       -21        33        39        22       -84       123       -70      -113        24         1       127        -7        68       -14       -56
+        -84]
+ [     -117      -120       103        22        73       -63       -66       119        71      -110       109       -60       -49       -93        65        89       -90        49        92         2       -68        64        49       -73        -1         7        76        72       -94       -70       -43       -15        21      -111        68        59        66      -128        35      -101        78       102       105        48       116       -80      -127
+        -37]
+ [      -64         0        30       102       119        90       -96       -62       -35        36       112       -28       -68       -84        90       -74       -93        78        68       -47        19      -123        25       -42      -117       -19       -17       -91       -65       -71      -113        46        17       118        48        79       -21       -97        95        51        16      -128       -25       -72        31       -61        19
+         53]
+ [       20        89       -21       -57       -81       -30       -14        -7        73        54        80       101        -8      -108       -97       -82        64      -101        76       -67        71        43        51      -120        79       124        84        84       -51        62       -20        14        70       -31       -26       -95       -89        82       -40       -63       -66        19        -2       -84        92       -11         0
+         79]
+ [      105      -125        85       -88      -114        30       -58       111        66       -38       122       -91      -105       -43        28       124       -55       -55        89        48      -111      -102       -70        43       126       124       101       -74        16        23       -94        -4        94        83        35       -74        21        11       -82        86        75        68        62       -92      -122       -28       -72
+        125]
+ [      -69       -62       -26       -62        90        86       -40        97       -68       113      -105        54       -24        66       114       124       -61        40        65        38        51       106       -96      -115        63        25       -33        14        -2         1       125       -53       -48       -66       113         2       -28      -121       -13       -27        74       -97       -51        80      -114       101       -52
+         95]
+ [      -50       -13        75      -115       -93        25       -13       122       -16       -51      -122       -91         5        24        33        19       -81      -117       -34        27        54       122        -7       -21       -82        30       -45        42         1        40       -65       -44       -84        23       -93      -103       -95        53       109        31       -90       -33        25        99      -107      -105       110
+         71]
+ [       63       -86      -123        16        80       104        60       -82       117      -120       -28        40       123        42       -68       -44        87        78        95        50        35       -35        57        29       -17        45       101       -29       -77       -95        80      -121       -94         1      -123       -42        94       -55       -98       -28        64       119        28        91       107       120        -2
+         95]
+ [      127       -11       -63       -81       107        32       -59       -84        31        41       -98        68        28        21        93        84      -114       -79         2       -41       -30       -60      -106       -71        13       -57       -79        60        85       -97        58       -84       -44        -7       -38       108        60        51      -117       -94        46        56       -80       -62       -10       126       -64
+        -81]
+ [       50      -121       -67         1      -109        23       100      -120       -36        22      -123         6        39       111        54        68        96       -40      -124        72       -12       -30       -60        53      -113        14      -114       -51       124      -105        17       -71        32       -82        90        -6       -64      -102        95        61        81        -2       121       121        93      -114       -11
+        -38]
+ [       -3        31       103        65       -84       -92        68       126        32      -120        11       -23       113      -122       -17       -93        -4        17       -14        61        63        42      -100        66        29       -77        47       120       -73       127      -124        70       126         5        24       -58       -66      -111      -125       -48        20        82         8        79        48       -17       106
+         46]
+ [       10       112       -64       116        20        34       -72        63        48       -27       -57      -117         6         0       -44        77      -113       110        26        13       -22      -110       -37        44        99      -108       -81       -58       -30      -103        77        15       -62       -48         6       -82       -20       120       -80      -106        -8       116        67      -126      -126        70      -106
+        -79]
+ [       70       -16       -54       124        94       -15       -24         2       -26        75       -68       -59        75        67       -81       126       -99       -89        40         1        -8         5        12       101       -30       -61         8      -105       -50        59       112        45        27       -15       106       -46        41        26       -11       105       -72        25      -109        77       -17       -53        18
+        -86]
+ [      -63       -58        98       -15       -73       -95        19        32         3        23       -14       -42       -89        15       102        33       -43       -12       -75       -38        63        96        45        43        16       -60       125        88        97       -48       115      -123       -69        99        82       -27        -1        86        33        98       -53       -73       -25       -36      -114       -53       -12
+         25]
+ [       15      -128        18       117       112       -92       -22       -42        -4        34       101       -86       -52        55       115       -98       117        60        98       -86       -43        -3        56        73       -88       -26       -50        91        92        83       -63       -89       -29        22        98       108        79      -100        -6        20        -4        90       -29       110      -125       126      -115
+        -86]]
 
 Matrix B (SINT8 loaded from .npy):
-[[       97        83       -16        91        94       -23       -77       -89]
- [      115       -37       -52       -42        30       110        15        72]
- [     -125      -117        31       -93        92      -111       -19       107]
- [       -7         5       -34      -103       122       -86        69        81]
- [     -112        33       -66        95       -92        95        67      -104]
- [        7        69       -20       -22       -67        69        57       123]
- [       35       -40        62       -41        89       -24       -86        92]
- [     -111        27        33       -70       -50      -109       -76        26]]
+[[      -59       100       -55        17      -124        91        39        27       -45        45       127       -30        28        -4       113       -57       -18       -12       -96       -97        64      -117        15        77       -99        19        60         5       120       -71       -46       112       -82         0       109      -111       -79        62       -84       -70       -87       -50       -20        30        -7       -56       -14
+         11]
+ [      107        56      -107       -90        92       -90         7       115       -57       100         4        41        14        20      -121        19       -49       -96        89        46       -26       -36        93       -95        19       -60        81       -59      -125       -52       -92         7       -72        92       105        74        80        73      -117       -56       -73       -39         2        63        10        -6       119
+        100]
+ [      -15       106       -10       -23        78       118       -28        24       120      -114        30      -119       -74        99        61        32       -61        56       -56       112       -84       -44        88        21         5        32         7        23       -69       -29       -51       -40        25        12        -9        94        -1       105        70       -60        63       -56       100       -67         9         2         8
+        -13]
+ [     -105        -8       -94       -14        58        -8       -11        26       -35        71       -72        88        60        45      -105       -75        76        23       108       -98       -72       -13        80       -95        19        72        28       -32      -101       121         0        81       -53       -98        29       103        45       -32      -114        85      -109       -70        39        61       -64       -41         5
+         14]
+ [       83        16        92       113       -96        57      -127       -44       -12        81        12      -107        73       -35      -101        75       -83       -32       -73      -122        18       -47        62      -125      -124       -34        24       -83        -7       -27       -83       110        -9      -104         2       124        44      -119        86       -49        41        56       -84        72        70       117       -50
+         64]
+ [       13        86        60        35       -70        12        18        13       -24        71        43       -66       -16        94      -102        42        -4       -44        83        10       -12        59        15       -35       -83       -21       -37       -89       -63        -8      -115        92       -43        79       117       114       -41       -49       -34       115       -49       103       -13       111        47       101       -81
+        -90]
+ [      102        -8      -127        97      -111        -4        71       109      -108       -36        13       -86       122        39        79       -86       106      -128        30         4       105       -67       -86        42       -60        83       -85       -63       -85         5      -126        19        -7       127       -14       -89       -22        90        15        93       122        42        50        90        18       100      -123
+         79]
+ [     -118       115       108        35        47       118       -54        18       -75       -40       -61      -101       -92        69       -66        65      -114        45        90       -38       -17        -5       -59       -38         5       -25       -94       103       -35       -46       -69        72        43        48       -93       -87        61       127      -116       104       -42       -99        15        48       116       -30       -59
+         64]
+ [      -36        75      -117       -15       120        43        65      -109        -2        14        11       -23       -13        40        10       -89       -39       -77         7       -66      -100       126       -70        -2       -99       -83       -17       -82        75       -43       -34      -117      -112        95        80       -60       -39      -128        83      -117       119       -77       124       -39       -67       -50       113
+         51]
+ [       42       -43        77        94        36       119        31        30       -63       110        62       -50        28       -80        40        91        19       -45       100       -30        61      -126       -65        25       -57        88        65       -70        -2      -104      -122      -127        83       -75       127        58       -41       -30        74        38       104       -88      -111        25       -27      -113        61
+        112]
+ [       49        -4        83       -22        60       114       -81       -47        27       -64        72        58        20      -101        66       102       -55       -32      -110       -65       121       -17        27        70        35       100        58       -60       114       114      -112        15         6        71       -52        66        -8       -46        31        71        30       -87        29        -8       -63        12        72
+         25]
+ [       31       -40        93      -109        61       -68        16       -48        -1        16        17        97        -1         4        16        91        35      -121       -87      -103        67      -110       104        -1       -62       -15        94        93        31       -82      -125        12        63       118       -25       -86         8       -34        44       -16       -28         8       -38       -57      -100       -67      -111
+        109]
+ [        7       109       -38       -77       -41       -85       104       -12        96        67       -90       127       -84        62         8       -35        69        19       -55        54       -90       -35       125        65        -7        33        83        78         5       -33        96        82       114        58        62       -80        24       -41        46        56       123        72       -53       -93      -102       -99       103
+         62]
+ [       53        67      -117        95       -92       -36       -37       -85        98         3       -76       -54       119       123      -115       111        93       -37       -46       100        44         3       -75       -36        46        68      -124        -5       -63       114       -95       -65       -92       122      -114       -91       -89        94        69       -53        95      -115      -111       115        -9       -16         8
+       -107]
+ [     -110       -98        48       121         6       107       -64        88       107       -39       120         5      -120        74       -45        -2        26       113       -75        19       -12       -46        -4      -103        94       -78        84      -115       -21       -77        69      -114         9      -118        10        99        46        59        22       106       108       -48      -107        80       -20        11        37
+         19]
+ [      109        61        90       -11        61      -118       -28      -112       124      -102        19        51       -10         1      -120       113       -44        93       -33       -79         2        96       -35       -73       -82       -61       -56        -4       -59        37      -104        37       -24       -37       -79        -1        70      -124        55        32        11       -96       -55        95       -97        77       127
+         46]
+ [     -102        70       127        30        39        82      -106       -48        24        83       109       -69       -38       -36       -92         9        93       -34        51       113       -78         3       -23       -96       -64        59       -56       110       107       -68        86       -90       -79      -114       -31       -54        47       -90       -71        50       -69        84       -81       -37        12       -96       -65
+       -113]
+ [      127        70        92        89        17       -20        69        86       -78        19        97       -97        40        77        85        58        67        13       -69       111       -61       -52       -55       -15       -90       -64        97      -105       -91        24       123         6       -17       -83        44        18       -11       -49       -94       -57      -101        -1        49        92       -87        99       -94
+         -1]
+ [       69        19       -42       126       -83       -95        12        79       -28       -29       -30       -80       -60        81       -41       119       124        49       -29       -96       118       -45       -89       107      -125        72       -54       111        19       -43        75       115        42        42        18       105        39      -114       -90        15       -52       114       -27        60        67       -46       -92
+         86]
+ [      100        33         3       -81      -124        63        97       -65        68        97       104      -120       -95       -84        72      -117       -23        87        64        91       -14        60      -116       -27       -87        70       -49        28         7        25        36       -66       -75        -4       -41       -84       -27        94        14       -40       -27       106        18       101        69        90        50
+        -61]
+ [      -93       -29       125        79        82        48       111        79        44       123        80       -99       -53       -81       -63        77       -40       104       -76       117       -21        47        -7       127       119       -18      -128        66       -19        89        53       102        23       -60        91       -20       -25       -20       -55        63        60       -58       -79       -65        23       -76        47
+        -70]
+ [      127        -7       -21        95        32      -116       -45        28       -74        97       -80        17       -66      -123        51       -68       -71        76       -54        87        36       -85      -116       -60        74         9        18        80       108        40       -19       -13       -88        23       -92       -36       -97       -67       -30        -9        47        83        77       118       105      -103      -121
+        112]
+ [      -45       -29       113        65       -14        -7        28       -66       119       121        49        80       -87        92       122       101        81       -72      -116        27        39       110       -41        13       -85        27        38       -31       -27        88        -5      -104       -64      -101       -77      -109        58      -119       -81        22       110      -118        36         0      -102        90       -43
+        -65]
+ [      -51        21       125        63        -8       113       -21       -90        30       105      -113       -53       -12        72       -13        58        50        41       110        22        41        77       -23       126        26      -105      -112      -117       105        95       126       -76      -106        49        83        14        88       127       -48        -2       -75       103       -52        70       -34      -109      -113
+       -112]
+ [        4       -80        90       -79       -84        66        72       -99        94       -54       -94        33       -87         4       -62        25       -89        35      -109        89       -81        57        37        96        93        50       105       124        19      -110      -116       -18        42       -64        57       -80        82        32      -122       -22       -39        73       114       -29       -16       106        17
+         -9]
+ [       94        85       -68        27       108         7        93        24       114        69       -88       117       115       -23        63       -14      -117       -85       -10       113       -30       -79       125       -98        83      -127        51       -13        45      -115       109        -9      -123        28        55       -10        45        19        51       -86       -87        35        30       -10        99       -74       -51
+        106]
+ [       97        24       -15        44       124        47        16        36       -83        73        88        41      -110       -96        43        60        21         1       113        94        25       -78       -54        52       -30       -75         3       -13        64        25        60       -70       -91       -93        66        92      -110        74         1       105      -111       -13       -68        82        93       -60      -115
+        110]
+ [       15        21       -12       -72        57        18       104        22       -43        61        12       122       104       -85        14        42       -89       -43        68        67       -28       -93        19       -98        16       -38       -67       -44       108      -121        60        66      -104       -54       -77        92        36      -120       -76       -78       -12       119       110       -36        85       -48       -92
+         45]
+ [      -26       -56        82       -76       -56        20       -78       -77         5         2      -122       -46       100        87        62         4       -27       110        37       -52       -65      -112        -6       -20       -31       113       -62      -126       -55        35        96       121      -106         9       -50        97       118        63       -76       115        69       -34        29      -106        87       118        50
+        122]
+ [       31        85      -125       -61       -12       -22       -64        71      -107      -109        32      -107        97      -127         2       121       -30       -24        29        76        67       124       -39       100       -46        -7       -20       -16        41        23       105       101       109       -22         3      -127       -88       -73         6      -110       -91       -75       -24       -70       -31        11       -39
+        -39]
+ [       14        66        36       126       -50       -25        31        81       -91        92       -45       -28       110      -123        10       -26        98      -126       120        -9        19       -30       112       100       -56       127       -25        14        37       110        -2       124        18      -124       -97        -1        95       -71        84       -93       -95        99        43       -66         1        -5       114
+         27]
+ [      102      -123        -8        10        44       -77        94       -90        45        -6        90       -40       -26       -75       -34       -48       -94      -103        41        69        77       -42       110      -113        71       -33        24       -54       -13       101        45       -83       111       -73      -115      -128        91       121        19        86       -64        16       -46        75       117        52       113
+         53]
+ [       83       -73       -28        90       -46       -32       -92       -98       -92       -42       -98        61       -23        80       -97        92       112      -111       111        10        66        71       -24       -25      -105       124        20        98       -41        17       -62        33        45       -14        -2       -31        87        98      -122        20       -30       -67      -110       -80        96      -118        28
+       -120]
+ [      122       -28       -78       -33       106      -125         2       -68       -69       -71      -118      -110        37       107      -102        -5       -72       -87        30        97        17        38        59       -13        75        69       120       -70       -58       -95         5       -80       -98      -108        32       -93       -57        98       -43       -58      -100       -32       -73       -49       -76       119       119
+        -89]
+ [        9       -29       105       -52       -12       -67       -88       -78        62       -69       115       114       -96       -55        55        53       -20       -28        36         1        66      -126        34       -81       -58       -68        13        90        76       -31        81       -47        45       -85      -112        88       -52       -41       123       -28       124       -98       -71       -30         0       101        -3
+        115]
+ [       70         8       -86        14        66        16       106        10       -57       -49        99        79       126       -36       -60       115        62       -83        33        93        91       -69        27       -21       -49       114      -116        10        -5        38       -69        78        64       -46        84        43       -71        71        59       -34        64        20       -53        28       -17       -74      -115
+         52]
+ [       93        27      -115        32        92        14        92      -113         8      -125         4       101       -50        96        -1       -41       121        91        87         6        11       -24       -87        13        49       125        41        60      -126        41       -23        11       -69        -7       -75       -20       114        37        29       -29        68        72       -10       123        23       -27        66
+        -92]
+ [       71        35       104        42        86        81        28       -34       -47       -56        54       -11         5       -90        39       -49        90       109       -91        89      -113        69       -78        -3      -116        -6       115      -113      -123         7        14        65       -63       -37        -7        75       114       -47       -47       -22      -106        72       120        77        50        24        25
+        -10]
+ [       56       -13       -70        38       -88       -81        35        64        17        76       -11      -108        21      -104       -75         3        47       -93        90       -47       -16       -94        23       -10      -127       -84       -45       -45       125      -112        62         5       -12       -25        31        18       -81       105       -10        92        60        -4       -65        34        31        44       102
+         48]
+ [      -14       118        16        54       -32      -106      -123       -28       -87       -46        92       121        86         8        40        17      -117       123        55       -18       123       -73        52       -21       -77        55        16        27       -70         7        49       -56        -1        61      -109      -120        94        87        40       -26       -53       -14      -113        90      -117        39       -91
+        -14]
+ [      -24       106        51       -39      -109       110        95         7       -41       -89        76        40        46      -121       -41        54        91       -32      -128      -116        18        -1       -95       -67       -79       -61        19       -28       118       109       -32       -13        71        -6        98       -99       -78        -4        95        12       -64      -118        90      -122         6       -57       -69
+         64]
+ [      106        17       -27        85       127        52       105       119        73      -121       -67       -69       -28       105       -91        96        22        83       -81       -49       -50      -116        61      -103      -118        18       116        48       -68      -125      -118       109       103        49       -64       -56        43       -70        -8       -66       115       -51       -60        67        42         8       -90
+         79]
+ [       -5       -57       -37       114       -53        87      -115       -19       -81        84        53       -27        44       113       -43        83        73      -122       -72       -90        45        69        29      -105        56        12        31      -118        92        79      -121       121        75       -27       -17      -102        89       -75       -52        11       114        25       -93        31        40        -3       -75
+          4]
+ [       96        35        35        55        41        62        58      -100       -91       -48        41       -44        49      -120        29         9        84        22        62        42        63       -13      -108       -94       -91         9        72       125      -106        88         1      -108       -41       -20        36        47        44       116         1        78       -58        72        23       -44       -34        -7       -63
+          2]
+ [      -77       -23        -7       -57      -124        72       -85       -29        11       -35        54       -88        98       -65       -74       -45      -109       -59         5       -86        51        24      -100       107      -128       119       115        78      -122       -64       125      -116        47        17      -120        82        61       -42        38        80       -69      -114       -59        35       -94        67      -123
+         77]
+ [       50       112        -5       -87      -121        13       -63      -104        98      -117      -102       -92         2       -50       -42      -104        90       -83      -118       122       -58        -2       -74        90        17        12      -115       -75       -41        71        40        94        25        30       116        46       112       110        89         2       -12        -3       100       -59        31       -57        79
+        -54]
+ [      -58       -57       -27        28       -72      -113         3      -119       -55       -19       -97        15        -9        11       -29       -37       -14         8        37        92      -111        13         6       -95       -99       101       -54       106        23        20      -124         5       -79        70      -114        85       -18        31       124      -113       -71       112      -108       -34       112       121         2
+         40]
+ [      -43        90        -1       -87         7       123        44      -124       -20       -23        75       -64        49        57        54       -49        69        18        69       -74        18       -88        98        72       -63        65        45       -38       -94        76       -82        13        26       -62       120       -70        16       -25       -92       -57        21      -118         8        84       -91       -98       122
+        -79]]
 
 Golden Result C (SINT32 loaded from .npy):
-[[    18010    -73885     -1879    -64160     95373    -21785    -58526     38092]
- [    27066     35525    -42406     67191    -65587     34180     34635     -3407]
- [   -41732    -68112    -11690    -31637     36953    -25607     -2219     67306]
- [   153751    -27718     38345     37545     -9921     39467    -63638     27928]
- [    -8512     31195     21590     -8336     37319     10732    -27150     29583]
- [    -7202    -79784     92168    -16493    -56459     26703     48650     29825]
- [  -108401     16027     16865     21191      3406     -3644      -260     63996]
- [    31031    -47806    -63951    -81754      2409     29183     68141     20712]]
+[[   -44102     45715     -8997     14146    -47793     70952      2102     70804     13953     -4585     -2266    -98846     30422    -13667    -12622    -52416     17787     -1426     -4997     17947    -21375     -8278    -31747     47504      2760    -12928     -3965    -50733    -20197    -38968      3943    -43350     -3079     23028     58779    -17399    -37999     38289     30905      9545     10880    -21535     12859     22008    -15342    -18291    -23077
+     -44901]
+ [     3380     16649    -49873    -63355     18359     32441     62606    -66914     85609    -50132     -4130     61522      1314     25422     85510    -56444    -25916    -50958    -98352     -3650     25967     24825     -7338     16836    100389    -17801      9503    -37333     37018      3205    -73086   -105776    -10763     76774      9946   -148283    -23296     48375     68634    -37185     58323    -45175    103829    -22366    -48906    -37675     44469
+     -27882]
+ [   -36358      3736    -75676    -81905    -41704    -77448     37568     -6499     13965    -43916    -54462     56953      2778      3326       884    -84089    -52077     11252    -22519      7903    -23707    -14303     17252     34585     69035     -3561    -34153     43764    -13138      9962     -4702      3574     -2914     47848      7347      2364     -5314     16746    -11905    -48312    -30060     17368     92906       579      5038     -3766      1566
+     -12919]
+ [   -29275    -27065    -45496     35788    -32632    -49444    -34912     20908   -103422     -1644   -111849    -34284     36857     -4093    -80929     23487    -12251    -36701     90345    -23475     21783     39118    -43789     16795    -16765     31609    -51873     39276     26937     31567       530     15784    -10138     48675    -72112    -27547    -22070     20456    -33501     34909    -32895    -30214    -28715    -41028     44803     19384    -46043
+      32996]
+ [    -7933    -49349     28405     47642    -18397     18641    -39827    -29374     15413     35020     90055    -18315    -19506    -32529     34478     28636     39802    -65802    -85692      7900     39892     37965    -38125    -17189    -18279    -14103    -65470     -2243     78663     65707    -70289    -34960    -26051     30168    -35931     30235    -97817    -22477     70812     34369     77794     28252     -8599     -2619     30273     36036    -86821
+     -30431]
+ [   -40443     33154    -56860    -22439     55767     47609     51742    -28790     46654     -6500      8353     10322    -28885     36344    -14569     38363      5738    -36969     38436     -8522     -6098     25593     13990     -1819     25958    -81255    -32708     22808     35755      -630     -9915    -65119     37588     54184     14126    -77317    -39528     29870     58740    -25062     52001    -66401    -38438     -4252     10850    -87521      5321
+       9544]
+ [    17663     -1574    -27696     12844    -38936    -12268    -48007     -4861     17018      5173    -23818    -14244     22774     48861    -24778    -21278      7497      8203    -49835    -15741    -25641    -63577     20970    -36558    -20461     57090     37626    -22676    -11861    -54060    -26662     40517    -13101     38979    -22434      4051     25753    -35026     11428     -8475     44972     -3775    -55606     26038     12010     19691     27827
+      52478]
+ [    25796    -38867     -2545     39849      5638    -37777     25360      4226     32036      4008     60106      2733   -111163    -23836     42521    -17400    -35397     24421      2325     28451     22224     -5025     -9448     24053      5081     14556    -21740     53437     28056     19950    -15189     -5016     23122    -19782    -46338     36051    -63950    -24798     66469      8523     42609     27731    -37153     55087     55268     53121     28087
+      19559]
+ [    20283    -29381     14241     45823    -12248    -71689     27308     29189    -10058     32990    -20734     -1442      5424     44454     32266    -19589    -32766      4442      4002    -10341     14656      -802     -1512    -28776     13812     -6520     -8346     24914    -23863     -6759     55914     -3990      4907     -4110    -72114    -32831     25995    -47542    -24090     44973     20420     54735     23635     -9083     15555     64850    -43326
+      46700]
+ [   -41792      2074     -1325     25152    -66004       896    -63510     20580     26002       176    -24632     -9751    -22578     16674     -1714      7566     46989     13889    -68983    -14558     22137     51397    -72474     75849    -10978     37661     -9199     42685      6376    -13771     39643     10857      6319     -8859    -21522    -10723    -25641    -90747    -38365     16531      1298    -28550    -14715    -10901     -3108    -58081    -50071
+     -69811]
+ [    33601    -62285     38920    -17640     58972    -41453      3129    -18737     11720     40644     18451     74803     21236    -54741     34204     21762    -41698      7500      6621    -10286     45180    -16011     -2969    -26517      6383     -2550     14323    -10889     12067    -20622     47935    -41395    -31389    -49097    -57777      7360     -1533    -62774    -10670      9214    -70510     -4583    -24771     24440     17518    -17382    -38064
+      27174]
+ [      659    -68159    -42350    -47945     48318     -9254      7268     24042     -6736    -27715     31268    -11235     -3283    -77865     -1645     24867    -44701    -26881    -13495      3697     37250    -21997      6516     61487     60443    -24613    -36546    -10617     79176    -24994      9023    -15724     62903     18398     22847     25354    -71313     14038     47829      8114     13209     -1413    -38038    -25805     13670    -43468      7705
+      30228]
+ [    34551     -5343     -8661     46619    -16567      2325     42388     -1478     40236    -66925    -11205    -84204       828     28060     28192    -17300     63720     21647    -87352    -20247     13457     25730    -40131    142558    -34583      3334     -9951    -37382    -41580     48415     36748     42788     26207     31518      5381    -49977     40811     -4713     -4085    -11803      8279    -30545     18918     25982    -28638     -6843     50642
+     -29206]
+ [   -22947    -69277    -11100    -14854     13110      3820     -3392     37720     43092     44241    -29415       926     -4687     -3639    -61285      2249    -24479    -34623     25380      1541    -40556      2597     -5360    -40577     34115    -47143      2983     22365     -2983    -83566     48894    -15909    -15101       862     -4815     33727     15581    -22078    -55953     58746     56018    -22294      -946    -31085     41032     18166     -7135
+      22261]
+ [     -497    -17816    -12705     54175     59686     36837     11537     58990    -59790      3762    -19347     19951     -5491    -19605    -18203     15039      3991     33053     66373     18607     21826       -59    -31479     36998     50847     44044       272     29061    -64239     19465    -45143    -18205     -3356     -4555     24974     52320      1828     86831    -31832     51918    -37242    -34034     -5433     18303     41682    -68320      2133
+      11872]
+ [    55400     39560      1465     16860     23454    -56809    -17960    -44395     62797     16485    -23618     17188    -36194     91117     12795     11001    -17918     11516    -32784    -20544     36629    -11874     24919     -4165     -5610    -32374    -10916      2235    -21557    -10034    -20398     15126    -55489     54683      6099    -61139      9368    -18179    -11581      -251     50459    -25382    -36802     39731     -1692     -8560      9134
+     -21359]
+ [   -45023    -36239     30027     11179     13598     69973      2371      4548    -51794     -3922    -51461     47948     23424     26611     -9243      5995     17375     46897     20102     15497    -66257     33557    -50553    -17506     47575     24472     -4611    -19741    -45682     30951    -12372     48332    -44771     17794       758    107779     37120     18782    -54398     54371    -42510     36835     41052    -20741     67062      4383    -46113
+     -14236]
+ [   -38391    -15208     39156    -16357    -61030     28144    -22352      1611    -50695     75347     -1025      -263     63826     15517    -45838      8622    -43346    -37298     74926    -49731     -3967    -53668     39913    -52439     17464     41038     23644      9941      5981    -46763     -9194     36494     14052    -37790    -16220     27787     25024    -29327    -16319     -2419    -14981     52032    -44647      3151     15978     38188    -29654
+      33217]
+ [   -30512    -13021     57792     28495     -9607     17284    -24263     -9632     18937    -34608    -25899    -61411      2721     -1694    -15487      9932      9430     46405    -36010      5982    -18066    -31217    -81263     -5839    -58431     40561    -22289    -13249     -1227    -31121     53238    -28667    -30571     12588    -54559     60407     32440     -7514     -3196     53345     15873      1556      4402       770     -6919     28604    -53318
+      26143]
+ [   -29176      2533     18610    -53592    -54715    -35746      3300    -24741     68070    -20092    -61944    -10792    -21522     14535    -32350    -49878     -1572     50281      8042     19025    -62841      9468     25159      2878     12308     19831    -46142     47303      3863      -982     54970     33793      -560    -18590     13957     96781     -4497    -33962     65985    -22596     -1517     86924     14450    -53345     -2450     42880     13106
+      -9592]
+ [    -2110      7091    -67943     20494     56416     21636     27630     16623    -40864      1860      9757    -35129     23707     13394     21642    -24508     44998    -40711     64269    -12623    -17497      9842     -9405    -29119      7000    -37890    -19532    -42654     15044     -3967     53671     -9207    -22410     -9222     62556     34567    -28500    -16690    -34997     44171    -21446     26876     35415    -19003     48360    -30199     17576
+     -27614]
+ [    41354     92648     -5627     12753    -44053      2655      1555     -2581    -18119      5613      9752   -100247     46168    -54898    -79613     26498    -25343      2108      1287     18385     24310     -2235     -9806     37159    -55263     50936     -7392     25440     -8768    -27719     -4708     51026     16969    -28224     36854    -73837    -19422     -3060    -30463    -55745    -84155    -28935    -38282     41719      2797    -42148     39357
+     -68856]
+ [    63986     43528      4834     29157     80506     -4682     45073      8581    -42952      4963     33300    -43432     38170   -104434     -7360     10642     14008     17523      1354     74585    -33241     -3223     -4143     23020    -43463    -26648     10375    -42564     40303    -16983     58840      2854    -69892    -80613     57483     63971     -1564    -51903      1256    -64227    -62421     74829     16846      -789    -23693    -20204     60364
+      12155]
+ [    19743     -9928     61384     71812    -12464     23421    -62187      3367     19601     33850     14835    -31280      2515    -32659    -68882    108672     42526    -19229      8498     34205      7467     41533    -37856     -2669    -36456     -6086    -55045     15468      3985      3117    -34604    -15040    -11474    -57970     37748    151327    -26797    -50551     17288     24056     -5700     34154    -34124      7400     19814       718    -46048
+     -31932]
+ [   -78759    -15867     99847     12444     13263     88547    -53449    -61769      7723     36857       115     25540    -32302      1392    -22774      8218    -14158     12220     30659    -21279    -27973     38447     24935    -38109     35303     -1802      5333    -32494     39271     12490    -23195    -44371    -15244    -46010     12752     81291     55866    -16213     39827     43366     12967     58094    -28731    -53790     -9230    -17238     20468
+     -44563]
+ [   -47735     12264      1354     31402   -100390      1116    -77209    -30360     -3322    -54734     26327    -20918    -22805    -12581     33182    -10988     39066    -30141     -2769     27152     23880     28456    -55905      4490    -35774     60830    -38565     99578     12253     15230    -35889    -14994      3090     18829    -96381     -8764    -15411     21429     51137    -24867      5729     12254      6303    -28464      9853     48026    -28294
+     -70195]
+ [   -69245    -55174    -11271    -11896       507    -24000    -48048    -43063    -11957     -8206    -80967     26784    -34127     26137    -23538    -21954     48239    -10209     32677    -23351     -8856     27702    -11420       127     28859     60788      8965    106463     12016    -17250     21954     -8794     46417    -25446     -7886    -15719     12198    -37130    -27171      8914     -1112      9548    -38824    -61460      8548    -64331    -17601
+     -46031]
+ [    35763      6014    -56436       580     -6391    -48844     16004    -35115     46189     -1822    -25604     28034    -31482     12832    -32027    -36836     29961    -32940     77022     23192     36557     34825    -43754     48913     24160    -11395    -24649       722    -20919      6257    100076    -97691    -23477     -5361     52768      5978     -7669     45538     58897     29016     -9038    -28207    -43440      1262    -20522    -34223     48964
+     -42898]
+ [    26031    -45395    -60992    -16010     45244    -83453      5286     -1286     28191    -35820    -49184     29051    -15751     22580     27748    -23280      6578      3154     -5032     46844     -7063    -27723     19709    -35596     35510     14836      -879     24840      -941      6368     13817    -26462      2098     28188    -66120    -13661    -60819     21258     63297     -7932     41691     -7543    -15461    -32762     17831      8862     -9161
+      22312]
+ [   -11048     65797    -52143      7487    -28687     60862     37938       219     -8912     37527    -64559    -35290     13336    -19028    -21828    -39880    -32518     23856     63610     40634    -64288     10608    -25418      7894    -23544      -870    -93494     14840     39486     -7455     12261     56046    -76973     33017     45230      5659    -19568     77536    -21799      3661    -25734     49176     52370      -509     99774    -28682    -42754
+     -12194]
+ [   -25846    -18084    -34247    -54329      1923    -24833     34623    -12667    -24556     33229    -42430    104560     19530     -5978     22951     20598     36889    -38857     27335    -69049    -17356    -19157     45177    -29426    -29568     -6053     36105     54874     35124    -50962    -14477     11841     19168      7095     38483      4205     13607    -95173       489    -63406     -8755     39810      5870    -74365      7793    -46458    -10140
+      43264]
+ [    -2609     65788     19612     62855     -6297     17884     26484     59496    -42328     27795     54126    -15580    -12889    -48678      2429      8941     54282     48478     -3576    -38613      8174      4546    -51709    -18549    -78829    -78682    -31595     43456     54062     -8491     33497     14426    -18125     -4654     17889    -42533    -23853     -9222    -35306    -27134    -63286     32413      5792     31224     14013    -82694    -47109
+       3966]
+ [   -19642      3854    -18500     24530    -10330      -930    -45003     24577     40961    -30365     -8021    -21005    -11798    -47569     13632    -38745    -54295     13790    -40138      8875     -8335    -10895      6872     36096     14466    -26346    -26720     65985     45250    -19526     45600     37793     14441    -19551    -22386     24571     -5735    -46679     57214    -47340    -11368      5102     -6659    -15624     35429    -17660    -49516
+      18152]
+ [   -40722    -39448     37535    -15578     75742     77417     37961     40875     32601     27338     76096    -10282    -57592    -11822     18278       156    -54612    -15006   -109545     96545    -76256     27125      -136    -30266     72406    -59811     97730    -16632     16376    -75914     30851    -66134     22289    -72676     53712    -16087      2144    -30145    -61620    -37171     19722    -45537     56110    -55599     -2506    -25832      6539
+       7316]
+ [    15842    -15381     10983     36865     45292     61889     -5637     21399     40589    -60022     46270     28802    -63505      -364     -8698     64842    -26152     18358    -44734    -89595     29903     -3197    -41638    -54406    -14226    -43383     25283     44345     38220     -1356     -1706     -9115     56794    -39047    -69804     52939     -2895    -80662     14861     40284     77738    -50928     39472     28734     17389      1886    -78153
+      75851]
+ [   -25993    -53237      2484      9726      2009    -20869    -42917     12953     -7919      5944     69009      -416       -99     35694    -28571     32113    -25555    -29928     19325    -62990     49240    -14539     59101    -20786      -801    -11826     32520    -66772    -23827      9603     14991    -40632     30831    -53555     51956     97486    -45144     10311     16446     42797     -5033    -63185    -75642     20280    -48048     51996     31463
+     -15454]
+ [    -6937    -17230     -3867    -50410     62802     12348     17137     25330    -14487     38702      3664     32975    -21783    -62227     31172      4047    -53986    -64972    -22995      9919     -6599     -2718     31654     55645      -296      1714     63293     53282     45322    -83427    -12097      6278     13883     17824     22361    -15021      4163    -88523    -58786    -22959    -38797    -18096     42026    -53940     28406    -69516     -1826
+      54557]
+ [     7290     45296     11753    -16531     32626     81701    -21823    -62884     35531   -125417      8510      3867    -63061     79983     31311     39745    -49531     67739    -20893    -41812     24896     31264      2752     28249     12915    -26202     24396    -16213     39723    -24787    -40031     -4385      -262     11852     28405    -70866      9829     46023    -33602    -21625    -31045    -70177     15821     18350     17974     -2779     29515
+     -35490]
+ [    26169     36331     71455     22712    -53771    -10964       310      5355     13987     -3054     13066    -24050    -14201    -54138    -18553     35600      2288     25855     -4362     -2420     20635    -61324    -22244    -23076     13077    -30683    -54643     38716      6237      6338    -32467     33944     44876    -45771     24235     30870    -29218    -20854     57229      8595     33933      3485      1695      7753     24238    -10312     20109
+      43746]
+ [   -31054     11894    -27273     14424     24257    -35128      7687     24302     -9836     23831    -44068    -51221    -30387      5628     25398    -37505    -64692     82365     32990     52998    -44331     31638    -13297    -32792     44761    -58353    -50046     14026     -1187    -22483       999    -15303    -45095     47213    -29155    -26175    -42562     45473    -20191     -5123     24194     34391      9156     10207     54943     10099     23306
+     -20244]
+ [    11103     96558    -18602     32826    -46765     45813     72784    -24443      8776     37867     -4499    -34797     19494     40890     -2870    -42307    103501    -20483    -51157    -26009    -20428     16020    -42993     55754    -78172     28340     12961     21585    -19042     34877      7034     33141    -48090     30343     61656    -32870     13170    -80314     11099    -17367    -21811     64317     21194     31969    -47815    -32096    -72931
+     -37738]
+ [     8492       841     -2623    -32569    -31325     10587     33923      2657     41959    -51607    -25803     30416     27959     13533    -32666    -16352     14016     21582    -80235    -58585    -30720    -31333       457      8125     -2659      6546       641    -36269    -22717    -53941    -51106     85008     13576     12589     50718     62097     15631    -39016     67182    -39701     47080     20031     27258    -28826     -1119     -7090     42065
+      35150]
+ [   -56165    -22185      6288     31251   -105423      3008    -25907    -19521     15558     41919     31161      9546     67113     13169      4935    -25359     62151     -5120     38674    -61608     28351    -25724    -30080    -59574    -46079     16251    -39885     11189     27652     19849     30576    -53812    -10434     25006    -40585    -39549    -20779     33785     52990     61276     77814    -11414    -87367    -17022    -38668      7475    -40697
+      -7683]
+ [   -32537      3499    -41664    -61243     29752     28224     23332      5902    -44501    -45306    -21266    -19573    -60252      1678      -420    -21998    -46758     18414     31737     48847    -19449     18503       332      3539     23473      -230      5375     91512     11959     -1067     25913      1767     48651     31845     -7291    -42849     -8875     50862    -58472     -6252    -37599     -1788     20983    -53800     35411    -45768    -51087
+       3160]
+ [     -930      9772     30030      3874      3114     11650     28793     38158     36566      3522    -51166    -22294    -46988     77908    -54974    -18027     28508     40060    -44848    -44475    -89149     66813     19513     -1909     29510    -54956     11263    -79886    -50682     24538    -41288     96555     23491     -9363     42546     19665     69601    -47285    -58646    -22179     -9908      5503     74851     41238      2945     40258     84393
+     -17566]
+ [    27839     17193     -4266     53930    -20349    -74733    -19523    -27438    -11037      7937    -35497     22146     -1807    -21735    -23934     13750      8035     43897     68653    -38714     46250     10060       635     16223    -54663     21424     -8202     46981    -38251     48021      3701     10671      5626    -12200    -48216      1144     15165      6423     42658     -5932    -21981     -2160    -68896     46170    -24338     14660     33975
+       6552]
+ [   -23532    -11597     52784     32488     68086      2604    -27681      9731    -14888      9851     -2554     20537    -24571     -9581     63221      1924    -19186     78935     32537     54253    -18289    -28647    -11442     20824     54055     -9921    -30437    -40637     14884     10868     28317    -39588    -78147    -67434    -45378     34055    -13673     22763     -2576     -4362     34643    -14834     27407      2477     -6499     17451     22862
+       3659]
+ [    -3103     16402      2790     62756     17851     51881    -56349     10312     13985    -46063      5750     -6268     34643     22898     11139     67922     73704     29699    -25822         9     39996    -64220    -40100    -33846      1034     18284    -43243    -38414     38755     19769     75991     16928    -19299    -63181      5023     63410     -1071    -17897      7928      4245     71632    -14911    -11742    -17788    -15212    -35688    -68486
+     -21140]]
 ----------------------------------------
 
 HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[    18010    -73885     -1879    -64160     95373    -21785    -58526     38092]
- [    27066     35525    -42406     67191    -65587     34180     34635     -3407]
- [   -41732    -68112    -11690    -31637     36953    -25607     -2219     67306]
- [   153751    -27718     38345     37545     -9921     39467    -63638     27928]
- [    -8512     31195     21590     -8336     37319     10732    -27150     29583]
- [    -7202    -79784     92168    -16493    -56459     26703     48650     29825]
- [  -108401     16027     16865     21191      3406     -3644      -260     63996]
- [    31031    -47806    -63951    -81754      2409     29183     68141     20712]]
+[[   -44102     45715     -8997     14146    -47793     70952      2102     70804     13953     -4585     -2266    -98846     30422    -13667    -12622    -52416     17787     -1426     -4997     17947    -21375     -8278    -31747     47504      2760    -12928     -3965    -50733    -20197    -38968      3943    -43350     -3079     23028     58779    -17399    -37999     38289     30905      9545     10880    -21535     12859     22008    -15342    -18291    -23077
+     -44901]
+ [     3380     16649    -49873    -63355     18359     32441     62606    -66914     85609    -50132     -4130     61522      1314     25422     85510    -56444    -25916    -50958    -98352     -3650     25967     24825     -7338     16836    100389    -17801      9503    -37333     37018      3205    -73086   -105776    -10763     76774      9946   -148283    -23296     48375     68634    -37185     58323    -45175    103829    -22366    -48906    -37675     44469
+     -27882]
+ [   -36358      3736    -75676    -81905    -41704    -77448     37568     -6499     13965    -43916    -54462     56953      2778      3326       884    -84089    -52077     11252    -22519      7903    -23707    -14303     17252     34585     69035     -3561    -34153     43764    -13138      9962     -4702      3574     -2914     47848      7347      2364     -5314     16746    -11905    -48312    -30060     17368     92906       579      5038     -3766      1566
+     -12919]
+ [   -29275    -27065    -45496     35788    -32632    -49444    -34912     20908   -103422     -1644   -111849    -34284     36857     -4093    -80929     23487    -12251    -36701     90345    -23475     21783     39118    -43789     16795    -16765     31609    -51873     39276     26937     31567       530     15784    -10138     48675    -72112    -27547    -22070     20456    -33501     34909    -32895    -30214    -28715    -41028     44803     19384    -46043
+      32996]
+ [    -7933    -49349     28405     47642    -18397     18641    -39827    -29374     15413     35020     90055    -18315    -19506    -32529     34478     28636     39802    -65802    -85692      7900     39892     37965    -38125    -17189    -18279    -14103    -65470     -2243     78663     65707    -70289    -34960    -26051     30168    -35931     30235    -97817    -22477     70812     34369     77794     28252     -8599     -2619     30273     36036    -86821
+     -30431]
+ [   -40443     33154    -56860    -22439     55767     47609     51742    -28790     46654     -6500      8353     10322    -28885     36344    -14569     38363      5738    -36969     38436     -8522     -6098     25593     13990     -1819     25958    -81255    -32708     22808     35755      -630     -9915    -65119     37588     54184     14126    -77317    -39528     29870     58740    -25062     52001    -66401    -38438     -4252     10850    -87521      5321
+       9544]
+ [    17663     -1574    -27696     12844    -38936    -12268    -48007     -4861     17018      5173    -23818    -14244     22774     48861    -24778    -21278      7497      8203    -49835    -15741    -25641    -63577     20970    -36558    -20461     57090     37626    -22676    -11861    -54060    -26662     40517    -13101     38979    -22434      4051     25753    -35026     11428     -8475     44972     -3775    -55606     26038     12010     19691     27827
+      52478]
+ [    25796    -38867     -2545     39849      5638    -37777     25360      4226     32036      4008     60106      2733   -111163    -23836     42521    -17400    -35397     24421      2325     28451     22224     -5025     -9448     24053      5081     14556    -21740     53437     28056     19950    -15189     -5016     23122    -19782    -46338     36051    -63950    -24798     66469      8523     42609     27731    -37153     55087     55268     53121     28087
+      19559]
+ [    20283    -29381     14241     45823    -12248    -71689     27308     29189    -10058     32990    -20734     -1442      5424     44454     32266    -19589    -32766      4442      4002    -10341     14656      -802     -1512    -28776     13812     -6520     -8346     24914    -23863     -6759     55914     -3990      4907     -4110    -72114    -32831     25995    -47542    -24090     44973     20420     54735     23635     -9083     15555     64850    -43326
+      46700]
+ [   -41792      2074     -1325     25152    -66004       896    -63510     20580     26002       176    -24632     -9751    -22578     16674     -1714      7566     46989     13889    -68983    -14558     22137     51397    -72474     75849    -10978     37661     -9199     42685      6376    -13771     39643     10857      6319     -8859    -21522    -10723    -25641    -90747    -38365     16531      1298    -28550    -14715    -10901     -3108    -58081    -50071
+     -69811]
+ [    33601    -62285     38920    -17640     58972    -41453      3129    -18737     11720     40644     18451     74803     21236    -54741     34204     21762    -41698      7500      6621    -10286     45180    -16011     -2969    -26517      6383     -2550     14323    -10889     12067    -20622     47935    -41395    -31389    -49097    -57777      7360     -1533    -62774    -10670      9214    -70510     -4583    -24771     24440     17518    -17382    -38064
+      27174]
+ [      659    -68159    -42350    -47945     48318     -9254      7268     24042     -6736    -27715     31268    -11235     -3283    -77865     -1645     24867    -44701    -26881    -13495      3697     37250    -21997      6516     61487     60443    -24613    -36546    -10617     79176    -24994      9023    -15724     62903     18398     22847     25354    -71313     14038     47829      8114     13209     -1413    -38038    -25805     13670    -43468      7705
+      30228]
+ [    34551     -5343     -8661     46619    -16567      2325     42388     -1478     40236    -66925    -11205    -84204       828     28060     28192    -17300     63720     21647    -87352    -20247     13457     25730    -40131    142558    -34583      3334     -9951    -37382    -41580     48415     36748     42788     26207     31518      5381    -49977     40811     -4713     -4085    -11803      8279    -30545     18918     25982    -28638     -6843     50642
+     -29206]
+ [   -22947    -69277    -11100    -14854     13110      3820     -3392     37720     43092     44241    -29415       926     -4687     -3639    -61285      2249    -24479    -34623     25380      1541    -40556      2597     -5360    -40577     34115    -47143      2983     22365     -2983    -83566     48894    -15909    -15101       862     -4815     33727     15581    -22078    -55953     58746     56018    -22294      -946    -31085     41032     18166     -7135
+      22261]
+ [     -497    -17816    -12705     54175     59686     36837     11537     58990    -59790      3762    -19347     19951     -5491    -19605    -18203     15039      3991     33053     66373     18607     21826       -59    -31479     36998     50847     44044       272     29061    -64239     19465    -45143    -18205     -3356     -4555     24974     52320      1828     86831    -31832     51918    -37242    -34034     -5433     18303     41682    -68320      2133
+      11872]
+ [    55400     39560      1465     16860     23454    -56809    -17960    -44395     62797     16485    -23618     17188    -36194     91117     12795     11001    -17918     11516    -32784    -20544     36629    -11874     24919     -4165     -5610    -32374    -10916      2235    -21557    -10034    -20398     15126    -55489     54683      6099    -61139      9368    -18179    -11581      -251     50459    -25382    -36802     39731     -1692     -8560      9134
+     -21359]
+ [   -45023    -36239     30027     11179     13598     69973      2371      4548    -51794     -3922    -51461     47948     23424     26611     -9243      5995     17375     46897     20102     15497    -66257     33557    -50553    -17506     47575     24472     -4611    -19741    -45682     30951    -12372     48332    -44771     17794       758    107779     37120     18782    -54398     54371    -42510     36835     41052    -20741     67062      4383    -46113
+     -14236]
+ [   -38391    -15208     39156    -16357    -61030     28144    -22352      1611    -50695     75347     -1025      -263     63826     15517    -45838      8622    -43346    -37298     74926    -49731     -3967    -53668     39913    -52439     17464     41038     23644      9941      5981    -46763     -9194     36494     14052    -37790    -16220     27787     25024    -29327    -16319     -2419    -14981     52032    -44647      3151     15978     38188    -29654
+      33217]
+ [   -30512    -13021     57792     28495     -9607     17284    -24263     -9632     18937    -34608    -25899    -61411      2721     -1694    -15487      9932      9430     46405    -36010      5982    -18066    -31217    -81263     -5839    -58431     40561    -22289    -13249     -1227    -31121     53238    -28667    -30571     12588    -54559     60407     32440     -7514     -3196     53345     15873      1556      4402       770     -6919     28604    -53318
+      26143]
+ [   -29176      2533     18610    -53592    -54715    -35746      3300    -24741     68070    -20092    -61944    -10792    -21522     14535    -32350    -49878     -1572     50281      8042     19025    -62841      9468     25159      2878     12308     19831    -46142     47303      3863      -982     54970     33793      -560    -18590     13957     96781     -4497    -33962     65985    -22596     -1517     86924     14450    -53345     -2450     42880     13106
+      -9592]
+ [    -2110      7091    -67943     20494     56416     21636     27630     16623    -40864      1860      9757    -35129     23707     13394     21642    -24508     44998    -40711     64269    -12623    -17497      9842     -9405    -29119      7000    -37890    -19532    -42654     15044     -3967     53671     -9207    -22410     -9222     62556     34567    -28500    -16690    -34997     44171    -21446     26876     35415    -19003     48360    -30199     17576
+     -27614]
+ [    41354     92648     -5627     12753    -44053      2655      1555     -2581    -18119      5613      9752   -100247     46168    -54898    -79613     26498    -25343      2108      1287     18385     24310     -2235     -9806     37159    -55263     50936     -7392     25440     -8768    -27719     -4708     51026     16969    -28224     36854    -73837    -19422     -3060    -30463    -55745    -84155    -28935    -38282     41719      2797    -42148     39357
+     -68856]
+ [    63986     43528      4834     29157     80506     -4682     45073      8581    -42952      4963     33300    -43432     38170   -104434     -7360     10642     14008     17523      1354     74585    -33241     -3223     -4143     23020    -43463    -26648     10375    -42564     40303    -16983     58840      2854    -69892    -80613     57483     63971     -1564    -51903      1256    -64227    -62421     74829     16846      -789    -23693    -20204     60364
+      12155]
+ [    19743     -9928     61384     71812    -12464     23421    -62187      3367     19601     33850     14835    -31280      2515    -32659    -68882    108672     42526    -19229      8498     34205      7467     41533    -37856     -2669    -36456     -6086    -55045     15468      3985      3117    -34604    -15040    -11474    -57970     37748    151327    -26797    -50551     17288     24056     -5700     34154    -34124      7400     19814       718    -46048
+     -31932]
+ [   -78759    -15867     99847     12444     13263     88547    -53449    -61769      7723     36857       115     25540    -32302      1392    -22774      8218    -14158     12220     30659    -21279    -27973     38447     24935    -38109     35303     -1802      5333    -32494     39271     12490    -23195    -44371    -15244    -46010     12752     81291     55866    -16213     39827     43366     12967     58094    -28731    -53790     -9230    -17238     20468
+     -44563]
+ [   -47735     12264      1354     31402   -100390      1116    -77209    -30360     -3322    -54734     26327    -20918    -22805    -12581     33182    -10988     39066    -30141     -2769     27152     23880     28456    -55905      4490    -35774     60830    -38565     99578     12253     15230    -35889    -14994      3090     18829    -96381     -8764    -15411     21429     51137    -24867      5729     12254      6303    -28464      9853     48026    -28294
+     -70195]
+ [   -69245    -55174    -11271    -11896       507    -24000    -48048    -43063    -11957     -8206    -80967     26784    -34127     26137    -23538    -21954     48239    -10209     32677    -23351     -8856     27702    -11420       127     28859     60788      8965    106463     12016    -17250     21954     -8794     46417    -25446     -7886    -15719     12198    -37130    -27171      8914     -1112      9548    -38824    -61460      8548    -64331    -17601
+     -46031]
+ [    35763      6014    -56436       580     -6391    -48844     16004    -35115     46189     -1822    -25604     28034    -31482     12832    -32027    -36836     29961    -32940     77022     23192     36557     34825    -43754     48913     24160    -11395    -24649       722    -20919      6257    100076    -97691    -23477     -5361     52768      5978     -7669     45538     58897     29016     -9038    -28207    -43440      1262    -20522    -34223     48964
+     -42898]
+ [    26031    -45395    -60992    -16010     45244    -83453      5286     -1286     28191    -35820    -49184     29051    -15751     22580     27748    -23280      6578      3154     -5032     46844     -7063    -27723     19709    -35596     35510     14836      -879     24840      -941      6368     13817    -26462      2098     28188    -66120    -13661    -60819     21258     63297     -7932     41691     -7543    -15461    -32762     17831      8862     -9161
+      22312]
+ [   -11048     65797    -52143      7487    -28687     60862     37938       219     -8912     37527    -64559    -35290     13336    -19028    -21828    -39880    -32518     23856     63610     40634    -64288     10608    -25418      7894    -23544      -870    -93494     14840     39486     -7455     12261     56046    -76973     33017     45230      5659    -19568     77536    -21799      3661    -25734     49176     52370      -509     99774    -28682    -42754
+     -12194]
+ [   -25846    -18084    -34247    -54329      1923    -24833     34623    -12667    -24556     33229    -42430    104560     19530     -5978     22951     20598     36889    -38857     27335    -69049    -17356    -19157     45177    -29426    -29568     -6053     36105     54874     35124    -50962    -14477     11841     19168      7095     38483      4205     13607    -95173       489    -63406     -8755     39810      5870    -74365      7793    -46458    -10140
+      43264]
+ [    -2609     65788     19612     62855     -6297     17884     26484     59496    -42328     27795     54126    -15580    -12889    -48678      2429      8941     54282     48478     -3576    -38613      8174      4546    -51709    -18549    -78829    -78682    -31595     43456     54062     -8491     33497     14426    -18125     -4654     17889    -42533    -23853     -9222    -35306    -27134    -63286     32413      5792     31224     14013    -82694    -47109
+       3966]
+ [   -19642      3854    -18500     24530    -10330      -930    -45003     24577     40961    -30365     -8021    -21005    -11798    -47569     13632    -38745    -54295     13790    -40138      8875     -8335    -10895      6872     36096     14466    -26346    -26720     65985     45250    -19526     45600     37793     14441    -19551    -22386     24571     -5735    -46679     57214    -47340    -11368      5102     -6659    -15624     35429    -17660    -49516
+      18152]
+ [   -40722    -39448     37535    -15578     75742     77417     37961     40875     32601     27338     76096    -10282    -57592    -11822     18278       156    -54612    -15006   -109545     96545    -76256     27125      -136    -30266     72406    -59811     97730    -16632     16376    -75914     30851    -66134     22289    -72676     53712    -16087      2144    -30145    -61620    -37171     19722    -45537     56110    -55599     -2506    -25832      6539
+       7316]
+ [    15842    -15381     10983     36865     45292     61889     -5637     21399     40589    -60022     46270     28802    -63505      -364     -8698     64842    -26152     18358    -44734    -89595     29903     -3197    -41638    -54406    -14226    -43383     25283     44345     38220     -1356     -1706     -9115     56794    -39047    -69804     52939     -2895    -80662     14861     40284     77738    -50928     39472     28734     17389      1886    -78153
+      75851]
+ [   -25993    -53237      2484      9726      2009    -20869    -42917     12953     -7919      5944     69009      -416       -99     35694    -28571     32113    -25555    -29928     19325    -62990     49240    -14539     59101    -20786      -801    -11826     32520    -66772    -23827      9603     14991    -40632     30831    -53555     51956     97486    -45144     10311     16446     42797     -5033    -63185    -75642     20280    -48048     51996     31463
+     -15454]
+ [    -6937    -17230     -3867    -50410     62802     12348     17137     25330    -14487     38702      3664     32975    -21783    -62227     31172      4047    -53986    -64972    -22995      9919     -6599     -2718     31654     55645      -296      1714     63293     53282     45322    -83427    -12097      6278     13883     17824     22361    -15021      4163    -88523    -58786    -22959    -38797    -18096     42026    -53940     28406    -69516     -1826
+      54557]
+ [     7290     45296     11753    -16531     32626     81701    -21823    -62884     35531   -125417      8510      3867    -63061     79983     31311     39745    -49531     67739    -20893    -41812     24896     31264      2752     28249     12915    -26202     24396    -16213     39723    -24787    -40031     -4385      -262     11852     28405    -70866      9829     46023    -33602    -21625    -31045    -70177     15821     18350     17974     -2779     29515
+     -35490]
+ [    26169     36331     71455     22712    -53771    -10964       310      5355     13987     -3054     13066    -24050    -14201    -54138    -18553     35600      2288     25855     -4362     -2420     20635    -61324    -22244    -23076     13077    -30683    -54643     38716      6237      6338    -32467     33944     44876    -45771     24235     30870    -29218    -20854     57229      8595     33933      3485      1695      7753     24238    -10312     20109
+      43746]
+ [   -31054     11894    -27273     14424     24257    -35128      7687     24302     -9836     23831    -44068    -51221    -30387      5628     25398    -37505    -64692     82365     32990     52998    -44331     31638    -13297    -32792     44761    -58353    -50046     14026     -1187    -22483       999    -15303    -45095     47213    -29155    -26175    -42562     45473    -20191     -5123     24194     34391      9156     10207     54943     10099     23306
+     -20244]
+ [    11103     96558    -18602     32826    -46765     45813     72784    -24443      8776     37867     -4499    -34797     19494     40890     -2870    -42307    103501    -20483    -51157    -26009    -20428     16020    -42993     55754    -78172     28340     12961     21585    -19042     34877      7034     33141    -48090     30343     61656    -32870     13170    -80314     11099    -17367    -21811     64317     21194     31969    -47815    -32096    -72931
+     -37738]
+ [     8492       841     -2623    -32569    -31325     10587     33923      2657     41959    -51607    -25803     30416     27959     13533    -32666    -16352     14016     21582    -80235    -58585    -30720    -31333       457      8125     -2659      6546       641    -36269    -22717    -53941    -51106     85008     13576     12589     50718     62097     15631    -39016     67182    -39701     47080     20031     27258    -28826     -1119     -7090     42065
+      35150]
+ [   -56165    -22185      6288     31251   -105423      3008    -25907    -19521     15558     41919     31161      9546     67113     13169      4935    -25359     62151     -5120     38674    -61608     28351    -25724    -30080    -59574    -46079     16251    -39885     11189     27652     19849     30576    -53812    -10434     25006    -40585    -39549    -20779     33785     52990     61276     77814    -11414    -87367    -17022    -38668      7475    -40697
+      -7683]
+ [   -32537      3499    -41664    -61243     29752     28224     23332      5902    -44501    -45306    -21266    -19573    -60252      1678      -420    -21998    -46758     18414     31737     48847    -19449     18503       332      3539     23473      -230      5375     91512     11959     -1067     25913      1767     48651     31845     -7291    -42849     -8875     50862    -58472     -6252    -37599     -1788     20983    -53800     35411    -45768    -51087
+       3160]
+ [     -930      9772     30030      3874      3114     11650     28793     38158     36566      3522    -51166    -22294    -46988     77908    -54974    -18027     28508     40060    -44848    -44475    -89149     66813     19513     -1909     29510    -54956     11263    -79886    -50682     24538    -41288     96555     23491     -9363     42546     19665     69601    -47285    -58646    -22179     -9908      5503     74851     41238      2945     40258     84393
+     -17566]
+ [    27839     17193     -4266     53930    -20349    -74733    -19523    -27438    -11037      7937    -35497     22146     -1807    -21735    -23934     13750      8035     43897     68653    -38714     46250     10060       635     16223    -54663     21424     -8202     46981    -38251     48021      3701     10671      5626    -12200    -48216      1144     15165      6423     42658     -5932    -21981     -2160    -68896     46170    -24338     14660     33975
+       6552]
+ [   -23532    -11597     52784     32488     68086      2604    -27681      9731    -14888      9851     -2554     20537    -24571     -9581     63221      1924    -19186     78935     32537     54253    -18289    -28647    -11442     20824     54055     -9921    -30437    -40637     14884     10868     28317    -39588    -78147    -67434    -45378     34055    -13673     22763     -2576     -4362     34643    -14834     27407      2477     -6499     17451     22862
+       3659]
+ [    -3103     16402      2790     62756     17851     51881    -56349     10312     13985    -46063      5750     -6268     34643     22898     11139     67922     73704     29699    -25822         9     39996    -64220    -40100    -33846      1034     18284    -43243    -38414     38755     19769     75991     16928    -19299    -63181      5023     63410     -1071    -17897      7928      4245     71632    -14911    -11742    -17788    -15212    -35688    -68486
+     -21140]]
 
 >> Accuracy Metrics (vs SINT32 Golden):
 >> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00

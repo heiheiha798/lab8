@@ -17,6 +17,7 @@ module tb_accelerator;
     parameter P_TILE_SIZE                 = 16;
     parameter P_MAIN_MEM_ADDR_WIDTH       = 32;
     parameter P_MAIN_MEM_DATA_WIDTH_BITS  = 64;
+    parameter P_SRAM_C_WRITE_WIDTH        = 512;
 
     // Base addresses must match the DUT
     parameter P_BASE_ADDR_A               = 32'h10000000;
@@ -80,7 +81,8 @@ module tb_accelerator;
         .MAIN_MEM_DATA_WIDTH_BITS(P_MAIN_MEM_DATA_WIDTH_BITS),
         .BASE_ADDR_A(P_BASE_ADDR_A),
         .BASE_ADDR_B(P_BASE_ADDR_B),
-        .BASE_ADDR_C(P_BASE_ADDR_C)
+        .BASE_ADDR_C(P_BASE_ADDR_C),
+        .SRAM_C_WRITE_WIDTH(P_SRAM_C_WRITE_WIDTH)
     ) dut (
         .clk(clk),
         .rst_n(rst_n),
