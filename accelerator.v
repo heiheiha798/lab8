@@ -70,7 +70,7 @@ module accelerator #(
     localparam SRAM_C_DEPTH           = SRAM_C_TOTAL_BITS / SRAM_C_WRITE_WIDTH;
     localparam SRAM_C_ADDR_WIDTH      = $clog2(SRAM_C_DEPTH);
     
-    localparam WRITER_SRAM_C_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
+    // localparam WRITER_SRAM_C_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
 
     //--------------------------------------------------------------------------
     // FSM State Definitions (REVISED)
@@ -180,31 +180,50 @@ module accelerator #(
     );
     
     // --- SRAM C (MODIFIED Instantiation) ---
-    logic [WRITER_SRAM_C_ADDR_WIDTH-1:0] writer_sram_c_addr;
-    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_c_rdata_to_writer;
+    logic [SRAM_C_ADDR_WIDTH-1:0]        writer_sram_c_addr;
+    logic [SRAM_C_WRITE_WIDTH-1:0]       sram_c_rdata_to_writer;
     sram_c #(
-        .NUM_ENTRIES(SRAM_C_DEPTH),               // MODIFIED
-        .ENTRY_WIDTH(SRAM_C_WRITE_WIDTH),         // MODIFIED
-        .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS) 
+        .NUM_ENTRIES(SRAM_C_DEPTH),
+        .ENTRY_WIDTH(SRAM_C_WRITE_WIDTH)
+        // BUS_DATA_WIDTH 参数已删除
     ) u_sram_c (
         .clk(clk), 
         .rst_n(rst_n),
         .we(sram_c_we),
         .waddr(sram_c_waddr),
         .wdata(sram_c_wdata),
+        // raddr 和 rdata 端口连接的信号线已在第2步中修正
         .raddr(writer_sram_c_addr),
         .rdata(sram_c_rdata_to_writer)
     );
 
     // --- Writer (MODIFIED Connections) ---
-    writer #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_C(BASE_ADDR_C))
-        u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), 
-                  .i_tile_idx(i_writer_idx_q), // Use writer's own indices
-                  .j_tile_idx(j_writer_idx_q), // Use writer's own indices
-                  .write_busy(), .write_done(writer_done), 
-                  .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), 
-                  .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), 
-                  .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(sram_c_rdata_to_writer));
+    writer #(
+        .MATRIX_SIZE(MATRIX_SIZE), 
+        .TILE_SIZE(TILE_SIZE), 
+        .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), 
+        .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), 
+        .BASE_ADDR_C(BASE_ADDR_C),
+        // 传递新的参数
+        .SRAM_C_WRITE_WIDTH(SRAM_C_WRITE_WIDTH),
+        .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)
+    ) u_writer (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .write_req(writer_req_pulse), 
+        .i_tile_idx(i_writer_idx_q),
+        .j_tile_idx(j_writer_idx_q),
+        .write_busy(), // 通常悬空
+        .write_done(writer_done), 
+        .mem_req_valid(omem_write_enb), 
+        .mem_req_wdata(omem_wdata), 
+        .mem_req_addr(omem_addr), 
+        .mem_req_ready(omem_req_ready), 
+        .mem_write_done(1'b1), // 通常连接到高电平，因为writer自己管理流水线
+        // sram_c_addr 和 sram_c_rdata 端口连接的信号线已在第2步中修正
+        .sram_c_addr(writer_sram_c_addr), 
+        .sram_c_rdata(sram_c_rdata_to_writer)
+    );
     
     //--------------------------------------------------------------------------
     // Ping-Pong MUX Logic for SRAM A/B (Unchanged)
@@ -277,7 +296,7 @@ module accelerator #(
         delayed_clear_sa_pulse_d = 1'b0;
         
         // SA is active during the entire computation phase of a tile (any state from START_TILE_COMP to START_DF)
-        sa_activate_pe_level = (current_state_q inside {S_START_TILE_COMP, S_LOAD_K_SLICE, S_WAIT_LOAD_DONE, S_START_DF});
+        sa_activate_pe_level = (current_state_q inside {S_START_TILE_COMP, S_LOAD_K_SLICE, S_WAIT_LOAD_DONE, S_START_DF, S_COMPUTE_DONE_WAIT_WRITE});
 
         // Default busy and done signals (will be overwritten by overall logic below)
         busyb = 1'b0; 

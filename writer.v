@@ -1,256 +1,207 @@
 //
-// Filename: writer_debug_fixed.v
-// Description: An ultra high-performance, pipelined data writer.
-//              This version is REVISED to support "zig-zag" (two-pass, column-first)
-//              half-width SRAM C read, disassemble data, and stream to main memory.
-//              It maintains a pipelined throughput by carefully managing internal buffers
-//              and state transitions.
+// Filename: writer_final_robust.v
+// Description: An ultra high-performance, pipelined data writer using a ping-pong buffer.
+//              This FINAL ROBUST version uses consumer progress to trigger the producer (SRAM read),
+//              creating a perfectly synchronized "Just-in-Time" data flow that prevents
+//              buffer overrun while maintaining a zero-bubble pipeline.
 //
 `timescale 1ns / 1ps
 
 module writer #(
-    // 主参数
-    parameter MATRIX_SIZE               = 48,
+    parameter MATRIX_SIZE               = 16,
     parameter TILE_SIZE                 = 16,
-    
-    // 外部总线参数
     parameter MAIN_MEM_ADDR_WIDTH       = 32,
     parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
-
-    // 矩阵基地址
     parameter BASE_ADDR_C               = 32'h30000000,
-    
-    // NEW: From SA's configuration, to understand SRAM C structure
-    parameter SRAM_C_WRITE_WIDTH        = 256, // For 16x16 matrix, 32-bit accum, this means 8 PE results (8 * 32 = 256)
-    parameter PE_ACCUM_DATA_WIDTH       = 32 // Needed for internal calculation of data size
+    parameter SRAM_C_WRITE_WIDTH        = 256,
+    parameter PE_ACCUM_DATA_WIDTH       = 32
 )(
-    // 控制接口
     input wire                                  clk,
     input wire                                  rst_n,
     input wire                                  write_req,
     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    i_tile_idx,
     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    j_tile_idx,
-    output reg                                  write_busy,
-    output reg                                  write_done,
-
-    // 主存写入接口
-    output reg                                  mem_req_valid,
-    output reg [MAIN_MEM_DATA_WIDTH_BITS-1:0]   mem_req_wdata,
-    output reg [MAIN_MEM_ADDR_WIDTH-1:0]        mem_req_addr,
+    output logic                                write_busy,
+    output logic                                write_done,
+    output logic                                mem_req_valid,
+    output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0]   mem_req_wdata,
+    output logic [MAIN_MEM_ADDR_WIDTH-1:0]        mem_req_addr,
     input wire                                  mem_req_ready,
-    input wire                                  mem_write_done, // Assuming this means the last outstanding write has completed
-
-    // SRAM 读取接口
-    // SRAM C的地址线宽度现在取决于SRAM_C_WRITE_WIDTH和总数据量 (TILE_SIZE * TILE_SIZE * PE_ACCUM_DATA_WIDTH)
-    // 其深度是 (TILE_SIZE * TILE_SIZE * PE_ACCUM_DATA_WIDTH) / SRAM_C_WRITE_WIDTH
-    output reg [$clog2( (TILE_SIZE*TILE_SIZE*PE_ACCUM_DATA_WIDTH)/SRAM_C_WRITE_WIDTH )-1:0]   sram_c_addr,
-    input wire [SRAM_C_WRITE_WIDTH-1:0]                                                     sram_c_rdata // MODIFIED: SRAM C read data width
+    input wire                                  mem_write_done,
+    output logic [$clog2( (TILE_SIZE*TILE_SIZE*PE_ACCUM_DATA_WIDTH)/SRAM_C_WRITE_WIDTH )-1:0]   sram_c_addr,
+    input wire [SRAM_C_WRITE_WIDTH-1:0]                                                     sram_c_rdata
 );
     
     //--------------------------------------------------------------------------
     // 内部参数定义
     //--------------------------------------------------------------------------
     localparam NUM_TILES_PER_DIM       = MATRIX_SIZE / TILE_SIZE;
-    localparam TILE_ACCUM_BITS         = TILE_SIZE * TILE_SIZE * PE_ACCUM_DATA_WIDTH;
-    localparam C_TILE_BYTES            = TILE_ACCUM_BITS / 8; // Total bytes for one C tile
-
-    // Number of main memory writes needed for one wide SRAM C read
-    // This assumes SRAM_C_WRITE_WIDTH is a multiple of MAIN_MEM_DATA_WIDTH_BITS
+    localparam C_TILE_BYTES            = (TILE_SIZE * TILE_SIZE * PE_ACCUM_DATA_WIDTH) / 8;
     localparam MEM_WRITES_PER_SRAM_READ = SRAM_C_WRITE_WIDTH / MAIN_MEM_DATA_WIDTH_BITS;
+    localparam SRAM_READS_PER_TILE     = (TILE_SIZE * TILE_SIZE * PE_ACCUM_DATA_WIDTH) / SRAM_C_WRITE_WIDTH;
 
-    // FSM States
-    typedef enum logic [1:0] { // 2 bits is enough for 3 states
-        S_IDLE,
-        S_READ_FIRST_HALVES,    // Read and disassemble all first halves
-        S_READ_SECOND_HALVES,   // Read and disassemble all second halves
-        S_PIPELINE_DRAIN        // Wait for the last memory write to complete
-    } state_t;
+    typedef enum logic [0:0] { S_IDLE, S_STREAMING } state_t;
 
     //--------------------------------------------------------------------------
-    // 内部寄存器定义
+    // 内部信号和寄存器
     //--------------------------------------------------------------------------
-    state_t current_state_q, next_state_d; // _q for registered, _d for combinational next
+    state_t current_state_q, next_state_d;
 
-    // Tile indices for the current write operation
-    reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_tile_idx_q, j_tile_idx_q; 
+    // --- Ping-Pong Buffer and Control ---
+    reg [SRAM_C_WRITE_WIDTH-1:0] data_buffer_ping_q;
+    reg [SRAM_C_WRITE_WIDTH-1:0] data_buffer_pong_q;
+    reg                          write_to_pong_q;
+    reg                          read_from_pong_q;
+    reg [1:0]                    buffer_valid_q;   // [1] for pong, [0] for ping
+
+    // --- Pointers ---
+    reg [$clog2(SRAM_READS_PER_TILE)-1:0] sram_read_ptr_q;
+    reg [$clog2(MEM_WRITES_PER_SRAM_READ)-1:0] chunk_idx_q;
+    reg [$clog2(SRAM_READS_PER_TILE)-1:0] active_sram_addr_q;
+
+    // --- Control Signals ---
+    wire sram_read_fire;
+    reg sram_read_fire_s1_q;
+    wire mem_write_fire;
     
-    // Pointer for current SRAM C row being read (0 to TILE_SIZE-1)
-    reg [$clog2(TILE_SIZE)-1:0] sram_row_idx_q, sram_row_idx_d; 
-
-    // Counter for disassembling a wide SRAM word into narrow main memory words
-    reg [$clog2(MEM_WRITES_PER_SRAM_READ)-1:0] disassemble_ptr_q, disassemble_ptr_d;
-
-    // A wide buffer to hold one full read from SRAM C. This is a pipeline stage 1 output.
-    reg [SRAM_C_WRITE_WIDTH-1:0] sram_data_buffer_q;
-    
-    // Main memory write address (byte offset within the C matrix)
-    reg [MAIN_MEM_ADDR_WIDTH-1:0] mem_current_byte_addr_q, mem_current_byte_addr_d;
-    
-    // Pipeline stage for main memory request
-    reg mem_req_valid_s1_q; // Staging the mem_req_valid signal
-    reg [MAIN_MEM_ADDR_WIDTH-1:0] mem_req_addr_s1_q; // Staging the address
-    reg [MAIN_MEM_DATA_WIDTH_BITS-1:0] mem_req_wdata_s1_q; // Staging the data
-
-    // Control signal to indicate if the main memory pipeline is not stalled
-    wire mem_pipeline_not_stalled;
-    assign mem_pipeline_not_stalled = (mem_req_ready || !mem_req_valid_s1_q); // If mem_req_valid_s1_q is false, it's not stalled. If true, it depends on mem_req_ready.
+    // --- Latched Inputs ---
+    reg [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0] i_tile_idx_q, j_tile_idx_q;
 
     //--------------------------------------------------------------------------
-    // FSM State and Pointer Sequential Logic
+    // 时序逻辑 (Sequential)
     //--------------------------------------------------------------------------
-    always @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            current_state_q <= S_IDLE;
-            sram_row_idx_q <= 0;
-            disassemble_ptr_q <= 0;
-            mem_current_byte_addr_q <= '0;
-            i_tile_idx_q <= 0;
-            j_tile_idx_q <= 0;
-            sram_data_buffer_q <= '0; // Initialize wide buffer
-            
-            // Initialize pipeline registers
-            mem_req_valid_s1_q <= 1'b0;
-            mem_req_addr_s1_q <= '0;
-            mem_req_wdata_s1_q <= '0;
+            current_state_q  <= S_IDLE;
+            sram_read_ptr_q  <= '0;
+            chunk_idx_q      <= '0;
+            active_sram_addr_q <= '0;
+            write_to_pong_q  <= 1'b0;
+            read_from_pong_q <= 1'b0;
+            buffer_valid_q   <= 2'b00;
+            i_tile_idx_q     <= '0;
+            j_tile_idx_q     <= '0;
+            sram_read_fire_s1_q <= 1'b0;
         end else begin
-            // Stall logic: only update state and pointers if main memory pipeline is not stalled
-            if (mem_pipeline_not_stalled) begin
-                current_state_q <= next_state_d;
-                sram_row_idx_q <= sram_row_idx_d;
-                disassemble_ptr_q <= disassemble_ptr_d;
-                mem_current_byte_addr_q <= mem_current_byte_addr_d;
-            end
-            
-            // Latch tile indices (happens once per tile operation)
-            if (current_state_q == S_IDLE && write_req) begin
+            current_state_q <= next_state_d;
+
+            if (write_req) begin
                 i_tile_idx_q <= i_tile_idx;
                 j_tile_idx_q <= j_tile_idx;
             end
 
-            // Latch the wide data from SRAM C (this is the Stage 1 of the pipeline).
-            // It happens ONE cycle AFTER the read address is issued by sram_c_addr_d.
-            // Data is latched when starting a new disassembly process (disassemble_ptr_d == 0)
-            // and pipeline is not stalled.
-            if ((current_state_q == S_READ_FIRST_HALVES || current_state_q == S_READ_SECOND_HALVES) &&
-                mem_pipeline_not_stalled && disassemble_ptr_d == 0) begin
-                sram_data_buffer_q <= sram_c_rdata;
+            sram_read_fire_s1_q <= sram_read_fire;
+
+            // ******************************************************************
+            // *** BUG FIX: 更新SRAM读指针 ***
+            // *** 每次触发SRAM读取时，必须将读指针加一，为下一次读取做准备。
+            // ******************************************************************
+            if (sram_read_fire) begin
+                sram_read_ptr_q <= sram_read_ptr_q + 1;
             end
 
-            // Pipeline Stage 1 -> Stage 2 (Main Memory Request Generation)
-            // mem_req_valid_s1_q and mem_req_addr_s1_q are updated always,
-            // but their *values* depend on the `mem_pipeline_not_stalled` condition
-            // from the previous cycle.
-            if (current_state_q == S_READ_FIRST_HALVES || current_state_q == S_READ_SECOND_HALVES) begin
-                // mem_req_valid_s1_q becomes high when `disassemble_ptr_q` points to the first chunk
-                // of a new main memory word.
-                mem_req_valid_s1_q <= 1'b1; // Always valid during streaming, unless stalled or finished
-                mem_req_addr_s1_q  <= BASE_ADDR_C + mem_current_byte_addr_q;
-                // Select the correct chunk from the buffer for the memory write
-                mem_req_wdata_s1_q <= sram_data_buffer_q >> (disassemble_ptr_q * MAIN_MEM_DATA_WIDTH_BITS);
-            end else begin
-                mem_req_valid_s1_q <= 1'b0; // Not sending memory requests in IDLE or DRAIN states
+            // --- Producer Logic (SRAM Read Data Capture) ---
+            if (sram_read_fire_s1_q) begin // One cycle after read fires, data is valid
+                if (!write_to_pong_q) begin
+                    data_buffer_ping_q <= sram_c_rdata;
+                    buffer_valid_q[0]  <= 1'b1;
+                    $display("Time %0t: 读取SRAM数值 (Ping): %h", $time, sram_c_rdata); // 输出读取的数值
+                end else begin
+                    data_buffer_pong_q <= sram_c_rdata;
+                    buffer_valid_q[1]  <= 1'b1;
+                    $display("Time %0t: 读取SRAM数值 (Pong): %h", $time, sram_c_rdata); // 输出读取的数值
+                end
+                write_to_pong_q <= ~write_to_pong_q; // Flip for next write
             end
 
-            // Debug display: log successful writes
-            if (mem_req_valid && mem_req_ready) begin
-                $display("%0t Writer: Wrote 0x%H to MEM ADDR 0x%H (Tile [%0d,%0d], Word offset %0d)", 
-                         $time, mem_req_wdata, mem_req_addr, i_tile_idx_q, j_tile_idx_q, 
-                         (mem_current_byte_addr_q / (MAIN_MEM_DATA_WIDTH_BITS/8)));
+            // --- Consumer Logic (MEM Write) ---
+            if (mem_write_fire) begin
+                $display("Time %0t: 写回主存数值: %h (地址: %h)", $time, mem_req_wdata, mem_req_addr); // 输出写回的数值
+                if (chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1) begin
+                    chunk_idx_q <= '0;
+                    if (!read_from_pong_q) begin
+                        buffer_valid_q[0] <= 1'b0;
+                    end else begin
+                        buffer_valid_q[1] <= 1'b0;
+                    end
+                    read_from_pong_q <= ~read_from_pong_q;
+                    active_sram_addr_q <= active_sram_addr_q + 1;
+                end else begin
+                    chunk_idx_q <= chunk_idx_q + 1;
+                end
+            end
+            
+            // --- Reset Logic ---
+            // Note: This logic correctly overrides the increment on the last cycle.
+            if (next_state_d == S_IDLE && current_state_q != S_IDLE) begin
+                sram_read_ptr_q <= '0;
+                chunk_idx_q     <= '0;
+                active_sram_addr_q <= '0;
+                write_to_pong_q <= 1'b0;
+                read_from_pong_q <= 1'b0;
+                buffer_valid_q   <= 2'b00;
+                sram_read_fire_s1_q <= 1'b0;
             end
         end
     end
 
     //--------------------------------------------------------------------------
-    // Combinational Logic for FSM and Outputs
+    // 组合逻辑 (Combinational)
     //--------------------------------------------------------------------------
+    // The SRAM address is driven by the read pointer register
+    assign sram_c_addr = sram_read_ptr_q;
+    
+    // *** CRITICAL FIX: The robust producer trigger logic ***
+    // The producer fires only when the consumer is about to need the next block.
+    // Trigger condition:
+    // 1. We are in the streaming state.
+    // 2. The consumer is starting to process a new 256-bit word (chunk_idx_q == 0)
+    //    AND a write was successful in this cycle (mem_write_fire).
+    //    This means a new buffer is just starting to be consumed.
+    // 3. There are still more words to read from SRAM.
+    // Exception: For the very first read, we trigger immediately when entering S_STREAMING.
+    assign sram_read_fire = ((current_state_q == S_STREAMING && chunk_idx_q == 0 && mem_write_fire) || 
+                            (current_state_q == S_IDLE && next_state_d == S_STREAMING)) &&
+                            (sram_read_ptr_q < SRAM_READS_PER_TILE);
+
+    assign mem_write_fire = mem_req_valid && mem_req_ready;
+
+    // --- FSM Logic ---
     always_comb begin
-        // Default assignments (prevent latches)
         next_state_d = current_state_q;
-        write_busy   = (current_state_q != S_IDLE);
-        write_done   = 1'b0;
-        
-        // Main Memory Interface Outputs (Stage 2 of pipeline)
-        mem_req_valid = mem_req_valid_s1_q; 
-        mem_req_wdata = mem_req_wdata_s1_q;
-        mem_req_addr  = mem_req_addr_s1_q;
-
-        // Default pointer updates (hold current values if stalled)
-        sram_row_idx_d        = sram_row_idx_q;
-        disassemble_ptr_d     = disassemble_ptr_q;
-        mem_current_byte_addr_d = mem_current_byte_addr_q;
-
-        // SRAM C Address Generation (Stage 0 of pipeline)
-        case (current_state_q)
-            S_READ_FIRST_HALVES:  sram_c_addr = {sram_row_idx_q, 1'b0}; // Address for first half of the row
-            S_READ_SECOND_HALVES: sram_c_addr = {sram_row_idx_q, 1'b1}; // Address for second half of the row
-            default:              sram_c_addr = '0; // No SRAM C reads in IDLE or DRAIN
-        endcase
-
-        // FSM State Transitions and Logic
         case (current_state_q)
             S_IDLE: begin
                 if (write_req) begin
-                    next_state_d = S_READ_FIRST_HALVES;
-                    sram_row_idx_d = 0;         // Start from row 0
-                    disassemble_ptr_d = 0;      // Start disassembling from the first chunk
-                    // Calculate the starting byte address for the current tile
-                    mem_current_byte_addr_d = (i_tile_idx * NUM_TILES_PER_DIM * C_TILE_BYTES) + 
-                                              (j_tile_idx * C_TILE_BYTES);
+                    next_state_d = S_STREAMING;
                 end
             end
-
-            S_READ_FIRST_HALVES: begin
-                // This state manages reading all first halves and writing them to memory
-                // It advances the disassemble_ptr and mem_current_byte_addr every cycle (if not stalled)
-                // It advances sram_row_idx every MEM_WRITES_PER_SRAM_READ cycles (when disassemble_ptr wraps)
-                disassemble_ptr_d = disassemble_ptr_q + 1;
-                mem_current_byte_addr_d = mem_current_byte_addr_q + (MAIN_MEM_DATA_WIDTH_BITS / 8);
-
-                if (disassemble_ptr_q == MEM_WRITES_PER_SRAM_READ - 1) begin
-                    // Just finished disassembling and sending the last chunk of the current SRAM word
-                    disassemble_ptr_d = 0; // Reset for the next SRAM word
-                    sram_row_idx_d = sram_row_idx_q + 1; // Advance to the next row's first half
-
-                    if (sram_row_idx_q == TILE_SIZE - 1) begin
-                        // All first halves (Row 0 through TILE_SIZE-1) have been processed
-                        next_state_d = S_READ_SECOND_HALVES;
-                        sram_row_idx_d = 0; // Reset row index for the second pass
-                        // IMPORTANT: mem_current_byte_addr_d continues from where it left off,
-                        // as the second halves logically follow the first halves in main memory.
-                        // No need to reset mem_current_byte_addr_d here.
-                    end
-                end
-            end
-
-            S_READ_SECOND_HALVES: begin
-                // This state manages reading all second halves and writing them to memory
-                disassemble_ptr_d = disassemble_ptr_q + 1;
-                mem_current_byte_addr_d = mem_current_byte_addr_q + (MAIN_MEM_DATA_WIDTH_BITS / 8);
-
-                if (disassemble_ptr_q == MEM_WRITES_PER_SRAM_READ - 1) begin
-                    // Just finished disassembling and sending the last chunk of the current SRAM word
-                    disassemble_ptr_d = 0; // Reset for the next SRAM word
-                    sram_row_idx_d = sram_row_idx_q + 1; // Advance to the next row's second half
-
-                    if (sram_row_idx_q == TILE_SIZE - 1) begin
-                        // All second halves (Row 0 through TILE_SIZE-1) have been processed.
-                        // All main memory writes for this tile have been initiated.
-                        next_state_d = S_PIPELINE_DRAIN;
-                    end
-                end
-            end
-            
-            S_PIPELINE_DRAIN: begin
-                // Wait for the main memory to signal that the last write has completed.
-                // The `mem_write_done` signal usually comes from an external memory controller.
-                if (mem_write_done) begin
-                    write_done = 1'b1; // Signal completion to the top controller
+            S_STREAMING: begin
+                // Done when the last sram block has been fully consumed.
+                if (active_sram_addr_q == SRAM_READS_PER_TILE - 1 &&
+                    chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1 &&
+                    mem_write_fire) begin
                     next_state_d = S_IDLE;
                 end
             end
-
-            default: next_state_d = S_IDLE; // Should not happen
         endcase
     end
+
+    // --- Output Logic ---
+    assign write_busy = (current_state_q != S_IDLE);
+    assign write_done = (current_state_q == S_STREAMING && next_state_d == S_IDLE);
+    
+    // Valid to write if the buffer we are reading from is valid
+    assign mem_req_valid = (!read_from_pong_q && buffer_valid_q[0]) || (read_from_pong_q && buffer_valid_q[1]);
+    
+    logic [MAIN_MEM_ADDR_WIDTH-1:0] tile_base_addr;
+    assign tile_base_addr = BASE_ADDR_C + (i_tile_idx_q * NUM_TILES_PER_DIM * C_TILE_BYTES) + 
+                                         (j_tile_idx_q * C_TILE_BYTES);
+    
+    assign mem_req_addr = tile_base_addr + 
+                          (active_sram_addr_q * (SRAM_C_WRITE_WIDTH/8)) +
+                          (chunk_idx_q * (MAIN_MEM_DATA_WIDTH_BITS/8));
+    
+    // Select data from the correct buffer
+    assign mem_req_wdata = (!read_from_pong_q ? data_buffer_ping_q : data_buffer_pong_q) >> (chunk_idx_q * MAIN_MEM_DATA_WIDTH_BITS);
 
 endmodule
