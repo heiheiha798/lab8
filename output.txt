@@ -1,24 +1,24 @@
 ----------------------------------------
 脚本开始执行
-矩阵维度: 16x16
+矩阵维度: 32x32
 线程数: 8
 Verilator 警告标志: '-Wall'
 所有日志将同步输出到终端和文件: output.txt
 ----------------------------------------
-提示：矩阵宽度 16 是 16 的倍数。
+提示：矩阵宽度 32 是 16 的倍数。
 
 步骤 0: 正在更新脚本和 Verilog 文件中的矩阵维度参数...
 ----------------------------------------
-已更新 InputGen.py 中的 MATRIX_DIM_TB 为 16
-已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 16
-已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 16
+已更新 InputGen.py 中的 MATRIX_DIM_TB 为 32
+已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 32
+已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 32
 ----------------------------------------
 
 步骤 1: 正在生成输入文件 (input_mem.csv)...
 ----------------------------------------
 ### Generating input_mem.csv for simulation...
-python3 InputGen.py --matrix_dim 16
-Generating 16x16 SINT8 matrices for testbench.
+python3 InputGen.py --matrix_dim 32
+Generating 32x32 SINT8 matrices for testbench.
 
 Processing Matrix A tiles (Row-Major)...
 Processing Matrix B tiles (Column-Major)...
@@ -38,866 +38,87 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
 		-cc --timing -O3 --x-assign fast --x-initial fast --noassert --Mdir obj_dir \
 		--threads 8 \
 		tb_accelerator.v accelerator.v loader.v writer.v data_formatter.v sa_enhanced.v pe.v sram_banked.v sram_c.v  --exe sim_main.cpp 
-%Warning-EOFNEWLINE: accelerator.v:343:10: Missing newline at end of file (POSIX 3.206).
+%Warning-EOFNEWLINE: accelerator.v:418:10: Missing newline at end of file (POSIX 3.206).
                                          : ... Suggest add newline.
-  343 | endmodule
+  418 | endmodule
       |          ^
                      ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.036
                      ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
-%Warning-PINCONNECTEMPTY: accelerator.v:131:189: Cell pin connected by name with empty reference: 'load_busy'
+%Warning-EOFNEWLINE: writer.v:256:10: Missing newline at end of file (POSIX 3.206).
+                                    : ... Suggest add newline.
+  256 | endmodule
+      |          ^
+%Warning-PINCONNECTEMPTY: accelerator.v:140:189: Cell pin connected by name with empty reference: 'load_busy'
                           ... For warning description see https://verilator.org/warn/PINCONNECTEMPTY?v=5.036
                           ... Use "/* verilator lint_off PINCONNECTEMPTY */" and lint_on around source to disable this message.
-%Warning-PINCONNECTEMPTY: accelerator.v:148:161: Cell pin connected by name with empty reference: 'pass_done'
-%Warning-PINCONNECTEMPTY: accelerator.v:148:363: Cell pin connected by name with empty reference: 'data_valid_out'
-%Warning-PINCONNECTEMPTY: accelerator.v:167:10: Cell pin connected by name with empty reference: 'sa_busy'
-  167 |         .sa_busy(), 
+%Warning-PINCONNECTEMPTY: accelerator.v:157:161: Cell pin connected by name with empty reference: 'pass_done'
+%Warning-PINCONNECTEMPTY: accelerator.v:157:363: Cell pin connected by name with empty reference: 'data_valid_out'
+%Warning-PINCONNECTEMPTY: accelerator.v:176:10: Cell pin connected by name with empty reference: 'sa_busy'
+  176 |         .sa_busy(), 
       |          ^~~~~~~
-%Warning-PINCONNECTEMPTY: accelerator.v:192:130: Cell pin connected by name with empty reference: 'write_busy'
-  192 |         u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .write_busy(), .write_done(writer_done), .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(sram_c_rdata_to_writer));
-      |                                                                                                                                  ^~~~~~~~~~
-%Warning-WIDTHEXPAND: pe.v:50:45: Operator ADD expects 32 bits on the LHS, but LHS's VARREF 'mul_result_reg' generates 16 bits.
-                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
-   50 |     assign add_output_data = mul_result_reg + local_accumulator_reg;
-      |                                             ^
-                      ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.036
-                      ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
-%Warning-ASCRANGE: writer.v:28:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   28 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    i_tile_idx,
-      |                ^
-                   ... For warning description see https://verilator.org/warn/ASCRANGE?v=5.036
-                   ... Use "/* verilator lint_off ASCRANGE */" and lint_on around source to disable this message.
-%Warning-ASCRANGE: writer.v:29:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   29 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: writer.v:64:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_writer'
-   64 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg_q, j_reg_q;
-      |         ^
-%Warning-ASCRANGE: sa_enhanced.v:75:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                     : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   75 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
-      |         ^
-%Warning-WIDTHEXPAND: sa_enhanced.v:154:101: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'wb_row_count_q' generates 4 bits.
-                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  154 |                     tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1);
-      |                                                                                                     ^~
-%Warning-WIDTHEXPAND: sa_enhanced.v:173:48: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'k_iter_count_q' generates 2 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  173 |                             if (k_iter_count_q == K_ITER_COUNT - 1) begin
-      |                                                ^~
-%Warning-WIDTHEXPAND: sa_enhanced.v:188:44: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'wb_row_count_q' generates 4 bits.
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  188 |                         if (wb_row_count_q == SIZE - 1) begin
-      |                                            ^~
-%Warning-WIDTHEXPAND: sram_banked.v:44:29: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'waddr' generates 5 bits.
-                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   44 |             row_idx = waddr / (NUM_BANKS / BYTES_PER_BUS_WORD);
-      |                             ^
-%Warning-WIDTHEXPAND: sram_banked.v:45:39: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'waddr' generates 5 bits.
-                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   45 |             bank_group_start = (waddr % (NUM_BANKS / BYTES_PER_BUS_WORD)) * BYTES_PER_BUS_WORD;
-      |                                       ^
-%Warning-WIDTHEXPAND: sram_banked.v:59:20: Operator ASSIGN expects 32 bits on the Assign RHS, but Assign RHS's SEL generates 4 bits.
-                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
-      |                    ^
-%Warning-ASCRANGE: loader.v:26:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   26 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      i_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:27:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   27 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:28:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   28 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      k_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:69:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |         ^
-%Warning-WIDTHEXPAND: loader.v:125:64: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  125 |                         mem_req_addr = b_base_addr + ((req_cnt - WORDS_PER_TILE) * (MAIN_MEM_DATA_WIDTH_BITS / 8));
-      |                                                                ^
-%Warning-WIDTHEXPAND: loader.v:120:33: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  120 |                     if (req_cnt < WORDS_PER_TILE) begin
-      |                                 ^
-%Warning-WIDTHEXPAND: loader.v:118:29: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  118 |                 if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready) begin
-      |                             ^
-%Warning-WIDTHTRUNC: loader.v:136:37: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's VARREF 'resp_cnt' generates 6 bits.
-                                    : ... note: In instance 'tb_accelerator.dut.u_loader'
-  136 |                         sram_a_addr = resp_cnt;  
-      |                                     ^
-                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
-                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
-%Warning-WIDTHTRUNC: loader.v:141:37: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 7 bits.
-                                    : ... note: In instance 'tb_accelerator.dut.u_loader'
-  141 |                         sram_b_addr = resp_cnt - WORDS_PER_TILE;  
-      |                                     ^
-%Warning-WIDTHEXPAND: loader.v:132:34: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'resp_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  132 |                     if (resp_cnt < WORDS_PER_TILE) begin
-      |                                  ^
-%Warning-WIDTHEXPAND: loader.v:147:30: Operator EQ expects 32 or 7 bits on the LHS, but LHS's VARREF 'resp_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  147 |                 if (resp_cnt == (WORDS_PER_TILE * 2) - 1 && mem_resp_valid) begin
-      |                              ^~
-%Warning-WIDTHEXPAND: loader.v:185:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'k_tile_idx' generates 2 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  185 |                         a_base_addr      <= BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES);
-      |                                                                                            ^
-%Warning-WIDTHEXPAND: loader.v:186:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'j_tile_idx' generates 2 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  186 |                         b_base_addr      <= BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES);
-      |                                                                                            ^
-%Warning-WIDTHEXPAND: loader.v:195:33: Operator LT expects 32 or 7 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-  195 |                     if (req_cnt < WORDS_PER_TILE * 2 && mem_req_ready && mem_req_valid) begin
-      |                                 ^
-%Warning-WIDTHEXPAND: sram_c.v:58:31: Operator DIV expects 32 bits on the LHS, but LHS's VARREF 'raddr' generates 7 bits.
-                                    : ... note: In instance 'tb_accelerator.dut.u_sram_c'
-   58 |             entry_idx = raddr / WORDS_PER_ENTRY;
-      |                               ^
-%Warning-WIDTHEXPAND: sram_c.v:59:33: Operator MODDIV expects 32 bits on the LHS, but LHS's VARREF 'raddr' generates 7 bits.
-                                    : ... note: In instance 'tb_accelerator.dut.u_sram_c'
-   59 |             word_offset = raddr % WORDS_PER_ENTRY;
-      |                                 ^
-%Warning-WIDTHTRUNC: sram_c.v:63:24: Operator ASSIGNDLY expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 512 bits.
-                                   : ... note: In instance 'tb_accelerator.dut.u_sram_c'
-   63 |                  rdata <= memory[entry_idx] >> (word_offset * BUS_DATA_WIDTH);
-      |                        ^~
-%Warning-WIDTHTRUNC: data_formatter.v:154:40: Operator ASSIGNW expects 4 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 6 bits.
-                                            : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  154 |             assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
-      |                                        ^
-%Warning-WIDTHEXPAND: data_formatter.v:155:103: Operator LT expects 32 or 5 bits on the LHS, but LHS's VARREF 'calculated_row_addr' generates 4 bits.
-                                              : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  155 |             assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
-      |                                                                                                       ^
-%Warning-WIDTHEXPAND: data_formatter.v:205:48: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'time_cnt_q' generates 6 bits.
-                                             : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  205 |                 t_feed_equivalent = time_cnt_q - PIPELINE_COMPENSATION;
-      |                                                ^
-%Warning-WIDTHEXPAND: accelerator.v:131:75: Input port connection 'i_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'i_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:131:102: Input port connection 'j_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'j_tile_idx_q' generates 1 bits.
-                                           : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:131:129: Input port connection 'k_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'k_tile_idx_q' generates 1 bits.
-                                           : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:192:76: Input port connection 'i_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'i_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  192 |         u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .write_busy(), .write_done(writer_done), .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(sram_c_rdata_to_writer));
-      |                                                                            ^~~~~~~~~~
-%Warning-WIDTHEXPAND: accelerator.v:192:103: Input port connection 'j_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'j_tile_idx_q' generates 1 bits.
-                                           : ... note: In instance 'tb_accelerator.dut'
-  192 |         u_writer (.clk(clk), .rst_n(rst_n), .write_req(writer_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .write_busy(), .write_done(writer_done), .mem_req_valid(omem_write_enb), .mem_req_wdata(omem_wdata), .mem_req_addr(omem_addr), .mem_req_ready(omem_req_ready), .mem_write_done(1'b1), .sram_c_addr(writer_sram_c_addr), .sram_c_rdata(sram_c_rdata_to_writer));
-      |                                                                                                       ^~~~~~~~~~
-%Warning-WIDTHEXPAND: accelerator.v:293:34: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  293 |                 if (k_tile_idx_q == K_ITER_COUNT - 1) begin
-      |                                  ^~
-%Warning-WIDTHEXPAND: accelerator.v:323:42: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  323 |                         if (j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
-      |                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:319:38: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  319 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
-      |                                      ^~
-%Warning-WIDTHEXPAND: accelerator.v:319:79: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  319 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
-      |                                                                               ^~
-%Warning-UNUSEDPARAM: tb_accelerator.v:29:15: Parameter is not used: 'TIMEOUT_CYCLES'
-                                            : ... note: In instance 'tb_accelerator'
-   29 |     parameter TIMEOUT_CYCLES              = P_MATRIX_SIZE * P_MATRIX_SIZE * P_MATRIX_SIZE * 2;  
-      |               ^~~~~~~~~~~~~~
-                      ... For warning description see https://verilator.org/warn/UNUSEDPARAM?v=5.036
-                      ... Use "/* verilator lint_off UNUSEDPARAM */" and lint_on around source to disable this message.
-%Warning-UNUSEDPARAM: tb_accelerator.v:34:16: Parameter is not used: 'NUM_TILES_PER_DIM'
-                                            : ... note: In instance 'tb_accelerator'
-   34 |     localparam NUM_TILES_PER_DIM  = P_MATRIX_SIZE / P_TILE_SIZE;
-      |                ^~~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: tb_accelerator.v:57:10: Signal is not used: 'tb_busyb'
-                                             : ... note: In instance 'tb_accelerator'
-   57 |     wire tb_busyb;
-      |          ^~~~~~~~
-                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.036
-                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
-%Warning-UNUSEDSIGNAL: accelerator.v:106:11: Signal is not used: 'start_tile_computation_pulse'
-                                           : ... note: In instance 'tb_accelerator.dut'
-  106 |     logic start_tile_computation_pulse;
-      |           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
-                                         : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   10 |     parameter IS_SRAM_A     = 1'b1,  
-      |               ^~~~~~~~~
-%Warning-UNUSEDSIGNAL: sram_banked.v:35:13: Bits of signal are not used: 'row_idx'[31:4]
-                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   35 |     integer row_idx;
-      |             ^~~~~~~
-%Warning-UNUSEDSIGNAL: sram_banked.v:39:13: Signal is not used: 'addr_bank0'
-                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
-   39 |     integer addr_bank0;  
-      |             ^~~~~~~~~~
-%Warning-UNUSEDSIGNAL: loader.v:69:41: Signal is not used: 'i_reg'
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |                                         ^~~~~
-%Warning-UNUSEDSIGNAL: loader.v:69:48: Signal is not used: 'j_reg'
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |                                                ^~~~~
-%Warning-UNUSEDSIGNAL: loader.v:69:55: Signal is not used: 'k_reg'
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |                                                       ^~~~~
-%Warning-UNUSEDSIGNAL: loader.v:70:40: Signal is not used: 'load_to_ping_reg'
-                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
-   70 |     reg                                load_to_ping_reg;
-      |                                        ^~~~~~~~~~~~~~~~
-%Warning-UNUSEDSIGNAL: sa_enhanced.v:55:45: Signal is not used: 'pe_result_valid_internal'
-                                          : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   55 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
-      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
-%Warning-UNSIGNED: data_formatter.v:155:54: Comparison is constant due to unsigned arithmetic
-                                          : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
-  155 |             assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
-      |                                                      ^~
-                   ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.036
-                   ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
-%Warning-CASEINCOMPLETE: writer.v:136:9: Case values incompletely covered (example pattern 0x3)
-  136 |         case (current_state)
-      |         ^~~~
-                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.036
-                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
-%Warning-BLKSEQ: tb_accelerator.v:144:30: Blocking assignment '=' in sequential logic process
-                                        : ... Suggest using delayed assignment '<='
-  144 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
-      |                              ^
-                 ... For warning description see https://verilator.org/warn/BLKSEQ?v=5.036
-                 ... Use "/* verilator lint_off BLKSEQ */" and lint_on around source to disable this message.
-%Warning-BLKSEQ: tb_accelerator.v:148:30: Blocking assignment '=' in sequential logic process
-                                        : ... Suggest using delayed assignment '<='
-  148 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_B) / BYTES_PER_WORD;
-      |                              ^
-%Warning-INITIALDLY: tb_accelerator.v:201:21: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  201 |         rst_n       <= 1'b0;
-      |                     ^~
-                     ... For warning description see https://verilator.org/warn/INITIALDLY?v=5.036
-                     ... Use "/* verilator lint_off INITIALDLY */" and lint_on around source to disable this message.
-%Warning-INITIALDLY: tb_accelerator.v:202:21: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  202 |         tb_comp_enb <= 1'b0;
-      |                     ^~
-%Warning-INITIALDLY: tb_accelerator.v:215:15: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  215 |         rst_n <= 1'b1;
-      |               ^~
-%Warning-INITIALDLY: tb_accelerator.v:222:21: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  222 |         tb_comp_enb <= 1'b1;
-      |                     ^~
-%Warning-INITIALDLY: tb_accelerator.v:224:21: Non-blocking assignment '<=' in initial/final block
-                                            : ... This will be executed as a blocking assignment '='!
-  224 |         tb_comp_enb <= 1'b0;
-      |                     ^~
-%Warning-BLKSEQ: sram_banked.v:44:21: Blocking assignment '=' in sequential logic process
-                                    : ... Suggest using delayed assignment '<='
-   44 |             row_idx = waddr / (NUM_BANKS / BYTES_PER_BUS_WORD);
-      |                     ^
-%Warning-BLKSEQ: sram_banked.v:45:30: Blocking assignment '=' in sequential logic process
-                                    : ... Suggest using delayed assignment '<='
-   45 |             bank_group_start = (waddr % (NUM_BANKS / BYTES_PER_BUS_WORD)) * BYTES_PER_BUS_WORD;
-      |                              ^
-%Warning-BLKSEQ: sram_banked.v:59:20: Blocking assignment '=' in sequential logic process
-                                    : ... Suggest using delayed assignment '<='
-   59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
-      |                    ^
-%Warning-BLKSEQ: sram_c.v:58:23: Blocking assignment '=' in sequential logic process
-                               : ... Suggest using delayed assignment '<='
-   58 |             entry_idx = raddr / WORDS_PER_ENTRY;
-      |                       ^
-%Warning-BLKSEQ: sram_c.v:59:25: Blocking assignment '=' in sequential logic process
-                               : ... Suggest using delayed assignment '<='
-   59 |             word_offset = raddr % WORDS_PER_ENTRY;
-      |                         ^
-%Warning-SYNCASYNCNET: tb_accelerator.v:54:10: Signal flopped as both synchronous and async: 'tb_accelerator.rst_n'
-                       tb_accelerator.v:120:14: ... Location of async usage
-  120 |         if (!rst_n) begin
-      |              ^~~~~
-                       sram_c.v:54:14: ... Location of sync usage
-   54 |         if (!rst_n) begin
-      |              ^~~~~
-                       ... For warning description see https://verilator.org/warn/SYNCASYNCNET?v=5.036
-                       ... Use "/* verilator lint_off SYNCASYNCNET */" and lint_on around source to disable this message.
-%Warning-MULTIDRIVEN: sram_c.v:30:27: Signal has multiple driving blocks with different clocking: 'tb_accelerator.dut.u_sram_c.memory'
-                      sram_c.v:74:17: ... Location of first driving block
-   74 |                 memory[i] <= {ENTRY_WIDTH{1'b0}};
-      |                 ^~~~~~
-                      sram_c.v:41:13: ... Location of other driving block
-   41 |             memory[waddr] <= wdata;
-      |             ^~~~~~
-                      ... For warning description see https://verilator.org/warn/MULTIDRIVEN?v=5.036
-                      ... Use "/* verilator lint_off MULTIDRIVEN */" and lint_on around source to disable this message.
-%Warning-UNOPTFLAT: sa_enhanced.v:62:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
-   62 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
-      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.036
-                    ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
-                    sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
-                    pe.v:60:38:      Example path: ASSIGNW
-                    pe.v:28:42:      Example path: tb_accelerator.dut.u_sa_enhanced.__Vcellout__pe_row_gen[0].pe_col_gen[0].u_pe_inst__pe_row_propagate_done_out
-                    sa_enhanced.v:122:22:      Example path: ASSIGNW
-                    sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
-- V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
-- Verilator: Built from 0.510 MB sources in 10 modules, into 5.524 MB in 11 C++ files needing 0.000 MB
-- Verilator: Walltime 1.178 s (elab=0.056, cvt=1.067, bld=0.000); cpu 1.173 s on 1 threads
-### Compiling C++ simulation executable...
-/Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
-c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -c -o verilated.o /opt/homebrew/Cellar/verilator/5.036/share/verilator/include/verilated.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -c -o verilated_timing.o /opt/homebrew/Cellar/verilator/5.036/share/verilator/include/verilated_timing.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -c -o verilated_threads.o /opt/homebrew/Cellar/verilator/5.036/share/verilator/include/verilated_threads.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -x c++-header Vtb_accelerator__pch.h -o Vtb_accelerator__pch.h.fast.gch
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator.o Vtb_accelerator.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator___024root__DepSet_hd743b889__0.o Vtb_accelerator___024root__DepSet_hd743b889__0.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator___024root__DepSet_hb8b3abc6__0.o Vtb_accelerator___024root__DepSet_hb8b3abc6__0.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator___024root__DepSet_hb8b3abc6__1.o Vtb_accelerator___024root__DepSet_hb8b3abc6__1.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator___024root__DepSet_hb8b3abc6__2.o Vtb_accelerator___024root__DepSet_hb8b3abc6__2.cpp
-c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.fast.gch -c -o Vtb_accelerator___024root__DepSet_hb8b3abc6__3.o Vtb_accelerator___024root__DepSet_hb8b3abc6__3.cpp
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -x c++-header Vtb_accelerator__pch.h -o Vtb_accelerator__pch.h.slow.gch
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.slow.gch -c -o Vtb_accelerator__ConstPool_0.o Vtb_accelerator__ConstPool_0.cpp
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.slow.gch -c -o Vtb_accelerator___024root__Slow.o Vtb_accelerator___024root__Slow.cpp
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.slow.gch -c -o Vtb_accelerator___024root__DepSet_hd743b889__0__Slow.o Vtb_accelerator___024root__DepSet_hd743b889__0__Slow.cpp
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.slow.gch -c -o Vtb_accelerator___024root__DepSet_hb8b3abc6__0__Slow.o Vtb_accelerator___024root__DepSet_hb8b3abc6__0__Slow.cpp
-c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -include-pch Vtb_accelerator__pch.h.slow.gch -c -o Vtb_accelerator__Syms.o Vtb_accelerator__Syms.cpp
-echo "" > Vtb_accelerator__ALL.verilator_deplist.tmp
-c++  -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv   sim_main.o verilated.o verilated_timing.o verilated_threads.o Vtb_accelerator__ALL.a    -pthread -lpthread   -o Vtb_accelerator
-rm Vtb_accelerator__ALL.verilator_deplist.tmp
-### Running simulation: ./obj_dir/Vtb_accelerator
-./obj_dir/Vtb_accelerator
-SIM_CPP: Starting main().
-SIM_CPP: DUT (Vtb_accelerator) instantiated.
-SIM_CPP: Entering simulation loop...
-==============================================
-[0] [TB] Testbench starting...
-==============================================
-[0] [TB] Loaded 'input_mem.csv' into memory model.
-[50000] [TB] Reset released.
-[55000] [TB] Asserting comp_enb to start accelerator.
-[65000] [TB] Waiting for accelerator to finish (tb_done=1)...
-75000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-75000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-85000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-85000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-95000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-95000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-105000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-105000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-115000 [LOADER] FSM周期中第         1个加载的数据, 具体数值是0xdbe80134b311843d
-115000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-115000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-125000 [LOADER] FSM周期中第         2个加载的数据, 具体数值是0x469ec71d2f630ada
-125000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-125000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-135000 [LOADER] FSM周期中第         3个加载的数据, 具体数值是0x084b8af3e66e6cd3
-135000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-135000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-145000 [LOADER] FSM周期中第         4个加载的数据, 具体数值是0xeb279a7d63732a84
-145000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-145000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-155000 [LOADER] FSM周期中第         5个加载的数据, 具体数值是0xfe09a46d44e8873a
-155000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-155000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-165000 [LOADER] FSM周期中第         6个加载的数据, 具体数值是0x7b26b07f7ba823c2
-165000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-165000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-175000 [LOADER] FSM周期中第         7个加载的数据, 具体数值是0xf8e9092f110fe273
-175000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-175000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-185000 [LOADER] FSM周期中第         8个加载的数据, 具体数值是0xfd571c9f194fa12a
-185000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-185000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-195000 [LOADER] FSM周期中第         9个加载的数据, 具体数值是0xf77f3368607263be
-195000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-195000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-205000 [LOADER] FSM周期中第        10个加载的数据, 具体数值是0x1cb0708dbed2c184
-205000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-205000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-215000 [LOADER] FSM周期中第        11个加载的数据, 具体数值是0x7e8e516bee9ecaf2
-215000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-215000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-225000 [LOADER] FSM周期中第        12个加载的数据, 具体数值是0x3a8cc2209021ea56
-225000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-225000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-235000 [LOADER] FSM周期中第        13个加载的数据, 具体数值是0x567594d46810f5d4
-235000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-235000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-245000 [LOADER] FSM周期中第        14个加载的数据, 具体数值是0xc6f0a80e4ee45059
-245000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-245000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-255000 [LOADER] FSM周期中第        15个加载的数据, 具体数值是0x9dde0a7676e0b0d1
-255000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-255000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-265000 [LOADER] FSM周期中第        16个加载的数据, 具体数值是0x237b555f806aa461
-265000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-265000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-275000 [LOADER] FSM周期中第        17个加载的数据, 具体数值是0xc4992be89c8f17a5
-275000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-275000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-285000 [LOADER] FSM周期中第        18个加载的数据, 具体数值是0xe16dcc04959c2d97
-285000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-285000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-295000 [LOADER] FSM周期中第        19个加载的数据, 具体数值是0x06615897eb4a63c0
-295000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-295000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-305000 [LOADER] FSM周期中第        20个加载的数据, 具体数值是0x6a056a45a0e26ab7
-305000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-305000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-315000 [LOADER] FSM周期中第        21个加载的数据, 具体数值是0x2d00b7230f695a9d
-315000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-315000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-325000 [LOADER] FSM周期中第        22个加载的数据, 具体数值是0x59ad7f40a827bcef
-325000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-325000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-335000 [LOADER] FSM周期中第        23个加载的数据, 具体数值是0x34ccaa59336f0e28
-335000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-335000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-345000 [LOADER] FSM周期中第        24个加载的数据, 具体数值是0xe6cad686d28436e3
-345000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-345000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-355000 [LOADER] FSM周期中第        25个加载的数据, 具体数值是0xb436e54ae08e525d
-355000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-355000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-365000 [LOADER] FSM周期中第        26个加载的数据, 具体数值是0x8a7657475260b8b8
-365000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-365000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-375000 [LOADER] FSM周期中第        27个加载的数据, 具体数值是0xab876859c3e78e5f
-375000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-375000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-385000 [LOADER] FSM周期中第        28个加载的数据, 具体数值是0x52c57b88e28fa163
-385000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-385000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-395000 [LOADER] FSM周期中第        29个加载的数据, 具体数值是0xb2b83ee7799f009b
-395000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-395000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-405000 [LOADER] FSM周期中第        30个加载的数据, 具体数值是0xee2042f01aedf5ff
-405000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-405000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-415000 [LOADER] FSM周期中第        31个加载的数据, 具体数值是0x4e2548a4b523edb4
-415000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-415000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-425000 [LOADER] FSM周期中第        32个加载的数据, 具体数值是0xda4d79d7e3abfd4c
-425000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-425000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-435000 [LOADER] FSM周期中第        33个加载的数据, 具体数值是0x5e26504e910e1178
-435000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-435000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-445000 [LOADER] FSM周期中第        34个加载的数据, 具体数值是0x830a597e80e05871
-445000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-445000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-455000 [LOADER] FSM周期中第        35个加载的数据, 具体数值是0xe6effe880ccd0130
-455000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-455000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-465000 [LOADER] FSM周期中第        36个加载的数据, 具体数值是0x9604abecd47bfc87
-465000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-465000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-475000 [LOADER] FSM周期中第        37个加载的数据, 具体数值是0xad2a23d16c9fd692
-475000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-475000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-485000 [LOADER] FSM周期中第        38个加载的数据, 具体数值是0x3b107ba06dc71cb6
-485000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-485000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-495000 [LOADER] FSM周期中第        39个加载的数据, 具体数值是0xf7dba8eb1de183b4
-495000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-495000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-505000 [LOADER] FSM周期中第        40个加载的数据, 具体数值是0x8cffea84f03c4e46
-505000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-505000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-515000 [LOADER] FSM周期中第        41个加载的数据, 具体数值是0x773e6a54430161af
-515000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-515000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-525000 [LOADER] FSM周期中第        42个加载的数据, 具体数值是0x9509b49a608b6a48
-525000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-525000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-535000 [LOADER] FSM周期中第        43个加载的数据, 具体数值是0x1edd19e094084e56
-535000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-535000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-545000 [LOADER] FSM周期中第        44个加载的数据, 具体数值是0x99adced25d59a89e
-545000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-545000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-555000 [LOADER] FSM周期中第        45个加载的数据, 具体数值是0x3872023279c16c5b
-555000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-555000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-565000 [LOADER] FSM周期中第        46个加载的数据, 具体数值是0x5ebfba3ce0b41eb7
-565000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-565000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-575000 [LOADER] FSM周期中第        47个加载的数据, 具体数值是0xbe062327b4506970
-575000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-575000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-585000 [LOADER] FSM周期中第        48个加载的数据, 具体数值是0x7cd6df72565c0b8f
-585000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-585000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-595000 [LOADER] FSM周期中第        49个加载的数据, 具体数值是0x98cba8b657be6b18
-595000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-595000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-605000 [LOADER] FSM周期中第        50个加载的数据, 具体数值是0x17239fd0fe2bcbfa
-605000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-605000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-615000 [LOADER] FSM周期中第        51个加载的数据, 具体数值是0xb6b53d9860397214
-615000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-615000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-625000 [LOADER] FSM周期中第        52个加载的数据, 具体数值是0x2b6829afe1c0e17f
-625000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-625000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-635000 [LOADER] FSM周期中第        53个加载的数据, 具体数值是0xde0c0e9e3e9440a2
-635000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-635000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-645000 [LOADER] FSM周期中第        54个加载的数据, 具体数值是0x4903123b10918b8a
-645000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-645000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-655000 [LOADER] FSM周期中第        55个加载的数据, 具体数值是0x42bd7e85f51ad2e2
-655000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-655000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-665000 [LOADER] FSM周期中第        56个加载的数据, 具体数值是0xeb2c59c915f8deb1
-665000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-665000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-675000 [LOADER] FSM周期中第        57个加载的数据, 具体数值是0x42cf7b585c08fff0
-675000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-675000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-685000 [LOADER] FSM周期中第        58个加载的数据, 具体数值是0x6a80c577b07640ef
-685000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-685000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-695000 [LOADER] FSM周期中第        59个加载的数据, 具体数值是0x6b885cdd8490ca18
-695000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-695000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-705000 [LOADER] FSM周期中第        60个加载的数据, 具体数值是0xf7435dc80aea5358
-705000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-705000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-715000 [LOADER] FSM周期中第        61个加载的数据, 具体数值是0xae0f5820ecad98de
-715000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-715000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-725000 [LOADER] FSM周期中第        62个加载的数据, 具体数值是0x9bd82a92974e6970
-725000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-725000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-735000 [LOADER] FSM周期中第        63个加载的数据, 具体数值是0x88654e030d1c176e
-735000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-735000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-745000 [LOADER] FSM周期中第        64个加载的数据, 具体数值是0x390d6070d919969e
-745000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-745000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-755000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-755000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-765000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-765000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-785000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-785000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-795000 [DF SEND] 时间步t_f=          0: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-795000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-795000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-805000 [DF SEND] 时间步t_f=          1: 发送A数据=0x0000000000000000000000000000003d, 发送B数据=0x00000000000000000000000000000078
-805000 [PE(0,0)] Input A:0x3d, Input B:0x78, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-805000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-815000 [DF SEND] 时间步t_f=          2: 发送A数据=0x0000000000000000000000000000d384, 发送B数据=0x00000000000000000000000000003011
-815000 [PE(0,0)] Input A:0x84, Input B:0x11, Latched A:0x3d, Latched B:0x78, Acc:0x00000000
-815000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-825000 [DF SEND] 时间步t_f=          3: 发送A数据=0x000000000000000000000000003a6c11, 发送B数据=0x0000000000000000000000000092010e
-825000 [PE(0,0)] Input A:0x11, Input B:0x0e, Latched A:0x84, Latched B:0x11, Acc:0x00000000
-825000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-835000 [DF SEND] 时间步t_f=          4: 发送A数据=0x00000000000000000000000073876eb3, 发送B数据=0x000000000000000000000000b4d6cd91
-835000 [PE(0,0)] Input A:0xb3, Input B:0x91, Latched A:0x11, Latched B:0x0e, Acc:0x00001c98
-835000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-845000 [DF SEND] 时间步t_f=          5: 发送A数据=0x0000000000000000000000bee2e8e634, 发送B数据=0x0000000000000000000000af839f0c4e
-845000 [PE(0,0)] Input A:0x34, Input B:0x4e, Latched A:0xb3, Latched B:0x91, Acc:0x0000145c
-845000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-855000 [DF SEND] 时间步t_f=          6: 发送A数据=0x00000000000000000000f2630f44f301, 发送B数据=0x000000000000000000005661e16c8850
-855000 [PE(0,0)] Input A:0x01, Input B:0x50, Latched A:0x34, Latched B:0x4e, Acc:0x0000154a
-855000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-865000 [DF SEND] 时间步t_f=          7: 发送A数据=0x000000000000000000d4ca72116d8ae8, 发送B数据=0x0000000000000000005b4e011dd1fe26
-865000 [PE(0,0)] Input A:0xe8, Input B:0x26, Latched A:0x01, Latched B:0x50, Acc:0x000036ad
-865000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-875000 [DF SEND] 时间步t_f=          8: 发送A数据=0x0000000000000000d1f59e602fa44bdb, 发送B数据=0x0000000000000000706c0843eb23ef5e
-875000 [PE(0,0)] Input A:0xdb, Input B:0x5e, Latched A:0xe8, Latched B:0x26, Acc:0x00004685
-875000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-885000 [DF SEND] 时间步t_f=          9: 发送A数据=0x00000000000000a5b010ee68090908da, 发送B数据=0x000000000000001869c19454a82ae671
-885000 [PE(0,0)] Input A:0xda, Input B:0x71, Latched A:0xdb, Latched B:0x5e, Acc:0x000046d5
-885000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-895000 [DF SEND] 时间步t_f=         10: 发送A数据=0x000000000000c017e0686b33e9fe840a, 发送B数据=0x000000000000146b5079e06adbad8758
-895000 [PE(0,0)] Input A:0x0a, Input B:0x58, Latched A:0xda, Latched B:0x71, Acc:0x00004345
-895000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-905000 [DF SEND] 时间步t_f=         11: 发送A数据=0x00000000009d638f76d4517ff8c22a63, 发送B数据=0x0000000000a272beb432193ef7b6fce0
-905000 [PE(0,0)] Input A:0x63, Input B:0xe0, Latched A:0x0a, Latched B:0x58, Acc:0x000035af
-905000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-915000 [DF SEND] 时间步t_f=         12: 发送A数据=0x00000000285a4a9c76948ef72a23732f, 发送B数据=0x00000000e24039572702dd77461c7b80
-915000 [PE(0,0)] Input A:0x2f, Input B:0x80, Latched A:0x63, Latched B:0xe0, Acc:0x000024e9
-915000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-925000 [DF SEND] 时间步t_f=         13: 发送A数据=0x0000005d0e69ebe80a757e84a1a8631d, 发送B数据=0x000000f0d29460b623721e484ec7d47e
-925000 [PE(0,0)] Input A:0x1d, Input B:0x7e, Latched A:0x2f, Latched B:0x80, Acc:0x00002859
-925000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-935000 [DF SEND] 时间步t_f=         14: 发送A数据=0x00005f526f0f972bde5656c14f7b7dc7, 发送B数据=0x000018ff1a3e98a806389e6a3c6dec59
-935000 [PE(0,0)] Input A:0xc7, Input B:0x59, Latched A:0x1d, Latched B:0x7e, Acc:0x00001bf9
-935000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-945000 [DF SEND] 时间步t_f=         15: 发送A数据=0x009b8e8e332358999d59ead2197f9a9e, 发送B数据=0x00deca08f59e3dcbbeb7a88bf0a0ab0a
-945000 [PE(0,0)] Input A:0x9e, Input B:0x0a, Latched A:0xc7, Latched B:0x59, Acc:0x00000479
-945000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-955000 [DF SEND] 时间步t_f=         16: 发送A数据=0xb400e7e059b761c4615021be9fb02746, 发送B数据=0x6e98905c850eb5988f1e5960847b0483
-955000 [PE(0,0)] Input A:0x46, Input B:0x83, Latched A:0x9e, Latched B:0x0a, Acc:0x000012bf
-955000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-965000 [DF SEND] 时间步t_f=         17: 发送A数据=0xed9fc34aaa000697a4e4908d1c26eb00, 发送B数据=0x17ad84587e0cb6fa0bb45d9aea109600
-965000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x46, Latched B:0x83, Acc:0xfffffeee
-965000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-975000 [DF SEND] 时间步t_f=         18: 发送A数据=0x237959e5cc2db72d6a4e2070577b0000, 发送B数据=0x1cecdd7bbdde7fcb5ce0d2b4ff3b0000
-975000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xfffffb1a
-975000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-985000 [DF SEND] 时间步t_f=         19: 发送A数据=0xb5e7683634ef6a9c800ec2b0fd000000, 发送B数据=0x0d205ccf428ae12b563cce098c000000
-985000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-985000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-995000 [DF SEND] 时间步t_f=         20: 发送A数据=0xa43e87b4e3bce2955fa88c1c00000000, 发送B数据=0x03588842b18bc0fe72baad9500000000
-995000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-995000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1005000 [DF SEND] 时间步t_f=         21: 发送A数据=0x48b8abb83627a00455f03a0000000000, 发送B数据=0x4e0f6befde91e1d0dfbf990000000000
-1005000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1005000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1015000 [DF SEND] 时间步t_f=         22: 发送A数据=0x25b263b884a845cc7bc6000000000000, 发送B数据=0x65ae5840f810af9fd65e000000000000
-1015000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1015000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1025000 [DF SEND] 时间步t_f=         23: 发送A数据=0x4effa160d2406a6d2300000000000000, 发送B数据=0x88705376153b29237c00000000000000
-1025000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1025000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1035000 [DF SEND] 时间步t_f=         24: 发送A数据=0x4cf58f52867f05e10000000000000000, 发送B数据=0x9e69eab0c91268170000000000000000
-1035000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1035000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1045000 [DF SEND] 时间步t_f=         25: 发送A数据=0xfdede247d6ad6a000000000000000000, 发送B数据=0x964e0a7759032b000000000000000000
-1045000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1045000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1055000 [DF SEND] 时间步t_f=         26: 发送A数据=0xab1a8857ca5900000000000000000000, 发送B数据=0x1997c8c52c4900000000000000000000
-1055000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1055000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1065000 [DF SEND] 时间步t_f=         27: 发送A数据=0xe3f07b76e60000000000000000000000, 发送B数据=0xd9925d80eb0000000000000000000000
-1065000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1065000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1075000 [DF SEND] 时间步t_f=         28: 发送A数据=0xd742c58a000000000000000000000000, 发送B数据=0x702a436a000000000000000000000000
-1075000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1075000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1085000 [DF SEND] 时间步t_f=         29: 发送A数据=0x79205200000000000000000000000000, 发送B数据=0x60d8f700000000000000000000000000
-1085000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1085000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1095000 [DF SEND] 时间步t_f=         30: 发送A数据=0x4dee0000000000000000000000000000, 发送B数据=0x0d9b0000000000000000000000000000
-1095000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1095000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1105000 [DF SEND] 时间步t_f=         31: 发送A数据=0xda000000000000000000000000000000, 发送B数据=0x39000000000000000000000000000000
-1105000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1105000 [PE(15,15)] Input A:0xb4, Input B:0x6e, Latched A:0x00, Latched B:0x00, Acc:0x00000000
-1115000 [DF SEND] 时间步t_f=         32: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1115000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1115000 [PE(15,15)] Input A:0xed, Input B:0x17, Latched A:0xb4, Latched B:0x6e, Acc:0x00000000
-1125000 [DF SEND] 时间步t_f=         33: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1125000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1125000 [PE(15,15)] Input A:0x23, Input B:0x1c, Latched A:0xed, Latched B:0x17, Acc:0x00000000
-1135000 [DF SEND] 时间步t_f=         34: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1135000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1135000 [PE(15,15)] Input A:0xb5, Input B:0x0d, Latched A:0x23, Latched B:0x1c, Acc:0xffffdf58
-1145000 [DF SEND] 时间步t_f=         35: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1145000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1145000 [PE(15,15)] Input A:0xa4, Input B:0x03, Latched A:0xb5, Latched B:0x0d, Acc:0xffffdda3
-1155000 [DF SEND] 时间步t_f=         36: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1155000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1155000 [PE(15,15)] Input A:0x48, Input B:0x4e, Latched A:0xa4, Latched B:0x03, Acc:0xffffe177
-1165000 [DF SEND] 时间步t_f=         37: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1165000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1165000 [PE(15,15)] Input A:0x25, Input B:0x65, Latched A:0x48, Latched B:0x4e, Acc:0xffffdda8
-1175000 [DF SEND] 时间步t_f=         38: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1175000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1175000 [PE(15,15)] Input A:0x4e, Input B:0x88, Latched A:0x25, Latched B:0x65, Acc:0xffffdc94
-1185000 [DF SEND] 时间步t_f=         39: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1185000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1185000 [PE(15,15)] Input A:0x4c, Input B:0x9e, Latched A:0x4e, Latched B:0x88, Acc:0xfffff284
-1195000 [DF SEND] 时间步t_f=         40: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1195000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1195000 [PE(15,15)] Input A:0xfd, Input B:0x96, Latched A:0x4c, Latched B:0x9e, Acc:0x0000011d
-1205000 [DF SEND] 时间步t_f=         41: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1205000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1205000 [PE(15,15)] Input A:0xab, Input B:0x19, Latched A:0xfd, Latched B:0x96, Acc:0xffffdc8d
-1215000 [DF SEND] 时间步t_f=         42: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1215000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1215000 [PE(15,15)] Input A:0xe3, Input B:0xd9, Latched A:0xab, Latched B:0x19, Acc:0xffffbf75
-1225000 [DF SEND] 时间步t_f=         43: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1225000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1225000 [PE(15,15)] Input A:0xd7, Input B:0x70, Latched A:0xe3, Latched B:0xd9, Acc:0xffffc0b3
-1235000 [DF SEND] 时间步t_f=         44: 发送A数据=0x00000000000000000000000000000000, 发送B数据=0x00000000000000000000000000000000
-1235000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1235000 [PE(15,15)] Input A:0x79, Input B:0x60, Latched A:0xd7, Latched B:0x70, Acc:0xffffb866
-1245000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1245000 [PE(15,15)] Input A:0x4d, Input B:0x0d, Latched A:0x79, Latched B:0x60, Acc:0xffffbcd1
-1255000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1255000 [PE(15,15)] Input A:0xda, Input B:0x39, Latched A:0x4d, Latched B:0x0d, Acc:0xffffaae1
-1265000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1265000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0xda, Latched B:0x39, Acc:0xffffd841
-1275000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1275000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffdc2a
-1285000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1285000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-1295000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1295000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1295000 ns | Write Data: waddr =  0, wdata = 000024a500001850ffffeb1e00007b83ffffd2f2ffff9b2affff506fffffd01900009fdaffffe1e300005067ffff669700000441ffffbfa600001c5dffffd8ec
-1305000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1305000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1305000 ns | Write Data: waddr =  1, wdata = 00001ec8ffff2145ffff208d00001140ffffa81500000230ffff754a00003cae0000e7a70000373c00007339ffffe740ffffbc1bffff9fa2000063acffffa645
-1315000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1315000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1315000 ns | Write Data: waddr =  2, wdata = 00001d67ffff46e6ffffa2af000036d5ffff85bb00002e91ffff71c1fffff07000006f9700009772ffff8de5ffffd6e6ffffb8cd0000289fffff9b3effff9fb4
-1325000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1325000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1325000 ns | Write Data: waddr =  3, wdata = 00002e2b00001bff000026a6ffffb81b00001786ffff9db100004d0500002a72ffffff33ffffb68e00003a16ffffcb020000165dffffe58400000fabfffff282
-1335000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1335000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1335000 ns | Write Data: waddr =  4, wdata = 00008df0ffffdf26ffff379e000027a800001b3a0000547400001bbeffffcba300001555000085d2fffff33c00006326ffff9a2b0000828affffb0ecffffbb51
-1345000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1345000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1345000 ns | Write Data: waddr =  5, wdata = ffff95a400006b120000878d00010fbdffffddfbffffc151ffffa84dffffb4b5ffffc75c0000267cffffe65200000dd100000b53ffff7251ffffcae300007b2c
-1355000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1355000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1355000 ns | Write Data: waddr =  6, wdata = ffff5d26ffffe1d7ffffa9eeffffd903ffff9d6affffd496ffffdc7c00000c8affff89de00004f15ffffb7c10000be9f0000717a000003b8ffffec13ffffe37e
-1365000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1365000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1365000 ns | Write Data: waddr =  7, wdata = 000082d200007567ffffd9cc00006bfdffffc30cfffff4ef00004e84000019bdffffb21cffffb641ffff298affff4f4600001b3600000637ffffc40200002b63
-1375000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1375000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1375000 ns | Write Data: waddr =  8, wdata = ffffd2d100002b0b00007731ffffbedc000042a600008381000011e300002a57ffffbb42ffffcceeffffdf01fffff94d000006ba000021f600004b7600000343
-1385000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1385000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1385000 ns | Write Data: waddr =  9, wdata = 00008b01ffffd1bbffffef080000541a000053c100006a8e00004237ffffaf540000640f00005e8dffff99d4ffffeacdffff642d000043efffffdcad00004d0d
-1395000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1395000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1395000 ns | Write Data: waddr = 10, wdata = 00004df9ffff9214ffff86ed00006f81ffffeafb00003b69fffffec1ffffd94d00003f9a00001e77ffffcf28ffff8cdbffff9e6dffffdefdffff9ad000000062
-1405000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1405000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1405000 ns | Write Data: waddr = 11, wdata = ffff7d1cffffdda9ffffc92dffffe5b9ffffce25ffffa2ae000011f8fffff5e5ffffbc6c0000420ffffff0260000874600003a9bffffc900ffffc38cfffffb74
-1415000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1415000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1415000 ns | Write Data: waddr = 12, wdata = 0000b478ffffdfbeffffe9ddffff7fd7ffffda0e00001d53ffffbeb500003c6d00006f42fffffb27000084efffffafd7ffffb78000000e5600005c15000044c9
-1425000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1425000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1425000 ns | Write Data: waddr = 13, wdata = 00003571000090690000b837ffffd7e700003e6dffffd637000074d5ffffaee0ffffbd98ffff91fbffffd3ffffffadfcfffff12600003be5ffff58d700003603
-1435000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1435000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1435000 ns | Write Data: waddr = 14, wdata = fffff961000048c40000246efffffbf700004be700008ace00007081000044d3ffff8cf1ffffd47effffabbb0000240c000031bb0000cfb100000455ffff8594
-1445000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1445000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-Time: 1445000 ns | Write Data: waddr = 15, wdata = ffffd3b400003d340000b159ffff71de0000999d00000b4400006a7effff7aa9ffff55e3ffff7badffffb9f00000594f000015f30000343cffffab9b00007f3d
-1455000 [PE(0,0)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd8ec
-1455000 [PE(15,15)] Input A:0x00, Input B:0x00, Latched A:0x00, Latched B:0x00, Acc:0xffffd3b4
-[2755000] [TB] Accelerator finished (tb_done asserted).
-[2765000] [TB] Writing results from memory model to 'result_mem.csv'...
-[2765000] [TB] Results written to 'result_mem.csv'.
-==============================================
-[2765000] [TB] TEST SCENARIO COMPLETED.
-==============================================
-- tb_accelerator.v:259: Verilog $finish
-SIM_CPP: Exited simulation loop. Total steps: 2765001
-SIM_CPP: main() finished.
-### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from inish or isplay).
-
-步骤 3: 正在重排硬件结果 (result_mem.csv)...
-----------------------------------------
-成功重排SINT32数据并保存到 'result_mem_reordered.csv'。
-重排完成，result_mem.csv 已被更新。
-
-步骤 4: 正在检查重排后的仿真结果...
-----------------------------------------
-### Checking result...
-python3 CheckResult.py
-
-Matrix A (SINT8 loaded from .npy):
-[[       61      -124        17       -77        52         1       -24       -37       -38        10        99        47        29       -57       -98        70]
- [      -45       108       110       -26       -13      -118        75         8      -124        42       115        99       125      -102        39       -21]
- [       58      -121       -24        68       109       -92         9        -2       -62        35       -88       123       127       -80        38       123]
- [      115       -30        15        17        47         9       -23        -8        42       -95        79        25       -97        28        87        -3]
- [      -66        99       114        96       104        51       127        -9      -124       -63       -46       -66      -115       112       -80        28]
- [      -14       -54       -98       -18       107        81      -114       126        86       -22        33      -112        32       -62      -116        58]
- [      -44       -11        16       104       -44      -108       117        86        89        80       -28        78        14       -88       -16       -58]
- [      -47       -80       -32       118       118        10       -34       -99        97       -92       106      -128        95        85       123        35]
- [      -91        23      -113      -100       -24        43      -103       -60      -105        45      -100      -107         4       -52       109       -31]
- [      -64        99        74       -21      -105        88        97         6       -73       106       -30       -96        69       106         5       106]
- [      -99        90       105        15        35       -73         0        45       -17       -68        39       -88        64       127       -83        89]
- [       40        14       111        51        89       -86       -52        52       -29        54      -124       -46      -122       -42       -54       -26]
- [       93        82      -114       -32        74       -27        54       -76       -72       -72        96        82        71        87       118      -118]
- [       95      -114       -25       -61        89       104      -121       -85        99       -95      -113       -30      -120       123       -59        82]
- [     -101         0       -97       121       -25        62       -72       -78        -1       -11       -19        26       -16        66        32       -18]
- [      -76       -19        35       -75       -92        72        37        78        76        -3       -85       -29       -41       121        77       -38]]
-
-Matrix B (SINT8 loaded from .npy):
-[[      120        48      -110       -76       -81        86        91       112        24        20       -94       -30       -16        24       -34       110]
- [       17         1       -42      -125        97        78       108       105       107       114        64       -46        -1       -54      -104        23]
- [       14       -51       -97       -31         1         8       -63        80       -66        57      -108        26         8      -112       -83        28]
- [     -111        12       108        29        67      -108       121       -76        87        96        62       -11        92      -124       -20        13]
- [       78      -120       -47       -21        84       -32        50        39       -74      -104       -98      -123        88       -35        32         3]
- [       80        -2        35       -88       106        25         2        35       -88        61        14       126       123        92        88        78]
- [       38       -17        42       -37        62       -35       114         6       -53       -75        12       -67       -49      -120        15       101]
- [       94       -26       -83        -9       119        30        56       -66      -104       -74       -34        66        66       107       -82      -120]
- [      113      -121       -74        70        72       -98       -73      -113        -6       127      -118       -79       -17        88       112       -98]
- [       88        -4        28        78       106       -88        30        11       -53       -31      -117       -34        64        83       105      -106]
- [      -32       123       -57        60      -117        89       -76        92        43       -64      -111        -8       118       -22        78        25]
- [     -128       -44       109       -16        96        93       -32        86        -2       -31        16        21       -80        10      -105       -39]
- [      126       -20       -96      -124      -102       -46        60       114       -48       -81        59       -55       119       -56      -110       112]
- [       89       -85       123       -22       -76       -50       -70       -33       -97        41        18        89       -59        93        42        96]
- [       10         4        16        -1         9       -83       -65       -42        35       104         3        44      -128        67       -40        13]
- [     -125      -106        59      -116      -107      -103        94       124        23        43        73       -21       106        -9      -101        57]]
-
-Golden Result C (SINT32 loaded from .npy):
-[[   -10004      7261    -16474      1089    -39273     20583     -7709     40922    -12263    -44945    -25814    -11534     31619     -5346      6224      9381]
- [   -22971     25516    -24670    -17381     -6336     29497     14140     59303     15534    -35510       560    -22507      4416    -57203    -57019      7880]
- [   -24652    -25794     10399    -18227    -10522    -29211     38770     28567     -3984    -36415     11921    -31301     14037    -23889    -47386      7527]
- [    -3454      4011     -6780      5725    -13566     14870    -18802      -205     10866     19717    -25167      6022    -18405      9894      7167     11819]
- [   -17583    -20244     33418    -26069     25382     -3268     34258      5461    -13405      7102     21620      6970     10152    -51298     -8410     36336]
- [    31532    -13597    -36271      2899      3537     -6574      9852    -14500    -19275    -22451    -16047     -8709     69565     34701     27410    -27228]
- [    -7298     -5101       952     29050     48799    -18495     20245    -30242      3210     -9092    -11114    -25238     -9981    -22034     -7721    -41690]
- [    11107    -15358      1591      6966    -45242    -54902    -18879    -19940      6589     20100     -2833    -15604     27645     -9780     30055     33490]
- [      835     19318      8694      1722     -1715     -8447    -13074    -17598     10839      4579     33665     17062    -16676     30513     11019    -11567]
- [    19725     -9043     17391    -39891     -5427    -26156     24205     25615    -20652     16951     27278     21441     21530     -4344    -11845     35585]
- [       98    -25904     -8451    -24979    -29477    -12504      7799     16282     -9907      -319     15209     -5381     28545    -30995    -28140     19961]
- [    -1164    -15476    -14080     15003     34630     -4058     16911    -17300     -2587      4600    -23890    -12763     -6727    -14035     -8791    -33508]
- [    17609     23573      3670    -18560    -20521     34031     -1241     28482     15469    -16715      7507     -9714    -32809     -5667     -8258     46200]
- [    13827    -42793     15333     -3802    -20996    -11265    -28165    -17000    -20768     29909    -10697     15981    -10265     47159     36969     13681]
- [   -31340      1109     53169     12731      9228    -21573    -11138    -29455     17619     28801     35534     19431     -1033      9326     18628     -1695]
- [    32573    -21605     13372      5619     22863    -17936    -33875    -43549    -34135     27262      2884     39325    -36386     45401     15668    -11340]]
-----------------------------------------
-
-HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[   -10004      7261    -16474      1089    -39273     20583     -7709     40922    -12263    -44945    -25814    -11534     31619     -5346      6224      9381]
- [   -22971     25516    -24670    -17381     -6336     29497     14140     59303     15534    -35510       560    -22507      4416    -57203    -57019      7880]
- [   -24652    -25794     10399    -18227    -10522    -29211     38770     28567     -3984    -36415     11921    -31301     14037    -23889    -47386      7527]
- [    -3454      4011     -6780      5725    -13566     14870    -18802      -205     10866     19717    -25167      6022    -18405      9894      7167     11819]
- [   -17583    -20244     33418    -26069     25382     -3268     34258      5461    -13405      7102     21620      6970     10152    -51298     -8410     36336]
- [    31532    -13597    -36271      2899      3537     -6574      9852    -14500    -19275    -22451    -16047     -8709     69565     34701     27410    -27228]
- [    -7298     -5101       952     29050     48799    -18495     20245    -30242      3210     -9092    -11114    -25238     -9981    -22034     -7721    -41690]
- [    11107    -15358      1591      6966    -45242    -54902    -18879    -19940      6589     20100     -2833    -15604     27645     -9780     30055     33490]
- [      835     19318      8694      1722     -1715     -8447    -13074    -17598     10839      4579     33665     17062    -16676     30513     11019    -11567]
- [    19725     -9043     17391    -39891     -5427    -26156     24205     25615    -20652     16951     27278     21441     21530     -4344    -11845     35585]
- [       98    -25904     -8451    -24979    -29477    -12504      7799     16282     -9907      -319     15209     -5381     28545    -30995    -28140     19961]
- [    -1164    -15476    -14080     15003     34630     -4058     16911    -17300     -2587      4600    -23890    -12763     -6727    -14035     -8791    -33508]
- [    17609     23573      3670    -18560    -20521     34031     -1241     28482     15469    -16715      7507     -9714    -32809     -5667     -8258     46200]
- [    13827    -42793     15333     -3802    -20996    -11265    -28165    -17000    -20768     29909    -10697     15981    -10265     47159     36969     13681]
- [   -31340      1109     53169     12731      9228    -21573    -11138    -29455     17619     28801     35534     19431     -1033      9326     18628     -1695]
- [    32573    -21605     13372      5619     22863    -17936    -33875    -43549    -34135     27262      2884     39325    -36386     45401     15668    -11340]]
-
->> Accuracy Metrics (vs SINT32 Golden):
->> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00
---------------------
-
->> Comparison Summary (HW SINT32 vs Golden SINT32):
->> PASSED: Hardware SINT32 result exactly matches the golden SINT32 result.
---------------------
-
-----------------------------------------
-所有步骤成功完成！
-----------------------------------------
+%Warning-PINCONNECTEMPTY: accelerator.v:204:20: Cell pin connected by name with empty reference: 'write_busy'
+  204 |                   .write_busy(), .write_done(writer_done), 
+      |                    ^~~~~~~~~~
+%Error: sa_enhanced.v:82:9: Duplicate declaration of enum value: SA_FSM_IDLE
+   82 |         SA_FSM_IDLE,
+      |         ^~~~~~~~~~~
+        sa_enhanced.v:71:9: ... Location of original declaration
+   71 |         SA_FSM_IDLE,
+      |         ^~~~~~~~~~~
+        ... See the manual at https://verilator.org/verilator_doc.html?v=5.036 for more assistance.
+%Error: sa_enhanced.v:83:9: Duplicate declaration of enum value: SA_FSM_COMPUTE_START_K
+   83 |         SA_FSM_COMPUTE_START_K,
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+        sa_enhanced.v:72:9: ... Location of original declaration
+   72 |         SA_FSM_COMPUTE_START_K,
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+%Error: sa_enhanced.v:84:9: Duplicate declaration of enum value: SA_FSM_COMPUTE_WAIT_K
+   84 |         SA_FSM_COMPUTE_WAIT_K,
+      |         ^~~~~~~~~~~~~~~~~~~~~
+        sa_enhanced.v:73:9: ... Location of original declaration
+   73 |         SA_FSM_COMPUTE_WAIT_K,
+      |         ^~~~~~~~~~~~~~~~~~~~~
+%Error: sa_enhanced.v:88:7: Duplicate declaration of TYPEDEF 'sa_fsm_state_e': 'sa_fsm_state_e'
+   88 |     } sa_fsm_state_e;
+      |       ^~~~~~~~~~~~~~
+        sa_enhanced.v:75:7: ... Location of original declaration
+   75 |     } sa_fsm_state_e;
+      |       ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:89:20: Duplicate declaration of signal: 'sa_fsm_state_q'
+   89 |     sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+      |                    ^~~~~~~~~~~~~~
+        sa_enhanced.v:76:20: ... Location of original declaration
+   76 |     sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+      |                    ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:89:36: Duplicate declaration of signal: 'sa_fsm_state_d'
+   89 |     sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+      |                                    ^~~~~~~~~~~~~~
+        sa_enhanced.v:76:36: ... Location of original declaration
+   76 |     sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+      |                                    ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:91:36: Duplicate declaration of signal: 'k_iter_count_q'
+   91 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+      |                                    ^~~~~~~~~~~~~~
+        sa_enhanced.v:78:36: ... Location of original declaration
+   78 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+      |                                    ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:91:52: Duplicate declaration of signal: 'k_iter_count_d'
+   91 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+      |                                                    ^~~~~~~~~~~~~~
+        sa_enhanced.v:78:52: ... Location of original declaration
+   78 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+      |                                                    ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:92:28: Duplicate declaration of signal: 'wb_row_count_q'
+   92 |     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
+      |                            ^~~~~~~~~~~~~~
+        sa_enhanced.v:79:28: ... Location of original declaration
+   79 |     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
+      |                            ^~~~~~~~~~~~~~
+%Error: sa_enhanced.v:92:44: Duplicate declaration of signal: 'wb_row_count_d'
+   92 |     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
+      |                                            ^~~~~~~~~~~~~~
+        sa_enhanced.v:79:44: ... Location of original declaration
+   79 |     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
+      |                                            ^~~~~~~~~~~~~~
+%Error: Exiting due to 10 error(s)
+make: *** [compile_verilog] Error 1

@@ -15,7 +15,7 @@ module sa_enhanced #(
     parameter SIZE = 16,
     parameter K_ITER_COUNT = 16,
     // --- NEW PARAMETER to control SRAM C write path ---
-    parameter SRAM_C_WRITE_WIDTH = 512, 
+    parameter SRAM_C_WRITE_WIDTH = 256, 
     parameter INPUT_DATA_WIDTH = 8,
     parameter PE_ACCUM_DATA_WIDTH = 32
 )(
@@ -63,6 +63,9 @@ module sa_enhanced #(
     wire last_column_done_signals [SIZE-1:0];
     wire all_rows_calculated = last_column_done_signals[SIZE-1];
 
+    // --- NEW: Wires for Halfway-Done Propagation ---
+    wire mid_column_done_signals [SIZE-1:0]; // Signal indicating row 'r' is done up to the midpoint
+
     // --- FSM State and Common Counters ---
     typedef enum logic [1:0] {
         SA_FSM_IDLE,
@@ -75,11 +78,21 @@ module sa_enhanced #(
     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
 
+    typedef enum logic [2:0] { // Increased width to hold more states
+        SA_FSM_IDLE,
+        SA_FSM_COMPUTE_START_K,
+        SA_FSM_COMPUTE_WAIT_K,
+        SA_FSM_WRITE_BACK_FIRST_HALF,  // NEW STATE
+        SA_FSM_WRITE_BACK_SECOND_HALF  // NEW STATE
+        // Note: The original SA_FSM_WRITE_BACK state is effectively replaced by these two
+    } sa_fsm_state_e;
+    sa_fsm_state_e sa_fsm_state_q, sa_fsm_state_d;
+    
+    reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
+    reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
+
     // --- Pulse generation logic ---
     assign clear_for_new_tile_pulse = (sa_fsm_state_q == SA_FSM_IDLE) && (sa_fsm_state_d == SA_FSM_COMPUTE_START_K);
-    // -- MODIFIED --
-    // Changed from (sa_fsm_state_d == SA_FSM_COMPUTE_WAIT_K) to fix deadlock.
-    // This now generates a pulse when the FSM is in the START_K state for one cycle.
     assign start_systolic_pass_pulse = (sa_fsm_state_q == SA_FSM_COMPUTE_START_K);
 
     //===============================================================
@@ -123,6 +136,9 @@ module sa_enhanced #(
                 );
             end
             assign last_column_done_signals[r_gen_local] = pe_row_propagate_done_chain[r_gen_local][SIZE];
+            // *** NEW: Tap into the halfway point of the done chain ***
+            // This signal becomes true when PE(r_gen_local, SIZE/2 - 1) has finished its pass.
+            assign mid_column_done_signals[r_gen_local] = pe_row_propagate_done_chain[r_gen_local][SIZE/2];
         end
     endgenerate
 
@@ -150,60 +166,100 @@ module sa_enhanced #(
                     k_iter_count_q <= k_iter_count_d;
                     wb_row_count_q <= wb_row_count_d;
                     
-                    // Generate single-cycle done pulse for WIDE path
+                    // Generate single-cycle done pulse. This happens when the writeback FSM is in its last cycle.
                     tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1);
                 end
             end
 
             // --- Main SA Control FSM (Combinational Part) ---
-            always @(*) begin
+            always_comb begin // Changed to always_comb for better synthesis and checking
+                // Default assignments to prevent latches
                 sa_fsm_state_d = sa_fsm_state_q;
                 k_iter_count_d = k_iter_count_q;
                 wb_row_count_d = wb_row_count_q;
 
-                sram_c_waddr_to_sram   = 0;
-                sram_c_wdata_to_sram   = 0;
+                sram_c_waddr_to_sram   = '0;
+                sram_c_wdata_to_sram   = '0;
                 sram_c_we_to_sram      = 1'b0;
 
                 case (sa_fsm_state_q)
-                    SA_FSM_IDLE: if (start_tile_computation) begin sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = 0; end
-                    SA_FSM_COMPUTE_START_K: sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
-                    SA_FSM_COMPUTE_WAIT_K: begin
-                        if (all_rows_calculated) begin
-                            if (k_iter_count_q == K_ITER_COUNT - 1) begin
-                                sa_fsm_state_d = SA_FSM_WRITE_BACK; wb_row_count_d = 0;
-                            end else begin
-                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = k_iter_count_q + 1;
-                            end
+                    SA_FSM_IDLE: begin
+                        if (start_tile_computation) begin
+                            sa_fsm_state_d = SA_FSM_COMPUTE_START_K;
+                            k_iter_count_d = 0;
                         end
                     end
+                    
+                    SA_FSM_COMPUTE_START_K: begin
+                        sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
+                    end
+                    
+                    SA_FSM_COMPUTE_WAIT_K: begin
+                        // *** CRITICAL LOGIC FIX ***
+                        // We must differentiate between intermediate k-iterations and the final one.
+                        
+                        if (k_iter_count_q < K_ITER_COUNT - 1) begin
+                            // --- Case 1: Intermediate k-iterations ---
+                            // We MUST wait for the ENTIRE array to finish the current pass
+                            // before starting the next one to avoid corrupting data.
+                            if (all_rows_calculated) begin // Wait for the last row to finish
+                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K;
+                                k_iter_count_d = k_iter_count_q + 1;
+                            end
+                            // else: stay in SA_FSM_COMPUTE_WAIT_K
+                        end else begin 
+                            // --- Case 2: Final k-iteration (k == K_ITER_COUNT - 1) ---
+                            // Here, we can start writing back as soon as the first row's
+                            // final result is ready. This is the optimization you wanted.
+                            if (last_column_done_signals[0]) begin // First row is done, start writing
+                                sa_fsm_state_d = SA_FSM_WRITE_BACK;
+                                wb_row_count_d = 0; // Start writing from row 0
+                            end
+                            // else: stay in SA_FSM_COMPUTE_WAIT_K
+                        end
+                    end
+                    
                     SA_FSM_WRITE_BACK: begin
                         sram_c_we_to_sram = 1'b1;
                         sram_c_waddr_to_sram = wb_row_count_q;
                         
+                        // This combinatorial loop is fine for synthesis and simulation.
+                        // It describes how to pack the data for a given row.
                         for (integer c_idx = 0; c_idx < SIZE; c_idx = c_idx + 1) begin
                             sram_c_wdata_to_sram[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] = pe_result_out_internal[wb_row_count_q][c_idx];
                         end
 
                         if (wb_row_count_q == SIZE - 1) begin
+                            // Finished writing the last row of the tile
                             sa_fsm_state_d = SA_FSM_IDLE;
                         end else begin
+                            // Move to the next row to write.
+                            // The writeback proceeds one row per clock cycle, perfectly pipelined
+                            // with the PE results becoming available.
                             wb_row_count_d = wb_row_count_q + 1;
                         end
                     end
+
+                    default: begin
+                        sa_fsm_state_d = SA_FSM_IDLE;
+                    end
+
                 endcase
             end
-        end 
+        end
         //----------------------------------------------------------------------
-        // IMPLEMENTATION 2: NARROW/EFFICIENT PATH (e.g., 64-bit)
+        // IMPLEMENTATION 2: NARROW/PPA-OPTIMIZED PATH ("ZIG-ZAG" WRITEBACK)
         //----------------------------------------------------------------------
-        else begin: gen_narrow_writeback
+        else if (SRAM_C_WRITE_WIDTH == (ROW_WIDTH_BITS / 2)) begin: gen_narrow_writeback
 
-            localparam CHUNKS_PER_ROW = ROW_WIDTH_BITS / SRAM_C_WRITE_WIDTH;
+            localparam HALF_SIZE = SIZE / 2;
 
-            // NEW state for the narrow write-back path
-            reg [$clog2(CHUNKS_PER_ROW)-1:0] wb_chunk_count_q, wb_chunk_count_d;
-            reg signed [ROW_WIDTH_BITS-1:0] latched_pe_row_data_q; // Latch for the row being written in chunks
+            // FSM状态定义 - 保持不变，但逻辑用途有细微变化
+            // SA_FSM_WRITE_BACK_FIRST_HALF: 写回所有行的前半部分
+            // SA_FSM_WRITE_BACK_SECOND_HALF: 写回所有行的后半部分
+            
+            // --- NEW: A counter to track which half-column pass we are on ---
+            reg wb_pass_q, wb_pass_d; // 0 for first half, 1 for second half
 
             // --- Main SA Control FSM (Sequential Part) ---
             always @(posedge clk or negedge rst_n) begin
@@ -213,70 +269,126 @@ module sa_enhanced #(
                     tile_computation_done <= 1'b0;
                     k_iter_count_q <= 0;
                     wb_row_count_q <= 0;
-                    wb_chunk_count_q <= 0;
-                    latched_pe_row_data_q <= 0;
+                    wb_pass_q <= 1'b0; // Start with the first pass (writing first halves)
                 end else begin
                     sa_fsm_state_q <= sa_fsm_state_d;
                     sa_busy <= (sa_fsm_state_d != SA_FSM_IDLE);
                     k_iter_count_q <= k_iter_count_d;
                     wb_row_count_q <= wb_row_count_d;
-                    wb_chunk_count_q <= wb_chunk_count_d;
-
-                    // Latch the PE result row only at the beginning of writing its chunks
-                    if ((sa_fsm_state_q == SA_FSM_COMPUTE_WAIT_K && sa_fsm_state_d == SA_FSM_WRITE_BACK) ||
-                        (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_chunk_count_q == CHUNKS_PER_ROW-1 && wb_row_count_q != SIZE-1) ) begin
-                        for (integer c_idx = 0; c_idx < SIZE; c_idx = c_idx + 1) begin
-                            latched_pe_row_data_q[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] <= pe_result_out_internal[wb_row_count_d][c_idx];
-                        end
-                    end
+                    wb_pass_q <= wb_pass_d;
                     
-                    // Generate single-cycle done pulse for NARROW path
-                    tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK && wb_row_count_q == SIZE-1 && wb_chunk_count_q == CHUNKS_PER_ROW-1);
+                    // Done pulse is generated when we are in the second pass and writing the last row.
+                    tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK_SECOND_HALF && wb_row_count_q == SIZE-1);
                 end
             end
 
             // --- Main SA Control FSM (Combinational Part) ---
-            always @(*) begin
+            always_comb begin
+                // Default assignments
                 sa_fsm_state_d = sa_fsm_state_q;
                 k_iter_count_d = k_iter_count_q;
                 wb_row_count_d = wb_row_count_q;
-                wb_chunk_count_d = wb_chunk_count_q;
-
-                sram_c_waddr_to_sram   = 0;
-                sram_c_wdata_to_sram   = 0;
-                sram_c_we_to_sram      = 1'b0;
+                wb_pass_d = wb_pass_q;
+                sram_c_waddr_to_sram = '0;
+                sram_c_wdata_to_sram = '0;
+                sram_c_we_to_sram    = 1'b0;
 
                 case (sa_fsm_state_q)
-                    SA_FSM_IDLE: if (start_tile_computation) begin sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = 0; end
-                    SA_FSM_COMPUTE_START_K: sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
-                    SA_FSM_COMPUTE_WAIT_K: begin
-                        if (all_rows_calculated) begin
-                            if (k_iter_count_q == K_ITER_COUNT - 1) begin
-                                sa_fsm_state_d = SA_FSM_WRITE_BACK; wb_row_count_d = 0; wb_chunk_count_d = 0;
-                            end else begin
-                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K; k_iter_count_d = k_iter_count_q + 1;
-                            end
+                    SA_FSM_IDLE: begin
+                        if (start_tile_computation) begin
+                            sa_fsm_state_d = SA_FSM_COMPUTE_START_K;
+                            k_iter_count_d = 0;
+                            wb_pass_d = 0; // Reset for the new tile
                         end
                     end
-                    SA_FSM_WRITE_BACK: begin
-                        sram_c_we_to_sram = 1'b1;
-                        sram_c_waddr_to_sram = (wb_row_count_q * CHUNKS_PER_ROW) + wb_chunk_count_q;
-                        sram_c_wdata_to_sram = latched_pe_row_data_q >> (wb_chunk_count_q * SRAM_C_WRITE_WIDTH);
 
-                        if (wb_chunk_count_q == CHUNKS_PER_ROW - 1) begin // End of a row
-                            wb_chunk_count_d = 0;
-                            if (wb_row_count_q == SIZE - 1) begin // End of all rows
-                                sa_fsm_state_d = SA_FSM_IDLE;
-                            end else begin
-                                wb_row_count_d = wb_row_count_q + 1; // Move to next row
+                    SA_FSM_COMPUTE_START_K: begin
+                        sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K;
+                    end
+                    
+                    SA_FSM_COMPUTE_WAIT_K: begin
+                        if (k_iter_count_q < K_ITER_COUNT - 1) begin
+                            // Intermediate k-iterations: MUST wait for the whole array
+                            if (all_rows_calculated) begin
+                                sa_fsm_state_d = SA_FSM_COMPUTE_START_K;
+                                k_iter_count_d = k_iter_count_q + 1;
                             end
-                        end else begin
-                            wb_chunk_count_d = wb_chunk_count_q + 1; // Move to next chunk
+                        end else begin 
+                            // Final k-iteration: Start writing based on which pass we are in.
+                            if (wb_pass_q == 0) begin // Pass 0: Waiting to start writing first halves
+                                if (mid_column_done_signals[0]) begin // First row's first half is ready
+                                    sa_fsm_state_d = SA_FSM_WRITE_BACK_FIRST_HALF;
+                                    wb_row_count_d = 0; // Start writing from row 0
+                                end
+                            end else begin // Pass 1: Waiting to start writing second halves
+                                if (last_column_done_signals[0]) begin // First row's second half is ready
+                                    sa_fsm_state_d = SA_FSM_WRITE_BACK_SECOND_HALF;
+                                    wb_row_count_d = 0; // Start writing from row 0 again
+                                end
+                            end
                         end
                     end
+                    
+                    SA_FSM_WRITE_BACK_FIRST_HALF: begin
+                        // Writing the first half of all rows (from row 0 to SIZE-1)
+                        sram_c_we_to_sram = 1'b1;
+                        // Address for the first half of row 'r' is 'r*2'
+                        sram_c_waddr_to_sram = {wb_row_count_q, 1'b0}; 
+                        
+                        // Pack the first half of the current row's results
+                        for (integer c_idx = 0; c_idx < HALF_SIZE; c_idx = c_idx + 1) begin
+                            sram_c_wdata_to_sram[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] = pe_result_out_internal[wb_row_count_q][c_idx];
+                        end
+
+                        if (wb_row_count_q == SIZE - 1) begin
+                            // Finished writing all first halves. Now, wait for the second halves to be ready.
+                            wb_pass_d = 1; // Move to the second pass
+                            sa_fsm_state_d = SA_FSM_COMPUTE_WAIT_K; // Go back to wait for the trigger for the second pass
+                        end else begin
+                            // Move to the next row's first half
+                            wb_row_count_d = wb_row_count_q + 1;
+                        end
+                    end
+
+                    SA_FSM_WRITE_BACK_SECOND_HALF: begin
+                        // Writing the second half of all rows (from row 0 to SIZE-1)
+                        sram_c_we_to_sram = 1'b1;
+                        // Address for the second half of row 'r' is 'r*2 + 1'
+                        sram_c_waddr_to_sram = {wb_row_count_q, 1'b1}; 
+
+                        // Pack the second half of the current row's results
+                        for (integer c_idx = 0; c_idx < HALF_SIZE; c_idx = c_idx + 1) begin
+                            sram_c_wdata_to_sram[c_idx*PE_ACCUM_DATA_WIDTH +: PE_ACCUM_DATA_WIDTH] = pe_result_out_internal[wb_row_count_q][c_idx + HALF_SIZE];
+                        end
+
+                        if (wb_row_count_q == SIZE - 1) begin
+                            // Finished writing the whole tile
+                            sa_fsm_state_d = SA_FSM_IDLE;
+                        end else begin
+                            // Move to the next row's second half
+                            wb_row_count_d = wb_row_count_q + 1;
+                        end
+                    end
+
+                    default: sa_fsm_state_d = SA_FSM_IDLE;
                 endcase
             end
         end
+        else begin: gen_unsupported_wb_width
+            // Good practice: add an error for unsupported configurations
+            // synthesis translate_off
+            always @(*) begin
+                $error("Unsupported SRAM_C_WRITE_WIDTH. In this design, it must be either (SIZE*PE_ACCUM_DATA_WIDTH) or half of that.");
+            end
+            // synthesis translate_on
+        end
     endgenerate
+
+    always @(posedge clk) begin
+        if (sa_busy) begin // 只在繁忙时打印，避免刷屏
+            $display("%0t [SA_ENHANCED] FSM_State: %s, k_iter: %d, wb_row: %d, all_rows_calc: %b, first_row_calc: %b, tile_done: %b", 
+                     $time, sa_fsm_state_q.name(), k_iter_count_q, wb_row_count_q, all_rows_calculated, last_column_done_signals[0], tile_computation_done);
+        end
+    end
 
 endmodule

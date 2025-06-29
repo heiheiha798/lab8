@@ -3,7 +3,7 @@ import os
 import math # 仍然可以保留，以防未来需要其他数学运算
 
 # --- Testbench/Hardware 参数 ---
-MATRIX_DIM_TB = 16
+MATRIX_DIM_TB = 32
 PE_ACCUM_BITS_TB = 32
 RAM_DATA_WIDTH_TB = 64
 

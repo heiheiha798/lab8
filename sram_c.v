@@ -10,7 +10,7 @@
 module sram_c #(
     // Generic parameters with default values for typical use case
     parameter NUM_ENTRIES    = 16,  // Default to 16 entries (e.g., for 512-bit width)
-    parameter ENTRY_WIDTH    = 512, // Default to 512 bits
+    parameter ENTRY_WIDTH    = 256, // Default to 256 bits
     parameter BUS_DATA_WIDTH = 64   // Width of the reader's bus (e.g., Writer)
 )(
     input wire clk,
@@ -45,7 +45,7 @@ module sram_c #(
     // --- Display Written Data ---
     always @(posedge clk) begin
         if (we) begin
-            $display("Time: %0t ns | Write Data: waddr = %d, wdata = %h", $time, waddr, wdata);
+            $display("%0t Write Data: waddr = %d, wdata = %h", $time, waddr, wdata);
         end
     end
 
