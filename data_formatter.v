@@ -131,42 +131,47 @@ module data_formatter #(
     //======================================================================
 
     // --- SRAM Address Generation (REVISED) ---
-    // `time_cnt_q` here is the `T_addr_gen` from our derivation.
-    // The data read using these addresses will be available in `sram_x_rdata_reg_q`
-    // when `time_cnt_q` (for skewed_out calc) is `T_addr_gen + 2`.
-    // At that point, `t_feed_equivalent` will be `(T_addr_gen + 2) - PIPELINE_COMPENSATION = T_addr_gen`.
-    // So, `time_cnt_q` used for address generation directly corresponds to the `t_feed_equivalent`
-    // for which this data is intended.
+    //
+    // **核心Bug修复**
+    //
+    // **问题**: 原始代码中的地址计算 `time_cnt_q - i_sram_bank_phys_idx` 是无符号减法。
+    // 当流水线刚启动时，`time_cnt_q` 的值很小。对于物理Bank号 `i_sram_bank_phys_idx` 较大的SRAM Bank，
+    // 这个减法会发生下溢 (e.g., 2 - 8)，结果是一个巨大的正数，而不是一个负数。
+    // 这导致 `addr_in_bounds` 条件 `(time_cnt_q >= i_sram_bank_phys_idx)` 立即判为假，
+    // 从而为这些Bank生成了无效地址'x'，使得SA无法获取正确的数据，导致计算结果为0。
     genvar i_sram_bank_phys_idx; // Physical SRAM bank index (0 to TILE_SIZE-1)
     generate
         for (i_sram_bank_phys_idx = 0; i_sram_bank_phys_idx < TILE_SIZE; i_sram_bank_phys_idx = i_sram_bank_phys_idx + 1) begin : addr_gen_loop
-            logic [SRAM_ADDR_WIDTH-1:0] calculated_row_addr;
+            // --- MODIFICATION START ---
+            
+            // 1. 声明一个 signed 类型的中间变量来存储地址计算结果。
+            //    位宽应与 time_cnt_q 相同，以防止溢出并能表示负数。
+            logic signed [TIME_COUNTER_WIDTH-1:0] signed_calculated_addr;
+
             logic addr_gen_active;
             logic addr_in_bounds;
 
+            // 2. 使用 $signed() 进行有符号减法。
+            assign signed_calculated_addr = $signed(time_cnt_q) - $signed(i_sram_bank_phys_idx);
+            
+            // 3. 边界检查逻辑现在基于有符号结果。
+            //    一个有效的地址必须大于等于0且小于TILE_SIZE。
+            assign addr_in_bounds = (signed_calculated_addr >= 0) && (signed_calculated_addr < TILE_SIZE);
+            
+            // addr_gen_active 的逻辑保持不变
             assign addr_gen_active = ((current_state_q == S_STREAMING) || (current_state_q == S_IDLE && next_state_d == S_STREAMING));
 
-            // For SRAM A:
-            // Physical bank `i_sram_bank_phys_idx` corresponds to A_tile's COLUMN `i_sram_bank_phys_idx`.
-            // The row address to be read from this bank is `time_cnt_q - i_sram_bank_phys_idx`.
-            // This row address corresponds to A_tile's ROW `(time_cnt_q - i_sram_bank_phys_idx)`.
-            // So, this fetches A_tile[ (time_cnt_q - i_sram_bank_phys_idx) ][ i_sram_bank_phys_idx ].
-            assign calculated_row_addr = time_cnt_q - i_sram_bank_phys_idx;
-            assign addr_in_bounds      = (time_cnt_q >= i_sram_bank_phys_idx) && (calculated_row_addr < TILE_SIZE);
-
+            // 4. 最终地址赋值。在确认地址有效后，将 signed 结果安全地转换为 unsigned 地址。
+            //    我们只取其低位 [SRAM_ADDR_WIDTH-1:0]，因为 addr_in_bounds 保证了其值在正确范围内。
             assign sram_a_addr_internal[i_sram_bank_phys_idx] = (addr_gen_active && addr_in_bounds) ?
-                                                               calculated_row_addr :
-                                                               {SRAM_ADDR_WIDTH{1'bx}}; // Use 'x' for invalid address to help debug
+                                                            signed_calculated_addr[SRAM_ADDR_WIDTH-1:0] :
+                                                            {SRAM_ADDR_WIDTH{1'bx}}; // 'x' for invalid address helps debugging
 
-            // For SRAM B:
-            // Physical bank `i_sram_bank_phys_idx` corresponds to B_tile's ROW `i_sram_bank_phys_idx`.
-            // The row address to be read from this bank is `time_cnt_q - i_sram_bank_phys_idx`.
-            // This row address corresponds to B_tile's COLUMN `(time_cnt_q - i_sram_bank_phys_idx)`.
-            // So, this fetches B_tile[ i_sram_bank_phys_idx ][ (time_cnt_q - i_sram_bank_phys_idx) ].
-            // calculated_row_addr and addr_in_bounds are the same as for A for this specific address formula.
             assign sram_b_addr_internal[i_sram_bank_phys_idx] = (addr_gen_active && addr_in_bounds) ?
-                                                               calculated_row_addr :
-                                                               {SRAM_ADDR_WIDTH{1'bx}};
+                                                            signed_calculated_addr[SRAM_ADDR_WIDTH-1:0] :
+                                                            {SRAM_ADDR_WIDTH{1'bx}};
+                                                            
+            // --- MODIFICATION END ---
         end
     endgenerate
 

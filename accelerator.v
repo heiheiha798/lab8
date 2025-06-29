@@ -62,7 +62,7 @@ module accelerator #(
     localparam K_ITER_WIDTH           = (K_ITER_COUNT > 1) ? $clog2(K_ITER_COUNT) : 1;
 
     localparam LOADER_SRAM_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
-    localparam DF_SRAM_ADDR_WIDTH     = $clog2(TILE_SIZE * TILE_SIZE); // Corrected: should be $clog2(TILE_SIZE * TILE_SIZE) for 2D address, but DF uses indexed access, so DF_SRAM_ADDR_WIDTH = TILE_SIZE * $clog2(TILE_SIZE) seems wrong. It should be $clog2(TILE_SIZE) for row/col index. Let's assume it's correct for now based on DF module.
+    // localparam DF_SRAM_ADDR_WIDTH     = $clog2(TILE_SIZE * TILE_SIZE); // Corrected: should be $clog2(TILE_SIZE * TILE_SIZE) for 2D address, but DF uses indexed access, so DF_SRAM_ADDR_WIDTH = TILE_SIZE * $clog2(TILE_SIZE) seems wrong. It should be $clog2(TILE_SIZE) for row/col index. Let's assume it's correct for now based on DF module.
     localparam DF_SRAM_DATA_WIDTH     = TILE_SIZE * INPUT_DATA_WIDTH;
     
     // SRAM C parameters derived from the new top-level parameter
@@ -143,7 +143,7 @@ module accelerator #(
     logic sram_a_ping_we, sram_a_pong_we, sram_b_ping_we, sram_b_pong_we;
     logic [LOADER_SRAM_ADDR_WIDTH-1:0] sram_a_ping_waddr, sram_a_pong_waddr, sram_b_ping_waddr, sram_b_pong_waddr;
     logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_ping_wdata, sram_a_pong_wdata, sram_b_ping_wdata, sram_b_pong_wdata;
-    logic [DF_SRAM_ADDR_WIDTH-1:0] sram_a_ping_raddr, sram_a_pong_raddr, sram_b_ping_raddr, sram_b_pong_raddr;
+    logic [TILE_SIZE*$clog2(TILE_SIZE)-1:0] sram_a_ping_raddr, sram_a_pong_raddr, sram_b_ping_raddr, sram_b_pong_raddr;
     logic [DF_SRAM_DATA_WIDTH-1:0] sram_a_ping_rdata, sram_a_pong_rdata, sram_b_ping_rdata, sram_b_pong_rdata;
     sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_ping (.clk(clk), .we(sram_a_ping_we), .waddr(sram_a_ping_waddr), .wdata(sram_a_ping_wdata), .raddr(sram_a_ping_raddr), .rdata(sram_a_ping_rdata));
     sram_banked #(.IS_SRAM_A(1'b1), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_a_pong (.clk(clk), .we(sram_a_pong_we), .waddr(sram_a_pong_waddr), .wdata(sram_a_pong_wdata), .raddr(sram_a_pong_raddr), .rdata(sram_a_pong_rdata));
@@ -151,7 +151,7 @@ module accelerator #(
     sram_banked #(.IS_SRAM_A(1'b0), .NUM_BANKS(TILE_SIZE), .BANK_DEPTH(TILE_SIZE), .BANK_DATA_WIDTH(INPUT_DATA_WIDTH), .BUS_DATA_WIDTH(MAIN_MEM_DATA_WIDTH_BITS)) sram_b_pong (.clk(clk), .we(sram_b_pong_we), .waddr(sram_b_pong_waddr), .wdata(sram_b_pong_wdata), .raddr(sram_b_pong_raddr), .rdata(sram_b_pong_rdata));
     
     // --- Data Formatter (Unchanged) ---
-    logic [DF_SRAM_ADDR_WIDTH-1:0] df_sram_a_addr, df_sram_b_addr;
+    logic [TILE_SIZE*$clog2(TILE_SIZE)-1:0] df_sram_a_addr, df_sram_b_addr;
     logic [DF_SRAM_DATA_WIDTH-1:0] df_sram_a_rdata, df_sram_b_rdata, df_skewed_a_out, df_skewed_b_out;
     logic [TILE_SIZE-1:0] df_skewed_a_valid_out, df_skewed_b_valid_out;
     data_formatter #(.TILE_SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH)) u_data_formatter (.clk(clk), .rst_n(rst_n), .start_pass(df_start_pass_pulse), .pass_done(), .sram_a_addr(df_sram_a_addr), .sram_a_rdata(df_sram_a_rdata), .sram_b_addr(df_sram_b_addr), .sram_b_rdata(df_sram_b_rdata), .skewed_a_out(df_skewed_a_out), .skewed_b_out(df_skewed_b_out), .data_valid_out(), .skewed_a_valid_out(df_skewed_a_valid_out), .skewed_b_valid_out(df_skewed_b_valid_out));

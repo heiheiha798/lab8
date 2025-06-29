@@ -92,7 +92,9 @@ module sa_enhanced #(
     reg [$clog2(SIZE)-1:0] wb_row_count_q, wb_row_count_d;
 
     // --- Pulse generation logic ---
-    assign clear_for_new_tile_pulse = (sa_fsm_state_q == SA_FSM_IDLE) && (sa_fsm_state_d == SA_FSM_COMPUTE_START_K);
+    assign clear_for_new_tile_pulse = 
+        ((sa_fsm_state_q == SA_FSM_IDLE) && (sa_fsm_state_d == SA_FSM_COMPUTE_START_K)) ||  // Case 1: Initial start-up from external signal
+        ((sa_fsm_state_q == SA_FSM_WRITE_BACK_SECOND_HALF) && (sa_fsm_state_d == SA_FSM_COMPUTE_START_K)); // Case 2: Auto-reload after finishing a tile
     assign start_systolic_pass_pulse = (sa_fsm_state_q == SA_FSM_COMPUTE_START_K);
 
     //===============================================================

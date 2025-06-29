@@ -80,8 +80,8 @@ module sram_c #(
         end
     end
 
-    always @(posedge clk) begin
-            $display("%0t [SRAM_C] READ: raddr = %d, rdata = %h", $time, raddr, rdata);
-    end
+    // always @(posedge clk) begin
+    //         $display("%0t [SRAM_C] READ: raddr = %d, rdata = %h", $time, raddr, rdata);
+    // end
 
 endmodule
