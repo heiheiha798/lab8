@@ -1,7 +1,6 @@
 *.vcd
 *.npy
 *.csv
-*.txt
 *.vvp
 obj_dir/
 yosys-sta/

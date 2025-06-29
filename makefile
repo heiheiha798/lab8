@@ -16,7 +16,7 @@ VERILOG_SOURCES = \
 	sa_enhanced.v \
 	pe.v \
 	sram_banked.v \
-	sram_c_accum.v 
+	sram_c.v 
 
 # --- MODIFIED: 更新顶层模块和 C++ Wrapper ---
 TARGET_MODULE = tb_accelerator

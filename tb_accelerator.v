@@ -17,6 +17,7 @@ module tb_accelerator;
     parameter P_TILE_SIZE                 = 16;
     parameter P_MAIN_MEM_ADDR_WIDTH       = 32;
     parameter P_MAIN_MEM_DATA_WIDTH_BITS  = 64;
+    parameter P_SRAM_C_WRITE_WIDTH        = 256;
 
     // Base addresses must match the DUT
     parameter P_BASE_ADDR_A               = 32'h10000000;
@@ -80,7 +81,8 @@ module tb_accelerator;
         .MAIN_MEM_DATA_WIDTH_BITS(P_MAIN_MEM_DATA_WIDTH_BITS),
         .BASE_ADDR_A(P_BASE_ADDR_A),
         .BASE_ADDR_B(P_BASE_ADDR_B),
-        .BASE_ADDR_C(P_BASE_ADDR_C)
+        .BASE_ADDR_C(P_BASE_ADDR_C),
+        .SRAM_C_WRITE_WIDTH(P_SRAM_C_WRITE_WIDTH)
     ) dut (
         .clk(clk),
         .rst_n(rst_n),
@@ -122,7 +124,7 @@ module tb_accelerator;
             if (dut_imem_read_enb && dut_imem_req_ready) begin
                 imem_addr_s1         <= dut_imem_addr;
                 imem_req_accepted_s1 <= 1'b1;
-                $display("[%0t] [TB-IMEM] Read Accepted. Latched Addr: 0x%h (Data available next cycle)", $time, dut_imem_addr);
+                // $display("[%0t] [TB-IMEM] Read Accepted. Latched Addr: 0x%h (Data available next cycle)", $time, dut_imem_addr);
             end else begin
                 imem_req_accepted_s1 <= 1'b0;
             end
@@ -141,11 +143,11 @@ module tb_accelerator;
                 if (imem_addr_s1 >= P_BASE_ADDR_A && imem_addr_s1 < P_BASE_ADDR_B) begin
                     read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
                     dut_imem_data_in <= main_memory_storage[MEM_A_START_IDX + read_idx];
-                    $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_A_START_IDX + read_idx]);
+                    // $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_A_START_IDX + read_idx]);
                 end else if (imem_addr_s1 >= P_BASE_ADDR_B && imem_addr_s1 < P_BASE_ADDR_C) begin
                     read_idx = (imem_addr_s1 - P_BASE_ADDR_B) / BYTES_PER_WORD;
                     dut_imem_data_in <= main_memory_storage[MEM_B_START_IDX + read_idx];
-                    $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_B_START_IDX + read_idx]);
+                    // $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_B_START_IDX + read_idx]);
                 end else begin
                     $error("[%0t] [TB-IMEM] ERROR: Read from unknown or unhandled address 0x%h", $time, imem_addr_s1);
                     dut_imem_data_in <= {P_MAIN_MEM_DATA_WIDTH_BITS{1'bx}};
@@ -173,8 +175,8 @@ module tb_accelerator;
                 if (dut_omem_addr >= P_BASE_ADDR_C && dut_omem_addr < (P_BASE_ADDR_C + C_MATRIX_SIZE_BYTES)) begin
                     write_idx = (dut_omem_addr - P_BASE_ADDR_C) / BYTES_PER_WORD;
                     main_memory_storage[MEM_C_START_IDX + write_idx] <= dut_omem_wdata;
-                    $display("[%0t] [TB-OMEM] Write Accepted & Stored. Addr: 0x%h, Data: 0x%h, Index: %d",
-                             $time, dut_omem_addr, dut_omem_wdata, MEM_C_START_IDX + write_idx);
+                    // $display("[%0t] [TB-OMEM] Write Accepted & Stored. Addr: 0x%h, Data: 0x%h, Index: %d",
+                    //          $time, dut_omem_addr, dut_omem_wdata, MEM_C_START_IDX + write_idx);
                 end else begin
                     $error("[%0t] [TB-OMEM] ERROR: Write to out-of-bounds address 0x%h for C matrix", $time, dut_omem_addr);
                 end
