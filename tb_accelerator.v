@@ -1,262 +1,412 @@
 //
-// Filename: tb_accelerator.v
-// Description: Top-level testbench for the complete matrix multiplication accelerator.
-//              It simulates a single-port main memory, loads initial data from
-//              a file, drives the accelerator, and writes the final results
-//              back to a file for verification.
+// Filename: accelerator_synth.v
+// Description: A fully integrated matrix multiplication accelerator, MODIFIED FOR SYNTHESIS.
+//              SRAM instances have been removed and their ports exposed at the top level.
 //
 `timescale 1ns / 1ps
 
-module tb_accelerator;
+module accelerator #(
+    // Architectural Parameters from Testbench (Hardcoded for Synthesis)
+    parameter MATRIX_SIZE               = 512,
+    parameter TILE_SIZE                 = 16,
 
-    //--------------------------------------------------------------------------
-    // Testbench Parameters
-    //--------------------------------------------------------------------------
-    // Match these with the DUT parameters
-    parameter P_MATRIX_SIZE               = 512;
-    parameter P_TILE_SIZE                 = 16;
-    parameter P_MAIN_MEM_ADDR_WIDTH       = 32;
-    parameter P_MAIN_MEM_DATA_WIDTH_BITS  = 64;
-    parameter P_SRAM_C_WRITE_WIDTH        = 256;
+    // Data Type Parameters
+    parameter INPUT_DATA_WIDTH          = 8,
+    parameter ACCUM_DATA_WIDTH          = 32,
 
-    // Base addresses must match the DUT
-    parameter P_BASE_ADDR_A               = 32'h10000000;
-    parameter P_BASE_ADDR_B               = 32'h20000000;
-    parameter P_BASE_ADDR_C               = 32'h30000000;
+    // External Memory Interface Parameters
+    parameter MAIN_MEM_ADDR_WIDTH       = 32,
+    parameter MAIN_MEM_DATA_WIDTH_BITS  = 64,
 
-    // Testbench control
-    parameter CLK_PERIOD                  = 10; // 100MHz clock
-    parameter TIMEOUT_CYCLES              = P_MATRIX_SIZE * P_MATRIX_SIZE * P_MATRIX_SIZE * 2; // Generous timeout
-
-    //--------------------------------------------------------------------------
-    // Memory Model Parameters
-    //--------------------------------------------------------------------------
-    localparam NUM_TILES_PER_DIM  = P_MATRIX_SIZE / P_TILE_SIZE;
-    localparam BYTES_PER_WORD     = P_MAIN_MEM_DATA_WIDTH_BITS / 8;
-    // Calculate memory size needed for A, B, and C matrices
-    localparam A_B_MATRIX_SIZE_BYTES = P_MATRIX_SIZE * P_MATRIX_SIZE * 1; // SINT8
-    localparam C_MATRIX_SIZE_BYTES   = P_MATRIX_SIZE * P_MATRIX_SIZE * 4; // SINT32
+    // Base Addresses in Main Memory
+    parameter BASE_ADDR_A               = 32'h10000000,
+    parameter BASE_ADDR_B               = 32'h20000000,
+    parameter BASE_ADDR_C               = 32'h30000000,
     
-    localparam A_B_MATRIX_SIZE_WORDS = A_B_MATRIX_SIZE_BYTES / BYTES_PER_WORD;
-    localparam C_MATRIX_SIZE_WORDS   = C_MATRIX_SIZE_BYTES / BYTES_PER_WORD;
+    // SRAM C write path width from Testbench
+    parameter SRAM_C_WRITE_WIDTH        = 256
+) (
+    // --- Top Controller Interface ---
+    input  wire                               clk,
+    input  wire                               rst_n,
+    input  wire                               comp_enb,
+    output logic                              busyb,
+    output logic                              done,
 
-    // Total memory size for simulation. Needs to be large enough for the address space.
-    // We will use offsets from base addresses for simplicity.
-    localparam MEM_A_START_IDX = 0;
-    localparam MEM_B_START_IDX = A_B_MATRIX_SIZE_WORDS;
-    localparam MEM_C_START_IDX = A_B_MATRIX_SIZE_WORDS * 2;
-    localparam MEM_TOTAL_WORDS = MEM_C_START_IDX + C_MATRIX_SIZE_WORDS;
+    // --- Input Memory Interface (Read-only) ---
+    output logic [MAIN_MEM_ADDR_WIDTH-1:0]    imem_addr,
+    output logic                              imem_read_enb,
+    input  wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] imem_data_in,
+    input  wire                               imem_req_ready,
+    input  wire                               imem_resp_valid,
 
-    //--------------------------------------------------------------------------
-    // Signals and Wires
-    //--------------------------------------------------------------------------
-    reg  clk;
-    reg  rst_n;
-    reg  tb_comp_enb;
-
-    wire tb_busyb;
-    wire tb_done;
-
-    // DUT Memory Interface
-    wire [P_MAIN_MEM_ADDR_WIDTH-1:0]      dut_imem_addr;
-    wire                                  dut_imem_read_enb;
-    reg  [P_MAIN_MEM_DATA_WIDTH_BITS-1:0] dut_imem_data_in;
-    // Modified: dut_imem_req_ready is now always 1'b1.
-    wire                                  dut_imem_req_ready;
-    reg                                   dut_imem_resp_valid;
-
-    wire [P_MAIN_MEM_ADDR_WIDTH-1:0]      dut_omem_addr;
-    wire [P_MAIN_MEM_DATA_WIDTH_BITS-1:0] dut_omem_wdata;
-    wire                                  dut_omem_write_enb;
-    // Modified: dut_omem_req_ready is now always 1'b1.
-    wire                                  dut_omem_req_ready;
+    // --- Result Memory Interface (Write-only) ---
+    output logic [MAIN_MEM_ADDR_WIDTH-1:0]    omem_addr,
+    output logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] omem_wdata,
+    output logic                              omem_write_enb,
+    input  wire                               omem_req_ready,
 
     //--------------------------------------------------------------------------
-    // DUT Instantiation
+    // --- SYNTHESIS: SRAM A/B and SRAM C Ports Exposed at Top Level ---
     //--------------------------------------------------------------------------
-    accelerator #(
-        .MATRIX_SIZE(P_MATRIX_SIZE),
-        .TILE_SIZE(P_TILE_SIZE),
-        .MAIN_MEM_ADDR_WIDTH(P_MAIN_MEM_ADDR_WIDTH),
-        .MAIN_MEM_DATA_WIDTH_BITS(P_MAIN_MEM_DATA_WIDTH_BITS),
-        .BASE_ADDR_A(P_BASE_ADDR_A),
-        .BASE_ADDR_B(P_BASE_ADDR_B),
-        .BASE_ADDR_C(P_BASE_ADDR_C),
-        .SRAM_C_WRITE_WIDTH(P_SRAM_C_WRITE_WIDTH)
-    ) dut (
-        .clk(clk),
-        .rst_n(rst_n),
-        .comp_enb(tb_comp_enb),
-        .busyb(tb_busyb),
-        .done(tb_done),
-        .imem_addr(dut_imem_addr),
-        .imem_read_enb(dut_imem_read_enb),
-        .imem_data_in(dut_imem_data_in),
-        .imem_req_ready(dut_imem_req_ready),
-        .imem_resp_valid(dut_imem_resp_valid),
-        .omem_addr(dut_omem_addr),
-        .omem_wdata(dut_omem_wdata),
-        .omem_write_enb(dut_omem_write_enb),
-        .omem_req_ready(dut_omem_req_ready)
+    
+    // --- SRAM A (Ping-Pong) Interface ---
+    output wire                               sram_a_ping_we,
+    output wire [($clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS))-1:0] sram_a_ping_waddr,
+    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_ping_wdata,
+    output wire [(TILE_SIZE*$clog2(TILE_SIZE))-1:0] sram_a_ping_raddr,
+    input  wire [(TILE_SIZE * INPUT_DATA_WIDTH)-1:0]  sram_a_ping_rdata,
+
+    output wire                               sram_a_pong_we,
+    output wire [($clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS))-1:0] sram_a_pong_waddr,
+    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_a_pong_wdata,
+    output wire [(TILE_SIZE*$clog2(TILE_SIZE))-1:0] sram_a_pong_raddr,
+    input  wire [(TILE_SIZE * INPUT_DATA_WIDTH)-1:0]  sram_a_pong_rdata,
+
+    // --- SRAM B (Ping-Pong) Interface ---
+    output wire                               sram_b_ping_we,
+    output wire [($clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS))-1:0] sram_b_ping_waddr,
+    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_b_ping_wdata,
+    output wire [(TILE_SIZE*$clog2(TILE_SIZE))-1:0] sram_b_ping_raddr,
+    input  wire [(TILE_SIZE * INPUT_DATA_WIDTH)-1:0]  sram_b_ping_rdata,
+
+    output wire                               sram_b_pong_we,
+    output wire [($clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS))-1:0] sram_b_pong_waddr,
+    output wire [MAIN_MEM_DATA_WIDTH_BITS-1:0] sram_b_pong_wdata,
+    output wire [(TILE_SIZE*$clog2(TILE_SIZE))-1:0] sram_b_pong_raddr,
+    input  wire [(TILE_SIZE * INPUT_DATA_WIDTH)-1:0]  sram_b_pong_rdata,
+
+    // --- SRAM C Interface ---
+    output wire                               sram_c_we,
+    output wire [($clog2((TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH) / SRAM_C_WRITE_WIDTH))-1:0] sram_c_waddr,
+    output wire signed [SRAM_C_WRITE_WIDTH-1:0] sram_c_wdata,
+    output wire [($clog2((TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH) / SRAM_C_WRITE_WIDTH))-1:0] writer_sram_c_raddr, // Renamed from writer_sram_c_addr for clarity
+    input  wire [SRAM_C_WRITE_WIDTH-1:0]      sram_c_rdata_to_writer
+);
+
+    //--------------------------------------------------------------------------
+    // Local Parameters & Derived Values
+    //--------------------------------------------------------------------------
+    localparam NUM_TILES_PER_DIM      = MATRIX_SIZE / TILE_SIZE;
+    localparam K_ITER_COUNT           = NUM_TILES_PER_DIM; 
+    localparam I_ITER_WIDTH           = (NUM_TILES_PER_DIM > 1) ? $clog2(NUM_TILES_PER_DIM) : 1;
+    localparam J_ITER_WIDTH           = (NUM_TILES_PER_DIM > 1) ? $clog2(NUM_TILES_PER_DIM) : 1;
+    localparam K_ITER_WIDTH           = (K_ITER_COUNT > 1) ? $clog2(K_ITER_COUNT) : 1;
+
+    localparam LOADER_SRAM_ADDR_WIDTH = $clog2(TILE_SIZE * TILE_SIZE * INPUT_DATA_WIDTH / MAIN_MEM_DATA_WIDTH_BITS);
+    localparam DF_SRAM_DATA_WIDTH     = TILE_SIZE * INPUT_DATA_WIDTH;
+    
+    localparam SRAM_C_TOTAL_BITS      = TILE_SIZE * TILE_SIZE * ACCUM_DATA_WIDTH;
+    localparam SRAM_C_DEPTH           = SRAM_C_TOTAL_BITS / SRAM_C_WRITE_WIDTH;
+    localparam SRAM_C_ADDR_WIDTH      = $clog2(SRAM_C_DEPTH);
+
+    //--------------------------------------------------------------------------
+    // FSM State Definitions (REVISED)
+    //--------------------------------------------------------------------------
+    typedef enum logic [2:0] {
+        S_IDLE,
+        S_INIT_GEMM,
+        S_START_TILE_COMP,   // Start computation for a C(i,j) tile
+        S_LOAD_K_SLICE,      // Head of the k-loop, load A(i,k) and B(k,j)
+        S_WAIT_LOAD_DONE,    // Wait for loader to finish loading one slice
+        S_START_DF,          // Start data formatter for the loaded slice
+        S_COMPUTE_DONE_WAIT_WRITE // NEW: Computation is finished, wait for write-back
+    } accel_fsm_state_t;
+    accel_fsm_state_t current_state_q, next_state_d;
+
+    // --- NEW Write-Back FSM State Definitions ---
+    typedef enum logic [1:0] {
+        W_IDLE,
+        W_WRITE_TILE,    
+        W_WAIT_WRITE_DONE
+    } accel_write_fsm_state_t;
+    accel_write_fsm_state_t write_state_q, write_next_state_d;
+
+    //--------------------------------------------------------------------------
+    // Internal Signals and Registers
+    //--------------------------------------------------------------------------
+    logic [I_ITER_WIDTH-1:0] i_tile_idx_q, i_tile_idx_d;
+    logic [J_ITER_WIDTH-1:0] j_tile_idx_q, j_tile_idx_d;
+    logic [K_ITER_WIDTH-1:0] k_tile_idx_q, k_tile_idx_d;
+
+    logic [I_ITER_WIDTH-1:0] i_writer_idx_q, i_writer_idx_d;
+    logic [J_ITER_WIDTH-1:0] j_writer_idx_q, j_writer_idx_d;
+    reg  writer_overall_done_q;
+    logic writer_overall_done_d;
+
+    logic load_ab_select_q,    load_ab_select_d;
+    logic compute_ab_select_q, compute_ab_select_d;
+    
+    logic loader_req_pulse;
+    logic df_start_pass_pulse;
+    logic writer_req_pulse; 
+    logic sa_activate_pe_level;
+
+    logic loader_done;
+    logic tile_computation_done; 
+    logic writer_done;
+
+    logic delayed_clear_sa_pulse_d; 
+    reg  delayed_clear_sa_pulse_q;  
+
+    //--------------------------------------------------------------------------
+    // Sub-module Instantiations (Connections are mostly unchanged)
+    //--------------------------------------------------------------------------
+    // --- Loader (Unchanged) ---
+    logic [LOADER_SRAM_ADDR_WIDTH-1:0] loader_sram_a_addr, loader_sram_b_addr;
+    logic [MAIN_MEM_DATA_WIDTH_BITS-1:0] loader_sram_a_wdata, loader_sram_b_wdata;
+    logic loader_sram_a_we, loader_sram_b_we;
+    loader #(.MATRIX_SIZE(MATRIX_SIZE), .TILE_SIZE(TILE_SIZE), .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), .BASE_ADDR_A(BASE_ADDR_A), .BASE_ADDR_B(BASE_ADDR_B))
+        u_loader (.clk(clk), .rst_n(rst_n), .load_req(loader_req_pulse), .i_tile_idx(i_tile_idx_q), .j_tile_idx(j_tile_idx_q), .k_tile_idx(k_tile_idx_q), .load_to_ping(load_ab_select_q), .load_busy(), .load_done(loader_done), .mem_req_valid(imem_read_enb), .mem_req_ready(imem_req_ready), .mem_resp_valid(imem_resp_valid), .mem_resp_rdata(imem_data_in), .mem_req_addr(imem_addr), .sram_a_addr(loader_sram_a_addr), .sram_a_wdata(loader_sram_a_wdata), .sram_a_we(loader_sram_a_we), .sram_b_addr(loader_sram_b_addr), .sram_b_wdata(loader_sram_b_wdata), .sram_b_we(loader_sram_b_we));
+    
+    // --- SRAMs A & B (Ping-Pong, Unchanged) ---
+    // SYNTHESIS: SRAM INSTANCES REMOVED. PORTS ARE NOW TOP-LEVEL I/O.
+    // sram_banked sram_a_ping(...);
+    // sram_banked sram_a_pong(...);
+    // sram_banked sram_b_ping(...);
+    // sram_banked sram_b_pong(...);
+    
+    // --- Data Formatter (Unchanged) ---
+    logic [TILE_SIZE*$clog2(TILE_SIZE)-1:0] df_sram_a_addr, df_sram_b_addr;
+    logic [DF_SRAM_DATA_WIDTH-1:0] df_sram_a_rdata, df_sram_b_rdata, df_skewed_a_out, df_skewed_b_out;
+    logic [TILE_SIZE-1:0] df_skewed_a_valid_out, df_skewed_b_valid_out;
+    data_formatter #(.TILE_SIZE(TILE_SIZE), .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH)) u_data_formatter (.clk(clk), .rst_n(rst_n), .start_pass(df_start_pass_pulse), .pass_done(), .sram_a_addr(df_sram_a_addr), .sram_a_rdata(df_sram_a_rdata), .sram_b_addr(df_sram_b_addr), .sram_b_rdata(df_sram_b_rdata), .skewed_a_out(df_skewed_a_out), .skewed_b_out(df_skewed_b_out), .data_valid_out(), .skewed_a_valid_out(df_skewed_a_valid_out), .skewed_b_valid_out(df_skewed_b_valid_out));
+    
+    // --- SA (MODIFIED Instantiation) ---
+    sa_enhanced #(
+        .SIZE(TILE_SIZE),
+        .K_ITER_COUNT(K_ITER_COUNT),
+        .SRAM_C_WRITE_WIDTH(SRAM_C_WRITE_WIDTH),
+        .INPUT_DATA_WIDTH(INPUT_DATA_WIDTH), 
+        .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)
+    ) u_sa_enhanced (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .start_tile_computation(delayed_clear_sa_pulse_q),
+        .activate_pe_computation(sa_activate_pe_level), 
+        .array_a_in(df_skewed_a_out), 
+        .array_b_in(df_skewed_b_out), 
+        .array_a_valid_in_indywidual(df_skewed_a_valid_out), 
+        .array_b_valid_in_indywidual(df_skewed_b_valid_out), 
+        .tile_computation_done(tile_computation_done),
+        .sa_busy(), 
+        .sram_c_waddr_to_sram(sram_c_waddr), 
+        .sram_c_wdata_to_sram(sram_c_wdata), 
+        .sram_c_we_to_sram(sram_c_we)
     );
+    
+    // --- SRAM C (MODIFIED Instantiation) ---
+    // SYNTHESIS: SRAM_C INSTANCE REMOVED. PORTS ARE NOW TOP-LEVEL I/O.
+    // sram_c u_sram_c(...);
 
+    // --- Writer (MODIFIED Connections) ---
+    writer #(
+        .MATRIX_SIZE(MATRIX_SIZE), 
+        .TILE_SIZE(TILE_SIZE), 
+        .MAIN_MEM_ADDR_WIDTH(MAIN_MEM_ADDR_WIDTH), 
+        .MAIN_MEM_DATA_WIDTH_BITS(MAIN_MEM_DATA_WIDTH_BITS), 
+        .BASE_ADDR_C(BASE_ADDR_C),
+        .SRAM_C_WRITE_WIDTH(SRAM_C_WRITE_WIDTH),
+        .PE_ACCUM_DATA_WIDTH(ACCUM_DATA_WIDTH)
+    ) u_writer (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .write_req(writer_req_pulse), 
+        .i_tile_idx(i_writer_idx_q),
+        .j_tile_idx(j_writer_idx_q),
+        .write_busy(),
+        .write_done(writer_done), 
+        .mem_req_valid(omem_write_enb), 
+        .mem_req_wdata(omem_wdata), 
+        .mem_req_addr(omem_addr), 
+        .mem_req_ready(omem_req_ready), 
+        .mem_write_done(1'b1),
+        .sram_c_addr(writer_sram_c_raddr), // Connect to top-level raddr port for SRAM C
+        .sram_c_rdata(sram_c_rdata_to_writer) // Connect to top-level rdata port for SRAM C
+    );
+    
     //--------------------------------------------------------------------------
-    // Main Memory Model (Modified for ideal pipelined behavior)
+    // Ping-Pong MUX Logic for SRAM A/B (Unchanged logic, now drives top-level ports)
     //--------------------------------------------------------------------------
-    reg [P_MAIN_MEM_DATA_WIDTH_BITS-1:0] main_memory_storage [0:MEM_TOTAL_WORDS-1];
-
-    // --- Input Memory (imem) Signals ---
-    // dut_imem_req_ready is always 1'b1, meaning the memory is always ready to accept read requests.
-    // --- Input Memory (imem) Signals ---
-    assign dut_imem_req_ready = 1'b1;
-
-    // Behavioral model for Input Memory (imem) - Corrected 1 cycle latency
-    reg [P_MAIN_MEM_ADDR_WIDTH-1:0] imem_addr_s1;       // Stage 1 latched address
-    reg                             imem_req_accepted_s1; // Stage 1 request accepted flag
-    integer read_idx;
-
-    // Stage 1: Latch incoming request
-    always @(posedge clk or negedge rst_n) begin
+    assign sram_a_ping_we = (load_ab_select_q == 0) ? loader_sram_a_we : 1'b0;
+    assign sram_a_pong_we = (load_ab_select_q == 1) ? loader_sram_a_we : 1'b0;
+    assign sram_a_ping_waddr = loader_sram_a_addr; assign sram_a_ping_wdata = loader_sram_a_wdata;
+    assign sram_a_pong_waddr = loader_sram_a_addr; assign sram_a_pong_wdata = loader_sram_a_wdata;
+    
+    assign sram_b_ping_we = (load_ab_select_q == 0) ? loader_sram_b_we : 1'b0;
+    assign sram_b_pong_we = (load_ab_select_q == 1) ? loader_sram_b_we : 1'b0;
+    assign sram_b_ping_waddr = loader_sram_b_addr; assign sram_b_ping_wdata = loader_sram_b_wdata;
+    assign sram_b_pong_waddr = loader_sram_b_addr; assign sram_b_pong_wdata = loader_sram_b_wdata;
+    
+    assign sram_a_ping_raddr = df_sram_a_addr; assign sram_a_pong_raddr = df_sram_a_addr;
+    assign df_sram_a_rdata = (compute_ab_select_q == 0) ? sram_a_ping_rdata : sram_a_pong_rdata;
+    
+    assign sram_b_ping_raddr = df_sram_b_addr; assign sram_b_pong_raddr = df_sram_b_addr;
+    assign df_sram_b_rdata = (compute_ab_select_q == 0) ? sram_b_ping_rdata : sram_b_pong_rdata;
+    
+    //--------------------------------------------------------------------------
+    // Main Accelerator FSM - Sequential Logic (REVISED)
+    //--------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            imem_req_accepted_s1 <= 1'b0;
-            imem_addr_s1         <= '0;
+            current_state_q   <= S_IDLE;
+            i_tile_idx_q      <= '0;
+            j_tile_idx_q      <= '0;
+            k_tile_idx_q      <= '0;
+            load_ab_select_q  <= 1'b0;
+            compute_ab_select_q <= 1'b1;
+            delayed_clear_sa_pulse_q <= 1'b0;
         end else begin
-            if (dut_imem_read_enb && dut_imem_req_ready) begin
-                imem_addr_s1         <= dut_imem_addr;
-                imem_req_accepted_s1 <= 1'b1;
-                // $display("[%0t] [TB-IMEM] Read Accepted. Latched Addr: 0x%h (Data available next cycle)", $time, dut_imem_addr);
-            end else begin
-                imem_req_accepted_s1 <= 1'b0;
-            end
+            current_state_q   <= next_state_d;
+            i_tile_idx_q      <= i_tile_idx_d;
+            j_tile_idx_q      <= j_tile_idx_d;
+            k_tile_idx_q      <= k_tile_idx_d;
+            load_ab_select_q  <= load_ab_select_d;
+            compute_ab_select_q <= compute_ab_select_d;
+            delayed_clear_sa_pulse_q <= delayed_clear_sa_pulse_d;
         end
     end
 
-    // Stage 2: Drive response (data and valid)
-    always @(posedge clk or negedge rst_n) begin
+    //--------------------------------------------------------------------------
+    // Writer FSM - Sequential Logic (NEW)
+    //--------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            dut_imem_resp_valid <= 1'b0;
-            dut_imem_data_in    <= '0;
+            write_state_q <= W_IDLE;
+            i_writer_idx_q <= '0;
+            j_writer_idx_q <= '0;
+            writer_overall_done_q <= 1'b0;
         end else begin
-            if (imem_req_accepted_s1) begin // If a request was latched in the previous cycle
-                dut_imem_resp_valid <= 1'b1;
-                // Determine memory region and calculate index
-                if (imem_addr_s1 >= P_BASE_ADDR_A && imem_addr_s1 < P_BASE_ADDR_B) begin
-                    read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
-                    dut_imem_data_in <= main_memory_storage[MEM_A_START_IDX + read_idx];
-                    // $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_A_START_IDX + read_idx]);
-                end else if (imem_addr_s1 >= P_BASE_ADDR_B && imem_addr_s1 < P_BASE_ADDR_C) begin
-                    read_idx = (imem_addr_s1 - P_BASE_ADDR_B) / BYTES_PER_WORD;
-                    dut_imem_data_in <= main_memory_storage[MEM_B_START_IDX + read_idx];
-                    // $display("[%0t] [TB-IMEM] Data Driven. Addr: 0x%h, Data: 0x%h", $time, imem_addr_s1, main_memory_storage[MEM_B_START_IDX + read_idx]);
-                end else begin
-                    $error("[%0t] [TB-IMEM] ERROR: Read from unknown or unhandled address 0x%h", $time, imem_addr_s1);
-                    dut_imem_data_in <= {P_MAIN_MEM_DATA_WIDTH_BITS{1'bx}};
-                end
-            end else begin
-                dut_imem_resp_valid <= 1'b0;
-                dut_imem_data_in    <= '0; // Or keep previous value if desired when not valid
-            end
+            write_state_q <= write_next_state_d;
+            i_writer_idx_q <= i_writer_idx_d;
+            j_writer_idx_q <= j_writer_idx_d;
+            writer_overall_done_q <= writer_overall_done_d;
         end
     end
 
-
-    // --- Output Memory (omem) Signals ---
-    // dut_omem_req_ready is always 1'b1, meaning the memory is always ready to accept write requests.
-    assign dut_omem_req_ready = 1'b1;
-
-    // Behavioral model for Output Memory (omem) - accepts one request per cycle, writes immediately
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            // No specific reg to reset as omem_req_ready is always 1
-        end else begin
-            if (dut_omem_write_enb && dut_omem_req_ready) begin // dut_omem_req_ready is always 1
-                integer write_idx;
-                // Ensure address is within C matrix bounds
-                if (dut_omem_addr >= P_BASE_ADDR_C && dut_omem_addr < (P_BASE_ADDR_C + C_MATRIX_SIZE_BYTES)) begin
-                    write_idx = (dut_omem_addr - P_BASE_ADDR_C) / BYTES_PER_WORD;
-                    main_memory_storage[MEM_C_START_IDX + write_idx] <= dut_omem_wdata;
-                    // $display("[%0t] [TB-OMEM] Write Accepted & Stored. Addr: 0x%h, Data: 0x%h, Index: %d",
-                    //          $time, dut_omem_addr, dut_omem_wdata, MEM_C_START_IDX + write_idx);
-                end else begin
-                    $error("[%0t] [TB-OMEM] ERROR: Write to out-of-bounds address 0x%h for C matrix", $time, dut_omem_addr);
-                end
-            end
-        end
-    end
-
-
     //--------------------------------------------------------------------------
-    // Test Sequence and Control
+    // Main Accelerator FSM - Combinational Logic (REVISED)
     //--------------------------------------------------------------------------
-    initial begin
-        clk = 1'b0;
-        forever #(CLK_PERIOD / 2) clk = ~clk;
-    end
-
-    integer out_file_handle;
-    integer i;
-
-    initial begin
-        // --- Initialization ---
-        rst_n       <= 1'b0;
-        tb_comp_enb <= 1'b0;
-
-        $display("==============================================");
-        $display("[%0t] [TB] Testbench starting...", $time);
-        $display("==============================================");
-
-        // Load input data from file into simulated memory
-        // A & B matrices are concatenated in the file.
-        $readmemh("input_mem.csv", main_memory_storage, MEM_A_START_IDX, (MEM_C_START_IDX-1));
-        $display("[%0t] [TB] Loaded 'input_mem.csv' into memory model.", $time);
-
-        // --- Reset Sequence ---
-        #(CLK_PERIOD * 5);
-        rst_n <= 1'b1;
-        $display("[%0t] [TB] Reset released.", $time);
-        wait (rst_n === 1'b1);
-        @(posedge clk);
+    always_comb begin
+        next_state_d = current_state_q;
+        i_tile_idx_d = i_tile_idx_q;
+        j_tile_idx_d = j_tile_idx_q;
+        k_tile_idx_d = k_tile_idx_q;
+        load_ab_select_d  = load_ab_select_q;
+        compute_ab_select_d = compute_ab_select_q;
+        loader_req_pulse = 1'b0;
+        df_start_pass_pulse = 1'b0;
+        delayed_clear_sa_pulse_d = 1'b0;
         
-        // --- Start Accelerator ---
-        $display("[%0t] [TB] Asserting comp_enb to start accelerator.", $time);
-        tb_comp_enb <= 1'b1;
-        @(posedge clk);
-        tb_comp_enb <= 1'b0;
+        sa_activate_pe_level = (current_state_q inside {S_START_TILE_COMP, S_LOAD_K_SLICE, S_WAIT_LOAD_DONE, S_START_DF, S_COMPUTE_DONE_WAIT_WRITE});
 
-        // --- Wait for Completion with Timeout ---
-        $display("[%0t] [TB] Waiting for accelerator to finish (tb_done=1)...", $time);
-        fork
-            // begin : timeout_watcher
-            //     #(CLK_PERIOD * TIMEOUT_CYCLES);
-            //     $error("[%0t] [TB] TIMEOUT! Accelerator did not finish within %0d cycles.", $time, TIMEOUT_CYCLES);
-            //     $finish;
-            // end
-            begin : done_watcher
-                wait (tb_done == 1'b1);
-                $display("[%0t] [TB] Accelerator finished (tb_done asserted).", $time);
-                // disable timeout_watcher;
+        busyb = 1'b0; 
+        done  = 1'b0;
+        
+        case (current_state_q)
+            S_IDLE: begin
+                if (comp_enb) next_state_d = S_INIT_GEMM;
             end
-        join
+            
+            S_INIT_GEMM: begin
+                i_tile_idx_d = 0; j_tile_idx_d = 0;
+                k_tile_idx_d = 0;
+                load_ab_select_d = 0; compute_ab_select_d = 1;
+                next_state_d = S_START_TILE_COMP;
+            end
 
-        // --- Write Results to File ---
-        @(posedge clk);
-        $display("[%0t] [TB] Writing results from memory model to 'result_mem.csv'...", $time);
-        out_file_handle = $fopen("result_mem.csv", "w");
-        if (out_file_handle == 0) begin
-            $error("Could not open result_mem.csv for writing.");
-            $finish;
-        end
-        for (i = 0; i < C_MATRIX_SIZE_WORDS; i = i + 1) begin
-            $fdisplay(out_file_handle, "%h", main_memory_storage[MEM_C_START_IDX + i]);
-        end
-        $fclose(out_file_handle);
-        $display("[%0t] [TB] Results written to 'result_mem.csv'.", $time);
+            S_START_TILE_COMP: begin
+                k_tile_idx_d = 0;
+                delayed_clear_sa_pulse_d = 1'b1;
+                next_state_d = S_LOAD_K_SLICE;
+            end
 
-        // --- Final Result ---
-        $display("==============================================");
-        $display("[%0t] [TB] TEST SCENARIO COMPLETED.", $time);
-        $display("==============================================");
-        $finish;
+            S_LOAD_K_SLICE: begin
+                loader_req_pulse = 1'b1;
+                next_state_d = S_WAIT_LOAD_DONE;
+            end
+
+            S_WAIT_LOAD_DONE: begin
+                if (loader_done) begin
+                    compute_ab_select_d = load_ab_select_q;
+                    load_ab_select_d = ~load_ab_select_q;
+                    next_state_d = S_START_DF;
+                end
+            end
+
+            S_START_DF: begin
+                df_start_pass_pulse = 1'b1;
+                if (k_tile_idx_q == K_ITER_COUNT - 1) begin
+                    if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
+                        next_state_d = S_COMPUTE_DONE_WAIT_WRITE;
+                    end else begin
+                        if (j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
+                            i_tile_idx_d = i_tile_idx_q + 1;
+                            j_tile_idx_d = 0;
+                        end else begin
+                            j_tile_idx_d = j_tile_idx_q + 1;
+                        end
+                        k_tile_idx_d = 0;
+                        next_state_d = S_START_TILE_COMP;
+                    end
+                end else begin
+                    k_tile_idx_d = k_tile_idx_q + 1;
+                    next_state_d = S_LOAD_K_SLICE;
+                end
+            end
+            
+            S_COMPUTE_DONE_WAIT_WRITE: begin
+                // Computation FSM has completed all its tasks.
+            end
+
+            default: next_state_d = S_IDLE;
+        endcase
     end
+
+    //--------------------------------------------------------------------------
+    // Writer FSM - Combinational Logic (NEW)
+    //--------------------------------------------------------------------------
+    always_comb begin
+        write_next_state_d = write_state_q;
+        writer_req_pulse = 1'b0;
+        i_writer_idx_d = i_writer_idx_q;
+        j_writer_idx_d = j_writer_idx_q;
+        writer_overall_done_d = writer_overall_done_q;
+
+        case (write_state_q)
+            W_IDLE: begin
+                if (tile_computation_done) begin
+                    writer_req_pulse = 1'b1;
+                    write_next_state_d = W_WAIT_WRITE_DONE;
+                end
+            end
+
+            W_WAIT_WRITE_DONE: begin
+                if (writer_done) begin
+                    if (j_writer_idx_q == NUM_TILES_PER_DIM - 1) begin
+                        i_writer_idx_d = i_writer_idx_q + 1;
+                        j_writer_idx_d = 0;
+                    end else begin
+                        j_writer_idx_d = j_writer_idx_q + 1;
+                    end
+                    
+                    write_next_state_d = W_IDLE;
+
+                    if (i_writer_idx_q == NUM_TILES_PER_DIM - 1 && j_writer_idx_q == NUM_TILES_PER_DIM - 1) begin
+                        writer_overall_done_d = 1'b1;
+                    end
+                end
+            end
+
+            default: write_next_state_d = W_IDLE;
+        endcase
+    end
+
+    //--------------------------------------------------------------------------
+    // Top-Level Control Signals
+    //--------------------------------------------------------------------------
+    assign busyb = comp_enb && !(done); 
+
+    assign done = (current_state_q == S_COMPUTE_DONE_WAIT_WRITE) && writer_overall_done_q;
 
 endmodule
