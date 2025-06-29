@@ -56,11 +56,11 @@ module sram_c #(
     end
     
     // --- Display Logic (Optional, but useful for debug) ---
-    always @(posedge clk) begin
-        if (we) begin
-            $display("%0t [SRAM_C] Write: waddr = %d, wdata = %h", $time, waddr, wdata);
-        end
-    end
+    // always @(posedge clk) begin
+    //     if (we) begin
+    //         $display("%0t [SRAM_C] Write: waddr = %d, wdata = %h", $time, waddr, wdata);
+    //     end
+    // end
 
     // The read display in the original was a bit confusing as it showed the *previous* cycle's data.
     // A better way to display reads is from the reader's perspective (like in writer.v).

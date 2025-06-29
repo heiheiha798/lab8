@@ -105,18 +105,18 @@ module writer #(
                 if (!write_to_pong_q) begin
                     data_buffer_ping_q <= sram_c_rdata;
                     buffer_valid_q[0]  <= 1'b1;
-                    $display("Time %0t: 读取SRAM数值 (Ping): %h", $time, sram_c_rdata); // 输出读取的数值
+                    // $display("Time %0t: 读取SRAM数值 (Ping): %h", $time, sram_c_rdata); // 输出读取的数值
                 end else begin
                     data_buffer_pong_q <= sram_c_rdata;
                     buffer_valid_q[1]  <= 1'b1;
-                    $display("Time %0t: 读取SRAM数值 (Pong): %h", $time, sram_c_rdata); // 输出读取的数值
+                    // $display("Time %0t: 读取SRAM数值 (Pong): %h", $time, sram_c_rdata); // 输出读取的数值
                 end
                 write_to_pong_q <= ~write_to_pong_q; // Flip for next write
             end
 
             // --- Consumer Logic (MEM Write) ---
             if (mem_write_fire) begin
-                $display("Time %0t: 写回主存数值: %h (地址: %h)", $time, mem_req_wdata, mem_req_addr); // 输出写回的数值
+                // $display("Time %0t: 写回主存数值: %h (地址: %h)", $time, mem_req_wdata, mem_req_addr); // 输出写回的数值
                 if (chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1) begin
                     chunk_idx_q <= '0;
                     if (!read_from_pong_q) begin

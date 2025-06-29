@@ -389,11 +389,11 @@ module sa_enhanced #(
         end
     endgenerate
 
-    always @(posedge clk) begin
-        if (sa_busy) begin // 只在繁忙时打印，避免刷屏
-            $display("%0t [SA_ENHANCED] FSM_State: %s, k_iter: %d, wb_row: %d, all_rows_calc: %b, mid_column_done_signals: %b, tile_done: %b", 
-                     $time, sa_fsm_state_q.name(), k_iter_count_q, wb_row_count_q, all_rows_calculated, mid_column_done_signals[0], tile_computation_done);
-        end
-    end
+    // always @(posedge clk) begin
+    //     if (sa_busy) begin // 只在繁忙时打印，避免刷屏
+    //         $display("%0t [SA_ENHANCED] FSM_State: %s, k_iter: %d, wb_row: %d, all_rows_calc: %b, mid_column_done_signals: %b, tile_done: %b", 
+    //                  $time, sa_fsm_state_q.name(), k_iter_count_q, wb_row_count_q, all_rows_calculated, mid_column_done_signals[0], tile_computation_done);
+    //     end
+    // end
 
 endmodule

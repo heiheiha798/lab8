@@ -200,7 +200,7 @@ module loader #(
                     if (mem_resp_valid) begin
                         resp_cnt <= resp_cnt + 1;
                         // Display what is loaded in each FSM cycle
-                        $display("%0t [LOADER] FSM周期中第%d个加载的数据, 具体数值是0x%h", $time, resp_cnt + 1, mem_resp_rdata);
+                        // $display("%0t [LOADER] FSM周期中第%d个加载的数据, 具体数值是0x%h", $time, resp_cnt + 1, mem_resp_rdata);
                     end
                 end
                 

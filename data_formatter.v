@@ -243,13 +243,13 @@ module data_formatter #(
                 end
 
                 // Display when data is being sent out for this time step (after all channels are processed)
-                if (t_feed_equivalent >= 0) begin
-                    $display("%0t [DF SEND] 时间步t_f=%d: 发送A数据=0x%h, 发送B数据=0x%h", 
-                             $time, 
-                             t_feed_equivalent, 
-                             skewed_a_out,
-                             skewed_b_out);
-                end
+                // if (t_feed_equivalent >= 0) begin
+                //     $display("%0t [DF SEND] 时间步t_f=%d: 发送A数据=0x%h, 发送B数据=0x%h", 
+                //              $time, 
+                //              t_feed_equivalent, 
+                //              skewed_a_out,
+                //              skewed_b_out);
+                // end
             end else begin // if not data_valid_out (i.e., not S_STREAMING)
                 skewed_a_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
                 skewed_b_out <= {TILE_SIZE*INPUT_DATA_WIDTH{1'b0}};
