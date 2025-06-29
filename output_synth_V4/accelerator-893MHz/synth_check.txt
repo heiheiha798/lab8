@@ -1,0 +1,7 @@
+
+21. Executing CHECK pass (checking for obvious problems).
+Checking module accelerator...
+Warning: multiple conflicting drivers for accelerator.\comp_enb:
+    port Z[0] of cell $auto$hilomap.cc:48:hilomap_worker$983327 (LOGIC0_X1)
+    module input comp_enb[0]
+Found and reported 1 problems.

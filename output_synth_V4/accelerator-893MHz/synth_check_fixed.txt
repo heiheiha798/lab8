@@ -1,0 +1,21 @@
+
+4. Executing CHECK pass (checking for obvious problems).
+Checking module accelerator...
+Warning: multiple conflicting drivers for accelerator.\comp_enb:
+    port Z[0] of cell _369056_ (LOGIC0_X1)
+    module input comp_enb[0]
+Warning: multiple conflicting drivers for accelerator.\sram_a_ping_raddr [0]:
+    port Z[0] of cell fanout_buf_672 (BUF_X8)
+    port Z[0] of cell fanout_buf_663 (BUF_X8)
+    port Q[0] of cell u_data_formatter.time_cnt_q_$_DFFE_PN0P__Q_5 (DFFR_X1)
+Warning: multiple conflicting drivers for accelerator.\sram_a_ping_raddr [17]:
+    port Z[0] of cell fanout_buf_677 (BUF_X8)
+    port Z[0] of cell fanout_buf_673 (BUF_X8)
+    port Q[0] of cell u_data_formatter.time_cnt_q_$_DFFE_PN0P__Q_4 (DFFR_X1)
+Warning: multiple conflicting drivers for accelerator.\sram_a_ping_raddr [35]:
+    port Z[0] of cell fanout_buf_678 (BUF_X8)
+    port QN[0] of cell u_data_formatter.time_cnt_q_$_DFFE_PN0P__Q_2 (DFFR_X1)
+Warning: Wire accelerator.\sram_b_pong_raddr [49] is used but has no driver.
+Warning: Wire accelerator.\sram_b_pong_raddr [35] is used but has no driver.
+Warning: Wire accelerator.\sram_b_pong_raddr [8] is used but has no driver.
+Found and reported 7 problems.
