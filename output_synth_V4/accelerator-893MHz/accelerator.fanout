@@ -1,0 +1,15 @@
+Generate the report at 2025-06-29T14:44:19, GitVersion: aa25008b3778a76ae1975c839d4cc459f7f7b3b7.
++-----------------------------------------------------------------------------------------+-----------+--------+-------------+-------------+------+
+| Net / Pin                                                                               | MaxFanout | Fanout | FanoutSlack | LibCellPort | Note |
++-----------------------------------------------------------------------------------------+-----------+--------+-------------+-------------+------+
+| _098358_                                                                                |           |        |             |             |      |
+| _356428_:ZN                                                                             | NA        | 1      | NA          | NAND2_X1/ZN |      |
+| u_sa_enhanced.pe_row_gen[10].pe_col_gen[14].u_pe_inst.mul_result_reg[13]                |           |        |             |             |      |
+| u_sa_enhanced.pe_row_gen[10].pe_col_gen[14].u_pe_inst.mul_result_reg_$_DFFE_PN0P__Q_2:Q | NA        | 2      | NA          | DFFR_X1/Q   |      |
+| _098394_                                                                                |           |        |             |             |      |
+| _356464_:ZN                                                                             | NA        | 2      | NA          | AND2_X1/ZN  |      |
+| _098560_                                                                                |           |        |             |             |      |
+| _356647_:ZN                                                                             | NA        | 1      | NA          | AND2_X1/ZN  |      |
+| u_sa_enhanced.pe_row_gen[10].pe_col_gen[14].u_pe_inst.mul_result_reg[10]                |           |        |             |             |      |
+| u_sa_enhanced.pe_row_gen[10].pe_col_gen[14].u_pe_inst.mul_result_reg_$_DFFE_PN0P__Q_5:Q | NA        | 2      | NA          | DFFR_X1/Q   |      |
++-----------------------------------------------------------------------------------------+-----------+--------+-------------+-------------+------+

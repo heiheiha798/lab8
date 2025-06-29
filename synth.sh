@@ -1,27 +1,27 @@
 #!/bin/bash
 
-# Script to run ONLY Logic Synthesis and STA for the accelerator
-# Execute this script from the ~/lab8 directory
-
 # --- Configuration ---
 TOP_MODULE_RTL="accelerator"
 
-# RTL Source Files (paths relative to ~/lab8, but will be used with ../ from yosys-sta dir)
-PE_FILE="./pe.v"
-SYSTOLIC_ARRAY_FILE="./systolic_array.v"
-ACCELERATOR_RTL_FILE="./accelerator.v"
-# Note: The makefile command will internally prepend "../" to these paths
-# when executed from the yosys-sta directory.
+# --- RTL Source Files ---
+RTL_FILES=(
+    "./pe.v"
+    "./sa_enhanced.v"
+    "./loader.v"
+    "./data_formatter.v"
+    "./writer.v"
+    "./accelerator_synth.v" # The synthesis-friendly top module
+)
 
-# Synthesis Output Directory (relative to ~/lab8)
-SYNTH_OUTPUT_DIR="./output_synth_wsl"
+# --- Tool & Output Configuration ---
+SYNTH_OUTPUT_DIR="./output_synth_V4"
 
-# SDC File (path relative to ~/lab8)
+# Path to the Synopsys Design Constraints file.
 SDC_FILE="./accelerator.sdc"
 
-# Clock Configuration
-CLK_FREQ_MHZ=885
-CLK_PORT_NAME="clk" # Clock port name in the top RTL module
+# Clock Configuration for STA.
+CLK_FREQ_MHZ=893
+CLK_PORT_NAME="clk" 
 
 # --- Helper Functions ---
 echocmd() {
@@ -32,61 +32,69 @@ echocmd() {
 }
 
 # --- Script Execution ---
-# Ensure we are in the lab8 directory (or adjust paths accordingly)
-if [ ! -f "accelerator.v" ]; then
-    echo "Error: This script must be run from the ~/lab8 directory, where accelerator.v is present."
+
+# Sanity check: Ensure script is run from the correct directory.
+if [ ! -f "./accelerator_synth.v" ]; then
+    echo "Error: Top RTL file './accelerator_synth.v' not found."
+    echo "Please run this script from your project's root directory."
     exit 1
 fi
 if [ ! -d "./yosys-sta" ]; then
-    echo "Error: ./yosys-sta directory not found. Please ensure it's in the current path."
+    echo "Error: The './yosys-sta' directory was not found."
     exit 1
 fi
 
+# 1. Start Synthesis and STA Process
+echocmd "Starting Logic Synthesis and Static Timing Analysis (STA) for '${TOP_MODULE_RTL}'"
 
-# 1. Logic Synthesis and Static Timing Analysis (using yosys-sta Makefile)
-echocmd "Starting Logic Synthesis and Static Timing Analysis (STA)"
-
-# Clean previous synthesis run for this specific output directory (optional, but good practice)
-# Note: The yosys-sta Makefile might have its own clean targets,
-# but cleaning the output directory from here ensures a fresh start for *this script's* output.
+# Clean previous run's output directory for a fresh start.
 rm -rf ${SYNTH_OUTPUT_DIR}
-mkdir -p ${SYNTH_OUTPUT_DIR} # Ensure base output directory exists, yosys-sta makefile will create subdir
+mkdir -p ${SYNTH_OUTPUT_DIR}
 
-# Prepare SDC file if it doesn't exist (basic clock definition)
+# Prepare a basic SDC file if one doesn't exist.
 if [ ! -f "${SDC_FILE}" ]; then
-    echo "SDC file '${SDC_FILE}' not found. Creating a basic one with clock definition."
-    echo "create_clock -name ${CLK_PORT_NAME} -period [expr 1000.0/${CLK_FREQ_MHZ}] [get_ports ${CLK_PORT_NAME}]" > ${SDC_FILE}
-    # You might want to add:
-    # echo "set_input_delay 2.0 -clock ${CLK_PORT_NAME} [all_inputs]" >> ${SDC_FILE}
-    # echo "set_output_delay 2.0 -clock ${CLK_PORT_NAME} [all_outputs]" >> ${SDC_FILE}
-    echo "Basic SDC file created. Please review and customize if needed."
+    echo "SDC file '${SDC_FILE}' not found. Creating a basic one with a ${CLK_FREQ_MHZ}MHz clock."
+    # Calculate clock period from frequency
+    CLK_PERIOD=$(echo "1000.0 / ${CLK_FREQ_MHZ}" | bc)
+    echo "create_clock -name ${CLK_PORT_NAME} -period ${CLK_PERIOD} [get_ports ${CLK_PORT_NAME}]" > ${SDC_FILE}
+    # Add example input/output delay constraints and load
+    echo "set_input_delay  0.5 -clock ${CLK_PORT_NAME} [all_inputs]" >> ${SDC_FILE}
+    echo "set_output_delay 0.5 -clock ${CLK_PORT_NAME} [all_outputs]" >> ${SDC_FILE}
+    echo "set_load 0.05 [all_outputs]" >> ${SDC_FILE}
+    echo "Basic SDC file created. Please review and customize for your design's specific needs."
 fi
 
-# Run the make command for STA (which includes synthesis)
-# The paths for SDC_FILE and RTL_FILES are adjusted with ../ because 'make -C' changes directory.
-# The path for O (output) is also adjusted with ../ so that the output directory
-# is created relative to the current script's location (~/lab8), not inside yosys-sta.
+# The 'make -C' command changes directory to ./yosys-sta, so we need to adjust
+# all paths with a "../" prefix to point back to the project root.
+ADJUSTED_RTL_FILES=""
+for f in "${RTL_FILES[@]}"; do
+    ADJUSTED_RTL_FILES="${ADJUSTED_RTL_FILES} ../${f}"
+done
+
+# Run the make command to perform synthesis and STA.
+echocmd "Invoking yosys-sta Makefile..."
 make -C ./yosys-sta sta \
     DESIGN=${TOP_MODULE_RTL} \
     SDC_FILE=../${SDC_FILE} \
     CLK_FREQ_MHZ=${CLK_FREQ_MHZ} \
     CLK_PORT_NAME=${CLK_PORT_NAME} \
     O=../${SYNTH_OUTPUT_DIR} \
-    RTL_FILES="../${PE_FILE} ../${SYSTOLIC_ARRAY_FILE} ../${ACCELERATOR_RTL_FILE}"
+    RTL_FILES="${ADJUSTED_RTL_FILES}"
 
-# Check if synthesis was successful
-# The yosys-sta makefile is expected to create a subdirectory like accelerator-100MHz
+# 2. Verify Results
+echocmd "Verifying synthesis results..."
+
 SYNTH_SUBDIR_NAME="${TOP_MODULE_RTL}-${CLK_FREQ_MHZ}MHz"
 FINAL_NETLIST_PATH_SYN="${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME}/${TOP_MODULE_RTL}.netlist.syn.v"
 FINAL_NETLIST_PATH_FIXED="${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME}/${TOP_MODULE_RTL}.netlist.fixed.v"
 
 if [ -f "${FINAL_NETLIST_PATH_FIXED}" ] || [ -f "${FINAL_NETLIST_PATH_SYN}" ]; then
-    echo "Logic Synthesis and STA appear to be successful."
-    echo "Outputs are in: ${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME}"
+    echocmd "SUCCESS: Logic Synthesis and STA appear to be complete."
+    echo "Outputs are located in: ${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME}"
 else
-    echo "Error: Synthesized netlist not found after make sta."
-    echo "Please check logs in ${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME} (e.g., yosys.log, sta.log)."
+    echocmd "ERROR: Synthesized netlist not found."
+    echo "Please check the logs in '${SYNTH_OUTPUT_DIR}/${SYNTH_SUBDIR_NAME}' for errors (e.g., yosys.log, sta.log)."
     exit 1
 fi
 
-echocmd "Logic Synthesis and STA finished."
+echocmd "Script finished."
