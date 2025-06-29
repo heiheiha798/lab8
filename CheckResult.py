@@ -3,7 +3,7 @@ import os
 import math # 仍然可以保留，以防未来需要其他数学运算
 
 # --- Testbench/Hardware 参数 ---
-MATRIX_DIM_TB = 16
+MATRIX_DIM_TB = 512
 PE_ACCUM_BITS_TB = 32
 RAM_DATA_WIDTH_TB = 64
 
@@ -81,7 +81,7 @@ def main():
         print("Error: matrix_a.npy, matrix_b.npy, or matrix_c_expected_sint32.npy not found. Run data generation script first.")
         return
 
-    DISPLAY_SUB_DIM = MATRIX_DIM_TB
+    DISPLAY_SUB_DIM = min(MATRIX_DIM_TB, 8)
     original_print_options = np.get_printoptions()
     np.set_printoptions(threshold=max(1024, DISPLAY_SUB_DIM*DISPLAY_SUB_DIM + 1),
                         linewidth=max(400, DISPLAY_SUB_DIM * 10), # Wider for SINT32

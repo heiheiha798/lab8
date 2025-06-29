@@ -1,24 +1,24 @@
 ----------------------------------------
 脚本开始执行
-矩阵维度: 16x16
+矩阵维度: 512x512
 线程数: 8
 Verilator 警告标志: '-Wall'
 所有日志将同步输出到终端和文件: output.txt
 ----------------------------------------
-提示：矩阵宽度 16 是 16 的倍数。
+提示：矩阵宽度 512 是 16 的倍数。
 
 步骤 0: 正在更新脚本和 Verilog 文件中的矩阵维度参数...
 ----------------------------------------
-已更新 InputGen.py 中的 MATRIX_DIM_TB 为 16
-已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 16
-已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 16
+已更新 InputGen.py 中的 MATRIX_DIM_TB 为 512
+已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 512
+已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 512
 ----------------------------------------
 
 步骤 1: 正在生成输入文件 (input_mem.csv)...
 ----------------------------------------
 ### Generating input_mem.csv for simulation...
-python3 InputGen.py --matrix_dim 16
-Generating 16x16 SINT8 matrices for testbench.
+python3 InputGen.py --matrix_dim 512
+Generating 512x512 SINT8 matrices for testbench.
 
 Processing Matrix A tiles (Row-Major)...
 Processing Matrix B tiles (Column-Major)...
@@ -38,12 +38,16 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
 		-cc --timing -O3 --x-assign fast --x-initial fast --noassert --Mdir obj_dir \
 		--threads 8 \
 		tb_accelerator.v accelerator.v loader.v writer.v data_formatter.v sa_enhanced.v pe.v sram_banked.v sram_c.v  --exe sim_main.cpp 
+%Warning-EOFNEWLINE: tb_accelerator.v:262:10: Missing newline at end of file (POSIX 3.206).
+                                            : ... Suggest add newline.
+  262 | endmodule
+      |          ^
+                     ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.036
+                     ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
 %Warning-EOFNEWLINE: accelerator.v:437:10: Missing newline at end of file (POSIX 3.206).
                                          : ... Suggest add newline.
   437 | endmodule
       |          ^
-                     ... For warning description see https://verilator.org/warn/EOFNEWLINE?v=5.036
-                     ... Use "/* verilator lint_off EOFNEWLINE */" and lint_on around source to disable this message.
 %Warning-EOFNEWLINE: writer.v:207:10: Missing newline at end of file (POSIX 3.206).
                                     : ... Suggest add newline.
   207 | endmodule
@@ -69,17 +73,33 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |                                             ^
                       ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.036
                       ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
-%Warning-ASCRANGE: sa_enhanced.v:91:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                     : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-   91 |     reg [$clog2(K_ITER_COUNT)-1:0] k_iter_count_q, k_iter_count_d;
-      |         ^
-                   ... For warning description see https://verilator.org/warn/ASCRANGE?v=5.036
-                   ... Use "/* verilator lint_off ASCRANGE */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: writer.v:120:33: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'chunk_idx_q' generates 2 bits.
+                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
+  120 |                 if (chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1) begin
+      |                                 ^~
+%Warning-WIDTHEXPAND: writer.v:165:46: Operator LT expects 32 or 9 bits on the LHS, but LHS's VARREF 'sram_read_ptr_q' generates 5 bits.
+                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
+  165 |                             (sram_read_ptr_q < SRAM_READS_PER_TILE);
+      |                                              ^
+%Warning-WIDTHEXPAND: writer.v:180:40: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'active_sram_addr_q' generates 5 bits.
+                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
+  180 |                 if (active_sram_addr_q == SRAM_READS_PER_TILE - 1 &&
+      |                                        ^~
+%Warning-WIDTHEXPAND: writer.v:181:33: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'chunk_idx_q' generates 2 bits.
+                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
+  181 |                     chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1 &&
+      |                                 ^~
+%Warning-WIDTHTRUNC: writer.v:205:26: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 256 bits.
+                                    : ... note: In instance 'tb_accelerator.dut.u_writer'
+  205 |     assign mem_req_wdata = (!read_from_pong_q ? data_buffer_ping_q : data_buffer_pong_q) >> (chunk_idx_q * MAIN_MEM_DATA_WIDTH_BITS);
+      |                          ^
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
 %Warning-WIDTHEXPAND: sa_enhanced.v:284:113: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'wb_row_count_q' generates 4 bits.
                                            : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
   284 |                     tile_computation_done <= (sa_fsm_state_q == SA_FSM_WRITE_BACK_SECOND_HALF && wb_row_count_q == SIZE - 1);
       |                                                                                                                 ^~
-%Warning-WIDTHEXPAND: sa_enhanced.v:313:44: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'k_iter_count_q' generates 2 bits.
+%Warning-WIDTHEXPAND: sa_enhanced.v:313:44: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'k_iter_count_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
   313 |                         if (k_iter_count_q < K_ITER_COUNT - 1) begin
       |                                            ^
@@ -103,22 +123,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    59 |         addr_bank0 = raddr[0*BANK_ADDR_WIDTH +: BANK_ADDR_WIDTH];
       |                    ^
-%Warning-ASCRANGE: loader.v:26:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   26 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      i_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:27:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   27 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:28:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_loader'
-   28 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]      k_tile_idx,
-      |                ^
-%Warning-ASCRANGE: loader.v:69:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_loader'
-   69 |     reg [$clog2(NUM_TILES_PER_DIM)-1:0] i_reg, j_reg, k_reg;
-      |         ^
 %Warning-WIDTHEXPAND: loader.v:125:64: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'req_cnt' generates 6 bits.
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   125 |                         mem_req_addr = b_base_addr + ((req_cnt - WORDS_PER_TILE) * (MAIN_MEM_DATA_WIDTH_BITS / 8));
@@ -135,8 +139,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
   136 |                         sram_a_addr = resp_cnt;  
       |                                     ^
-                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.036
-                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
 %Warning-WIDTHTRUNC: loader.v:141:37: Operator ASSIGN expects 5 bits on the Assign RHS, but Assign RHS's SUB generates 32 or 7 bits.
                                     : ... note: In instance 'tb_accelerator.dut.u_loader'
   141 |                         sram_b_addr = resp_cnt - WORDS_PER_TILE;  
@@ -149,11 +151,11 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   147 |                 if (resp_cnt == (WORDS_PER_TILE * 2) - 1 && mem_resp_valid) begin
       |                              ^~
-%Warning-WIDTHEXPAND: loader.v:185:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'k_tile_idx' generates 2 bits.
+%Warning-WIDTHEXPAND: loader.v:185:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'k_tile_idx' generates 5 bits.
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   185 |                         a_base_addr      <= BASE_ADDR_A + ((i_tile_idx * NUM_TILES_PER_DIM + k_tile_idx) * A_B_TILE_BYTES);
       |                                                                                            ^
-%Warning-WIDTHEXPAND: loader.v:186:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'j_tile_idx' generates 2 bits.
+%Warning-WIDTHEXPAND: loader.v:186:92: Operator ADD expects 32 bits on the RHS, but RHS's VARREF 'j_tile_idx' generates 5 bits.
                                      : ... note: In instance 'tb_accelerator.dut.u_loader'
   186 |                         b_base_addr      <= BASE_ADDR_B + ((k_tile_idx * NUM_TILES_PER_DIM + j_tile_idx) * A_B_TILE_BYTES);
       |                                                                                            ^
@@ -177,77 +179,31 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                              : ... note: In instance 'tb_accelerator.dut.u_data_formatter'
   210 |                 t_feed_equivalent = time_cnt_q - PIPELINE_COMPENSATION;
       |                                                ^
-%Warning-ASCRANGE: writer.v:22:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   22 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    i_tile_idx,
-      |                ^
-%Warning-ASCRANGE: writer.v:23:16: Ascending bit range vector: left < right of bit range: [-1:0]
-                                 : ... note: In instance 'tb_accelerator.dut.u_writer'
-   23 |     input wire [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0]    j_tile_idx,
-      |                ^
-%Warning-ASCRANGE: writer.v:68:9: Ascending bit range vector: left < right of bit range: [-1:0]
-                                : ... note: In instance 'tb_accelerator.dut.u_writer'
-   68 |     reg [$clog2(MATRIX_SIZE/TILE_SIZE)-1:0] i_tile_idx_q, j_tile_idx_q;
-      |         ^
-%Warning-WIDTHEXPAND: writer.v:120:33: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'chunk_idx_q' generates 2 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
-  120 |                 if (chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1) begin
-      |                                 ^~
-%Warning-WIDTHEXPAND: writer.v:165:46: Operator LT expects 32 or 9 bits on the LHS, but LHS's VARREF 'sram_read_ptr_q' generates 5 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
-  165 |                             (sram_read_ptr_q < SRAM_READS_PER_TILE);
-      |                                              ^
-%Warning-WIDTHEXPAND: writer.v:180:40: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'active_sram_addr_q' generates 5 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
-  180 |                 if (active_sram_addr_q == SRAM_READS_PER_TILE - 1 &&
-      |                                        ^~
-%Warning-WIDTHEXPAND: writer.v:181:33: Operator EQ expects 32 or 9 bits on the LHS, but LHS's VARREF 'chunk_idx_q' generates 2 bits.
-                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
-  181 |                     chunk_idx_q == MEM_WRITES_PER_SRAM_READ - 1 &&
-      |                                 ^~
-%Warning-WIDTHTRUNC: writer.v:205:26: Operator ASSIGNW expects 64 bits on the Assign RHS, but Assign RHS's SHIFTR generates 256 bits.
-                                    : ... note: In instance 'tb_accelerator.dut.u_writer'
-  205 |     assign mem_req_wdata = (!read_from_pong_q ? data_buffer_ping_q : data_buffer_pong_q) >> (chunk_idx_q * MAIN_MEM_DATA_WIDTH_BITS);
-      |                          ^
-%Warning-WIDTHEXPAND: accelerator.v:140:75: Input port connection 'i_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'i_tile_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:140:102: Input port connection 'j_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'j_tile_idx_q' generates 1 bits.
-                                           : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:140:129: Input port connection 'k_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'k_tile_idx_q' generates 1 bits.
-                                           : ... note: In instance 'tb_accelerator.dut'
-%Warning-WIDTHEXPAND: accelerator.v:214:10: Input port connection 'i_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'i_writer_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  214 |         .i_tile_idx(i_writer_idx_q),
-      |          ^~~~~~~~~~
-%Warning-WIDTHEXPAND: accelerator.v:215:10: Input port connection 'j_tile_idx' expects 2 bits on the pin connection, but pin connection's VARREF 'j_writer_idx_q' generates 1 bits.
-                                          : ... note: In instance 'tb_accelerator.dut'
-  215 |         .j_tile_idx(j_writer_idx_q),
-      |          ^~~~~~~~~~
-%Warning-WIDTHEXPAND: accelerator.v:352:42: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:352:42: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   352 |                         if (j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                          ^~
-%Warning-WIDTHEXPAND: accelerator.v:347:38: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:347:38: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'i_tile_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   347 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                      ^~
-%Warning-WIDTHEXPAND: accelerator.v:347:79: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:347:79: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'j_tile_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   347 |                     if (i_tile_idx_q == NUM_TILES_PER_DIM - 1 && j_tile_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                                                               ^~
-%Warning-WIDTHEXPAND: accelerator.v:343:34: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:343:34: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'k_tile_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   343 |                 if (k_tile_idx_q == K_ITER_COUNT - 1) begin
       |                                  ^~
-%Warning-WIDTHEXPAND: accelerator.v:406:40: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_writer_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:406:40: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'j_writer_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   406 |                     if (j_writer_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                        ^~
-%Warning-WIDTHEXPAND: accelerator.v:416:40: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'i_writer_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:416:40: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'i_writer_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   416 |                     if (i_writer_idx_q == NUM_TILES_PER_DIM - 1 && j_writer_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                        ^~
-%Warning-WIDTHEXPAND: accelerator.v:416:83: Operator EQ expects 32 or 5 bits on the LHS, but LHS's VARREF 'j_writer_idx_q' generates 1 bits.
+%Warning-WIDTHEXPAND: accelerator.v:416:83: Operator EQ expects 32 or 10 bits on the LHS, but LHS's VARREF 'j_writer_idx_q' generates 5 bits.
                                           : ... note: In instance 'tb_accelerator.dut'
   416 |                     if (i_writer_idx_q == NUM_TILES_PER_DIM - 1 && j_writer_idx_q == NUM_TILES_PER_DIM - 1) begin
       |                                                                                   ^~
@@ -285,10 +241,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
       |          ^~~~~~~~
                        ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.036
                        ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
-%Warning-UNUSEDSIGNAL: writer.v:30:49: Signal is not used: 'mem_write_done'
-                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
-   30 |     input wire                                  mem_write_done,
-      |                                                 ^~~~~~~~~~~~~~
 %Warning-UNUSEDPARAM: sram_banked.v:10:15: Parameter is not used: 'IS_SRAM_A'
                                          : ... note: In instance 'tb_accelerator.dut.sram_b_pong'
    10 |     parameter IS_SRAM_A     = 1'b1,  
@@ -321,6 +273,10 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                           : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
    55 |     wire                                    pe_result_valid_internal [SIZE-1:0][SIZE-1:0];
       |                                             ^~~~~~~~~~~~~~~~~~~~~~~~
+%Warning-UNUSEDSIGNAL: writer.v:30:49: Signal is not used: 'mem_write_done'
+                                     : ... note: In instance 'tb_accelerator.dut.u_writer'
+   30 |     input wire                                  mem_write_done,
+      |                                                 ^~~~~~~~~~~~~~
 %Warning-UNUSEDPARAM: pe.v:7:15: Parameter is not used: 'ROW_IDX'
                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
     7 |     parameter ROW_IDX = 0, 
@@ -329,12 +285,6 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                                : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced.pe_row_gen[15].pe_col_gen[15].u_pe_inst'
     8 |     parameter COL_IDX = 0  
       |               ^~~~~~~
-%Warning-UNSIGNED: sa_enhanced.v:313:44: Comparison is constant due to unsigned arithmetic
-                                       : ... note: In instance 'tb_accelerator.dut.u_sa_enhanced'
-  313 |                         if (k_iter_count_q < K_ITER_COUNT - 1) begin
-      |                                            ^
-                   ... For warning description see https://verilator.org/warn/UNSIGNED?v=5.036
-                   ... Use "/* verilator lint_off UNSIGNED */" and lint_on around source to disable this message.
 %Warning-BLKSEQ: tb_accelerator.v:144:30: Blocking assignment '=' in sequential logic process
                                         : ... Suggest using delayed assignment '<='
   144 |                     read_idx = (imem_addr_s1 - P_BASE_ADDR_A) / BYTES_PER_WORD;
@@ -395,27 +345,19 @@ verilator -Wno-fatal -Wall --top-module tb_accelerator \
                       sram_c.v:39:13: ... Location of other driving block
    39 |             memory[waddr] <= wdata;
       |             ^~~~~~
-%Warning-UNOPTFLAT: accelerator.v:116:11: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.writer_req_pulse'
-  116 |     logic writer_req_pulse;  
-      |           ^~~~~~~~~~~~~~~~
-                    ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.036
-                    ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
-                    accelerator.v:116:11:      Example path: tb_accelerator.dut.writer_req_pulse
-                    writer.v:170:5:      Example path: ALWAYS
-                    writer.v:48:30:      Example path: tb_accelerator.dut.u_writer.next_state_d
-                    accelerator.v:380:5:      Example path: ALWAYS
-                    accelerator.v:116:11:      Example path: tb_accelerator.dut.writer_req_pulse
 %Warning-UNOPTFLAT: sa_enhanced.v:62:10: Signal unoptimizable: Circular combinational logic: 'tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain'
    62 |     wire pe_row_propagate_done_chain [SIZE-1:0][SIZE:0];
       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    ... For warning description see https://verilator.org/warn/UNOPTFLAT?v=5.036
+                    ... Use "/* verilator lint_off UNOPTFLAT */" and lint_on around source to disable this message.
                     sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
                     pe.v:60:38:      Example path: ASSIGNW
                     pe.v:28:42:      Example path: tb_accelerator.dut.u_sa_enhanced.__Vcellout__pe_row_gen[0].pe_col_gen[0].u_pe_inst__pe_row_propagate_done_out
                     sa_enhanced.v:137:22:      Example path: ASSIGNW
                     sa_enhanced.v:62:10:      Example path: tb_accelerator.dut.u_sa_enhanced.pe_row_propagate_done_chain
 - V e r i l a t i o n   R e p o r t: Verilator 5.036 2025-04-27 rev UNKNOWN.REV
-- Verilator: Built from 0.540 MB sources in 10 modules, into 5.568 MB in 11 C++ files needing 0.001 MB
-- Verilator: Walltime 1.186 s (elab=0.057, cvt=1.068, bld=0.000); cpu 1.167 s on 1 threads
+- Verilator: Built from 0.540 MB sources in 10 modules, into 5.563 MB in 11 C++ files needing 0.001 MB
+- Verilator: Walltime 1.199 s (elab=0.080, cvt=1.059, bld=0.000); cpu 1.167 s on 1 threads
 ### Compiling C++ simulation executable...
 /Library/Developer/CommandLineTools/usr/bin/make -C obj_dir -f Vtb_accelerator.mk Vtb_accelerator CXXFLAGS+=""
 c++  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.036/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable      -std=gnu++20 -Os  -c -o sim_main.o ../sim_main.cpp
@@ -450,108 +392,265 @@ SIM_CPP: Entering simulation loop...
 [50000] [TB] Reset released.
 [55000] [TB] Asserting comp_enb to start accelerator.
 [65000] [TB] Waiting for accelerator to finish (tb_done=1)...
-[2685000] [TB] Accelerator finished (tb_done asserted).
-[2695000] [TB] Writing results from memory model to 'result_mem.csv'...
-[2695000] [TB] Results written to 'result_mem.csv'.
-==============================================
-[2695000] [TB] TEST SCENARIO COMPLETED.
-==============================================
-- tb_accelerator.v:259: Verilog $finish
-SIM_CPP: Exited simulation loop. Total steps: 2695001
-SIM_CPP: main() finished.
-### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from inish or isplay).
-
-步骤 3: 正在重排硬件结果 (result_mem.csv)...
-----------------------------------------
-成功重排SINT32数据并保存到 'result_mem_reordered.csv'。
-重排完成，result_mem.csv 已被更新。
-
-步骤 4: 正在检查重排后的仿真结果...
-----------------------------------------
-### Checking result...
-python3 CheckResult.py
-
-Matrix A (SINT8 loaded from .npy):
-[[      -82      -122      -111        24       -90        -4      -127        -8       -39        -8         0      -123        52        31        87        -2]
- [       78       -94        43        55       -11      -100        65       -21       -68        15       114        43       -25        70      -126       -67]
- [       -1       100        40       -97       119        34        62       116      -121       -46        75        15       -50      -108       126        -8]
- [       64        29        24       -25       -84       -33        75       -49       -55       120        72       -75         7         6        89       -51]
- [      -35       -43        -6       127        12       -36        54       -37       -75        24      -126       -36      -119       116       -45        74]
- [      -43       -81        85       104        74       -72       -34       103      -105      -107       -63        63         1       -89       -90        88]
- [     -111       -58        87       -71        48       -64       -35      -114       -33        17       -76        57        46       -75      -114       116]
- [      -28        55       114       -94       -42        60        43        27       -23        31       -31       -98        17        57       -76        79]
- [      -64       124      -101        -3         0        23      -121        77       107       109        57        52       -51        10       -55        77]
- [       55       119      -101       -58        48       -82        39       -42       -22        55       -83       -83       -89       -95        95        92]
- [       41      -105        30       -46        52       -29        69       109       116        77        52      -112      -103       -10      -100       -69]
- [     -122       -80      -114       -75       -72       -76       -93        10       117       -39        50       -80      -110       -46        24        13]
- [       51        97        14       -55      -102       -53       -29       -31       -84       -20      -116       115       -13       -99         7       -29]
- [      -20       -93       -98        14        36        17        47      -103       -53       -69        -4        71       107       104      -118       -75]
- [       95       -74         1       105        44      -123       -41        97      -109        79        44       117        44         7      -127       118]
- [      126       -45       -89       -33      -104        14        89         8        27      -116       -75         6        94       -83        99        -6]]
-
-Matrix B (SINT8 loaded from .npy):
-[[       32       -97        83        -8        58       112       -23        -4       -72       -18        62        16       119        92        55       -29]
- [       69       -73        -1        20       -47        33        71        16       -37        52       -80         5       -79       107        73        64]
- [      114       -72       -96       -60       -51        26      -105        96        -9       -90        -8        35       -86        40        50       -15]
- [       41       -10       -56        45       -44      -102        11       -63       -39       -45        57       113        94        30        28       -57]
- [     -113        -3       -96       108        96         0         8        69      -125       -19       -66       -42       -77       -51        53        49]
- [      -81       -89      -126        64       -73        92      -109       -42      -109        75       -49        -5       -66       -13       -82       -33]
- [      113        14        31         0        -5       -24       -30        66        79        89       -78       105        98       -71       -25       -11]
- [      -98       -43        19      -110      -126        -9       -63      -125        29       -90       -28       -64       125        43       -96       101]
- [       95         3      -128       -85        23      -120       -58       -21       -39        51       -30        44       105       -89        15       -61]
- [       89       106      -117        38        60        66         0        63        35        29       -48       -88       -67        79      -111       110]
- [      -91        35        12        68        28         1      -105        93        11       100        55        38        70        30        14       -16]
- [      -27       -24       -56       -53         5         6       116      -113        52       -48        86         2        95        45       -70       127]
- [      118        68       -45       -44        12       -70        29        16        59        44        47        49        77         7        97       -77]
- [       12        67      -107       -98        30       -11        20       -20      -126       -55       -26       -79       -89      -118        59       -75]
- [     -120        28       -97       -17       115        68        29       104       -68        76       -53       -11       -26       121      -110      -126]
- [     -112       108        11       -68        -4        -5      -105        76        72       110        94        76      -128        66       -62       -25]]
-
-Golden Result C (SINT32 loaded from .npy):
-[[   -30589     33624      6381      -279      8453    -10433      2028     -3894      -151      5527     11013    -14386    -10575     -6598    -12453    -40185]
- [    25767      2966     25661      4874      3215     -7160     -1175     -2677     12247    -27846     24964      7274     36989    -18680     24746     11528]
- [   -57351    -27562     12253     21539     -1200     39663     -8299     26709     -4296     13061    -27234     -9467    -10846     40545    -23933     26401]
- [    28060     11280      5908     10874     20648     26797     -3257     40010      6849     22134    -13224     -1492      -899     26386     -6262    -12786]
- [     3635     16396       375     -1215     -4531     -8858      7708     -6439     -7913    -22470     -1843      1932    -35707    -21731     -3388     -2499]
- [   -24949    -10080     26250     -8182    -31690    -22420     -3160    -24895     26833    -44873     33116     18010      9138      5166      3972     25021]
- [    15401     24525      3094      -421      1940    -14243      4965     17732     39307     -5501     20859      7408    -46111    -11502      9583     21469]
- [    23143      1523     -3931    -17607    -25085     12283    -33967     19762      6733      5886    -16844     -4498    -47326     -6914      5844      1076]
- [   -22858     14006    -22028     -4951    -11121     -7011         2    -22683      -799     14169      -435    -21472    -13140     14881    -22272     39164]
- [   -14927      8366     29525     18016     27685     24239     16926     33157      4046     31893    -21407     -3474    -31668     34288    -14816      9116]
- [    12808     -4216      3761       -86     -3739     -7299    -41436      2484     -2336    -14107    -22080    -14108     28979    -34046     -5795     17362]
- [   -35306     23281     21247     -6630      4998    -23739     -7956     -4755     14994     12782      1131    -12530      1386    -22075    -21015     -8400]
- [    20623    -26181     36294     -8257     -9777     22940     42706    -19677     26518    -16256     10470     -2147      3332     38713     -3101     29247]
- [    16010     12634      6470     11170      8569    -21977     29181    -23920     -1277     -8984     16108      3652     19722    -53524     32813     -8989]
- [    -9982     20563     23402    -10794     -4786     -7034      3106    -20251     31705    -32418     53061      3430     28192     24879       301     41605]
- [     7111    -14260     35888    -18667      4593      2919      8929    -13103     16632     20904     11169     26254     58653      9862     -5868    -34829]]
-----------------------------------------
-
-HW Accelerator Result C (SINT32 parsed from 'result_mem.csv'):
-[[   -30589     33624      6381      -279      8453    -10433      2028     -3894      -151      5527     11013    -14386    -10575     -6598    -12453    -40185]
- [    25767      2966     25661      4874      3215     -7160     -1175     -2677     12247    -27846     24964      7274     36989    -18680     24746     11528]
- [   -57351    -27562     12253     21539     -1200     39663     -8299     26709     -4296     13061    -27234     -9467    -10846     40545    -23933     26401]
- [    28060     11280      5908     10874     20648     26797     -3257     40010      6849     22134    -13224     -1492      -899     26386     -6262    -12786]
- [     3635     16396       375     -1215     -4531     -8858      7708     -6439     -7913    -22470     -1843      1932    -35707    -21731     -3388     -2499]
- [   -24949    -10080     26250     -8182    -31690    -22420     -3160    -24895     26833    -44873     33116     18010      9138      5166      3972     25021]
- [    15401     24525      3094      -421      1940    -14243      4965     17732     39307     -5501     20859      7408    -46111    -11502      9583     21469]
- [    23143      1523     -3931    -17607    -25085     12283    -33967     19762      6733      5886    -16844     -4498    -47326     -6914      5844      1076]
- [   -22858     14006    -22028     -4951    -11121     -7011         2    -22683      -799     14169      -435    -21472    -13140     14881    -22272     39164]
- [   -14927      8366     29525     18016     27685     24239     16926     33157      4046     31893    -21407     -3474    -31668     34288    -14816      9116]
- [    12808     -4216      3761       -86     -3739     -7299    -41436      2484     -2336    -14107    -22080    -14108     28979    -34046     -5795     17362]
- [   -35306     23281     21247     -6630      4998    -23739     -7956     -4755     14994     12782      1131    -12530      1386    -22075    -21015     -8400]
- [    20623    -26181     36294     -8257     -9777     22940     42706    -19677     26518    -16256     10470     -2147      3332     38713     -3101     29247]
- [    16010     12634      6470     11170      8569    -21977     29181    -23920     -1277     -8984     16108      3652     19722    -53524     32813     -8989]
- [    -9982     20563     23402    -10794     -4786     -7034      3106    -20251     31705    -32418     53061      3430     28192     24879       301     41605]
- [     7111    -14260     35888    -18667      4593      2919      8929    -13103     16632     20904     11169     26254     58653      9862     -5868    -34829]]
-
->> Accuracy Metrics (vs SINT32 Golden):
->> SSE (HW SINT32 vs Golden SINT32): 0.000000e+00
---------------------
-
->> Comparison Summary (HW SINT32 vs Golden SINT32):
->> PASSED: Hardware SINT32 result exactly matches the golden SINT32 result.
---------------------
-
-----------------------------------------
-所有步骤成功完成！
-----------------------------------------
+[SIM_CPP PROGRESS] Time:       100 cycle
+[SIM_CPP PROGRESS] Time:       200 cycle
+[SIM_CPP PROGRESS] Time:       300 cycle
+[SIM_CPP PROGRESS] Time:       400 cycle
+[SIM_CPP PROGRESS] Time:       500 cycle
+[SIM_CPP PROGRESS] Time:       600 cycle
+[SIM_CPP PROGRESS] Time:       700 cycle
+[SIM_CPP PROGRESS] Time:       800 cycle
+[SIM_CPP PROGRESS] Time:       900 cycle
+[SIM_CPP PROGRESS] Time:      1000 cycle
+[SIM_CPP PROGRESS] Time:      1100 cycle
+[SIM_CPP PROGRESS] Time:      1200 cycle
+[SIM_CPP PROGRESS] Time:      1300 cycle
+[SIM_CPP PROGRESS] Time:      1400 cycle
+[SIM_CPP PROGRESS] Time:      1500 cycle
+[SIM_CPP PROGRESS] Time:      1600 cycle
+[SIM_CPP PROGRESS] Time:      1700 cycle
+[SIM_CPP PROGRESS] Time:      1800 cycle
+[SIM_CPP PROGRESS] Time:      1900 cycle
+[SIM_CPP PROGRESS] Time:      2000 cycle
+[SIM_CPP PROGRESS] Time:      2100 cycle
+[SIM_CPP PROGRESS] Time:      2200 cycle
+[SIM_CPP PROGRESS] Time:      2300 cycle
+[SIM_CPP PROGRESS] Time:      2400 cycle
+[SIM_CPP PROGRESS] Time:      2500 cycle
+[SIM_CPP PROGRESS] Time:      2600 cycle
+[SIM_CPP PROGRESS] Time:      2700 cycle
+[SIM_CPP PROGRESS] Time:      2800 cycle
+[SIM_CPP PROGRESS] Time:      2900 cycle
+[SIM_CPP PROGRESS] Time:      3000 cycle
+[SIM_CPP PROGRESS] Time:      3100 cycle
+[SIM_CPP PROGRESS] Time:      3200 cycle
+[SIM_CPP PROGRESS] Time:      3300 cycle
+[SIM_CPP PROGRESS] Time:      3400 cycle
+[SIM_CPP PROGRESS] Time:      3500 cycle
+[SIM_CPP PROGRESS] Time:      3600 cycle
+[SIM_CPP PROGRESS] Time:      3700 cycle
+[SIM_CPP PROGRESS] Time:      3800 cycle
+[SIM_CPP PROGRESS] Time:      3900 cycle
+[SIM_CPP PROGRESS] Time:      4000 cycle
+[SIM_CPP PROGRESS] Time:      4100 cycle
+[SIM_CPP PROGRESS] Time:      4200 cycle
+[SIM_CPP PROGRESS] Time:      4300 cycle
+[SIM_CPP PROGRESS] Time:      4400 cycle
+[SIM_CPP PROGRESS] Time:      4500 cycle
+[SIM_CPP PROGRESS] Time:      4600 cycle
+[SIM_CPP PROGRESS] Time:      4700 cycle
+[SIM_CPP PROGRESS] Time:      4800 cycle
+[SIM_CPP PROGRESS] Time:      4900 cycle
+[SIM_CPP PROGRESS] Time:      5000 cycle
+[SIM_CPP PROGRESS] Time:      5100 cycle
+[SIM_CPP PROGRESS] Time:      5200 cycle
+[SIM_CPP PROGRESS] Time:      5300 cycle
+[SIM_CPP PROGRESS] Time:      5400 cycle
+[SIM_CPP PROGRESS] Time:      5500 cycle
+[SIM_CPP PROGRESS] Time:      5600 cycle
+[SIM_CPP PROGRESS] Time:      5700 cycle
+[SIM_CPP PROGRESS] Time:      5800 cycle
+[SIM_CPP PROGRESS] Time:      5900 cycle
+[SIM_CPP PROGRESS] Time:      6000 cycle
+[SIM_CPP PROGRESS] Time:      6100 cycle
+[SIM_CPP PROGRESS] Time:      6200 cycle
+[SIM_CPP PROGRESS] Time:      6300 cycle
+[SIM_CPP PROGRESS] Time:      6400 cycle
+[SIM_CPP PROGRESS] Time:      6500 cycle
+[SIM_CPP PROGRESS] Time:      6600 cycle
+[SIM_CPP PROGRESS] Time:      6700 cycle
+[SIM_CPP PROGRESS] Time:      6800 cycle
+[SIM_CPP PROGRESS] Time:      6900 cycle
+[SIM_CPP PROGRESS] Time:      7000 cycle
+[SIM_CPP PROGRESS] Time:      7100 cycle
+[SIM_CPP PROGRESS] Time:      7200 cycle
+[SIM_CPP PROGRESS] Time:      7300 cycle
+[SIM_CPP PROGRESS] Time:      7400 cycle
+[SIM_CPP PROGRESS] Time:      7500 cycle
+[SIM_CPP PROGRESS] Time:      7600 cycle
+[SIM_CPP PROGRESS] Time:      7700 cycle
+[SIM_CPP PROGRESS] Time:      7800 cycle
+[SIM_CPP PROGRESS] Time:      7900 cycle
+[SIM_CPP PROGRESS] Time:      8000 cycle
+[SIM_CPP PROGRESS] Time:      8100 cycle
+[SIM_CPP PROGRESS] Time:      8200 cycle
+[SIM_CPP PROGRESS] Time:      8300 cycle
+[SIM_CPP PROGRESS] Time:      8400 cycle
+[SIM_CPP PROGRESS] Time:      8500 cycle
+[SIM_CPP PROGRESS] Time:      8600 cycle
+[SIM_CPP PROGRESS] Time:      8700 cycle
+[SIM_CPP PROGRESS] Time:      8800 cycle
+[SIM_CPP PROGRESS] Time:      8900 cycle
+[SIM_CPP PROGRESS] Time:      9000 cycle
+[SIM_CPP PROGRESS] Time:      9100 cycle
+[SIM_CPP PROGRESS] Time:      9200 cycle
+[SIM_CPP PROGRESS] Time:      9300 cycle
+[SIM_CPP PROGRESS] Time:      9400 cycle
+[SIM_CPP PROGRESS] Time:      9500 cycle
+[SIM_CPP PROGRESS] Time:      9600 cycle
+[SIM_CPP PROGRESS] Time:      9700 cycle
+[SIM_CPP PROGRESS] Time:      9800 cycle
+[SIM_CPP PROGRESS] Time:      9900 cycle
+[SIM_CPP PROGRESS] Time:     10000 cycle
+[SIM_CPP PROGRESS] Time:     10100 cycle
+[SIM_CPP PROGRESS] Time:     10200 cycle
+[SIM_CPP PROGRESS] Time:     10300 cycle
+[SIM_CPP PROGRESS] Time:     10400 cycle
+[SIM_CPP PROGRESS] Time:     10500 cycle
+[SIM_CPP PROGRESS] Time:     10600 cycle
+[SIM_CPP PROGRESS] Time:     10700 cycle
+[SIM_CPP PROGRESS] Time:     10800 cycle
+[SIM_CPP PROGRESS] Time:     10900 cycle
+[SIM_CPP PROGRESS] Time:     11000 cycle
+[SIM_CPP PROGRESS] Time:     11100 cycle
+[SIM_CPP PROGRESS] Time:     11200 cycle
+[SIM_CPP PROGRESS] Time:     11300 cycle
+[SIM_CPP PROGRESS] Time:     11400 cycle
+[SIM_CPP PROGRESS] Time:     11500 cycle
+[SIM_CPP PROGRESS] Time:     11600 cycle
+[SIM_CPP PROGRESS] Time:     11700 cycle
+[SIM_CPP PROGRESS] Time:     11800 cycle
+[SIM_CPP PROGRESS] Time:     11900 cycle
+[SIM_CPP PROGRESS] Time:     12000 cycle
+[SIM_CPP PROGRESS] Time:     12100 cycle
+[SIM_CPP PROGRESS] Time:     12200 cycle
+[SIM_CPP PROGRESS] Time:     12300 cycle
+[SIM_CPP PROGRESS] Time:     12400 cycle
+[SIM_CPP PROGRESS] Time:     12500 cycle
+[SIM_CPP PROGRESS] Time:     12600 cycle
+[SIM_CPP PROGRESS] Time:     12700 cycle
+[SIM_CPP PROGRESS] Time:     12800 cycle
+[SIM_CPP PROGRESS] Time:     12900 cycle
+[SIM_CPP PROGRESS] Time:     13000 cycle
+[SIM_CPP PROGRESS] Time:     13100 cycle
+[SIM_CPP PROGRESS] Time:     13200 cycle
+[SIM_CPP PROGRESS] Time:     13300 cycle
+[SIM_CPP PROGRESS] Time:     13400 cycle
+[SIM_CPP PROGRESS] Time:     13500 cycle
+[SIM_CPP PROGRESS] Time:     13600 cycle
+[SIM_CPP PROGRESS] Time:     13700 cycle
+[SIM_CPP PROGRESS] Time:     13800 cycle
+[SIM_CPP PROGRESS] Time:     13900 cycle
+[SIM_CPP PROGRESS] Time:     14000 cycle
+[SIM_CPP PROGRESS] Time:     14100 cycle
+[SIM_CPP PROGRESS] Time:     14200 cycle
+[SIM_CPP PROGRESS] Time:     14300 cycle
+[SIM_CPP PROGRESS] Time:     14400 cycle
+[SIM_CPP PROGRESS] Time:     14500 cycle
+[SIM_CPP PROGRESS] Time:     14600 cycle
+[SIM_CPP PROGRESS] Time:     14700 cycle
+[SIM_CPP PROGRESS] Time:     14800 cycle
+[SIM_CPP PROGRESS] Time:     14900 cycle
+[SIM_CPP PROGRESS] Time:     15000 cycle
+[SIM_CPP PROGRESS] Time:     15100 cycle
+[SIM_CPP PROGRESS] Time:     15200 cycle
+[SIM_CPP PROGRESS] Time:     15300 cycle
+[SIM_CPP PROGRESS] Time:     15400 cycle
+[SIM_CPP PROGRESS] Time:     15500 cycle
+[SIM_CPP PROGRESS] Time:     15600 cycle
+[SIM_CPP PROGRESS] Time:     15700 cycle
+[SIM_CPP PROGRESS] Time:     15800 cycle
+[SIM_CPP PROGRESS] Time:     15900 cycle
+[SIM_CPP PROGRESS] Time:     16000 cycle
+[SIM_CPP PROGRESS] Time:     16100 cycle
+[SIM_CPP PROGRESS] Time:     16200 cycle
+[SIM_CPP PROGRESS] Time:     16300 cycle
+[SIM_CPP PROGRESS] Time:     16400 cycle
+[SIM_CPP PROGRESS] Time:     16500 cycle
+[SIM_CPP PROGRESS] Time:     16600 cycle
+[SIM_CPP PROGRESS] Time:     16700 cycle
+[SIM_CPP PROGRESS] Time:     16800 cycle
+[SIM_CPP PROGRESS] Time:     16900 cycle
+[SIM_CPP PROGRESS] Time:     17000 cycle
+[SIM_CPP PROGRESS] Time:     17100 cycle
+[SIM_CPP PROGRESS] Time:     17200 cycle
+[SIM_CPP PROGRESS] Time:     17300 cycle
+[SIM_CPP PROGRESS] Time:     17400 cycle
+[SIM_CPP PROGRESS] Time:     17500 cycle
+[SIM_CPP PROGRESS] Time:     17600 cycle
+[SIM_CPP PROGRESS] Time:     17700 cycle
+[SIM_CPP PROGRESS] Time:     17800 cycle
+[SIM_CPP PROGRESS] Time:     17900 cycle
+[SIM_CPP PROGRESS] Time:     18000 cycle
+[SIM_CPP PROGRESS] Time:     18100 cycle
+[SIM_CPP PROGRESS] Time:     18200 cycle
+[SIM_CPP PROGRESS] Time:     18300 cycle
+[SIM_CPP PROGRESS] Time:     18400 cycle
+[SIM_CPP PROGRESS] Time:     18500 cycle
+[SIM_CPP PROGRESS] Time:     18600 cycle
+[SIM_CPP PROGRESS] Time:     18700 cycle
+[SIM_CPP PROGRESS] Time:     18800 cycle
+[SIM_CPP PROGRESS] Time:     18900 cycle
+[SIM_CPP PROGRESS] Time:     19000 cycle
+[SIM_CPP PROGRESS] Time:     19100 cycle
+[SIM_CPP PROGRESS] Time:     19200 cycle
+[SIM_CPP PROGRESS] Time:     19300 cycle
+[SIM_CPP PROGRESS] Time:     19400 cycle
+[SIM_CPP PROGRESS] Time:     19500 cycle
+[SIM_CPP PROGRESS] Time:     19600 cycle
+[SIM_CPP PROGRESS] Time:     19700 cycle
+[SIM_CPP PROGRESS] Time:     19800 cycle
+[SIM_CPP PROGRESS] Time:     19900 cycle
+[SIM_CPP PROGRESS] Time:     20000 cycle
+[SIM_CPP PROGRESS] Time:     20100 cycle
+[SIM_CPP PROGRESS] Time:     20200 cycle
+[SIM_CPP PROGRESS] Time:     20300 cycle
+[SIM_CPP PROGRESS] Time:     20400 cycle
+[SIM_CPP PROGRESS] Time:     20500 cycle
+[SIM_CPP PROGRESS] Time:     20600 cycle
+[SIM_CPP PROGRESS] Time:     20700 cycle
+[SIM_CPP PROGRESS] Time:     20800 cycle
+[SIM_CPP PROGRESS] Time:     20900 cycle
+[SIM_CPP PROGRESS] Time:     21000 cycle
+[SIM_CPP PROGRESS] Time:     21100 cycle
+[SIM_CPP PROGRESS] Time:     21200 cycle
+[SIM_CPP PROGRESS] Time:     21300 cycle
+[SIM_CPP PROGRESS] Time:     21400 cycle
+[SIM_CPP PROGRESS] Time:     21500 cycle
+[SIM_CPP PROGRESS] Time:     21600 cycle
+[SIM_CPP PROGRESS] Time:     21700 cycle
+[SIM_CPP PROGRESS] Time:     21800 cycle
+[SIM_CPP PROGRESS] Time:     21900 cycle
+[SIM_CPP PROGRESS] Time:     22000 cycle
+[SIM_CPP PROGRESS] Time:     22100 cycle
+[SIM_CPP PROGRESS] Time:     22200 cycle
+[SIM_CPP PROGRESS] Time:     22300 cycle
+[SIM_CPP PROGRESS] Time:     22400 cycle
+[SIM_CPP PROGRESS] Time:     22500 cycle
+[SIM_CPP PROGRESS] Time:     22600 cycle
+[SIM_CPP PROGRESS] Time:     22700 cycle
+[SIM_CPP PROGRESS] Time:     22800 cycle
+[SIM_CPP PROGRESS] Time:     22900 cycle
+[SIM_CPP PROGRESS] Time:     23000 cycle
+[SIM_CPP PROGRESS] Time:     23100 cycle
+[SIM_CPP PROGRESS] Time:     23200 cycle
+[SIM_CPP PROGRESS] Time:     23300 cycle
+[SIM_CPP PROGRESS] Time:     23400 cycle
+[SIM_CPP PROGRESS] Time:     23500 cycle
+[SIM_CPP PROGRESS] Time:     23600 cycle
+[SIM_CPP PROGRESS] Time:     23700 cycle
+[SIM_CPP PROGRESS] Time:     23800 cycle
+[SIM_CPP PROGRESS] Time:     23900 cycle
+[SIM_CPP PROGRESS] Time:     24000 cycle
+[SIM_CPP PROGRESS] Time:     24100 cycle
+[SIM_CPP PROGRESS] Time:     24200 cycle
+[SIM_CPP PROGRESS] Time:     24300 cycle
+[SIM_CPP PROGRESS] Time:     24400 cycle
+[SIM_CPP PROGRESS] Time:     24500 cycle
+[SIM_CPP PROGRESS] Time:     24600 cycle
+[SIM_CPP PROGRESS] Time:     24700 cycle
+[SIM_CPP PROGRESS] Time:     24800 cycle
+[SIM_CPP PROGRESS] Time:     24900 cycle
+[SIM_CPP PROGRESS] Time:     25000 cycle
+[SIM_CPP PROGRESS] Time:     25100 cycle
+[SIM_CPP PROGRESS] Time:     25200 cycle
+[SIM_CPP PROGRESS] Time:     25300 cycle
+[SIM_CPP PROGRESS] Time:     25400 cycle
+[SIM_CPP PROGRESS] Time:     25500 cycle
+[SIM_CPP PROGRESS] Time:     25600 cycle
+[SIM_CPP PROGRESS] Time:     25700 cycle
+[SIM_CPP PROGRESS] Time:     25800 cycle
+[SIM_CPP PROGRESS] Time:     25900 cycle
+[SIM_CPP PROGRESS] Time:     26000 cycle
+[SIM_CPP PROGRESS] Time:     26100 cycle
+[SIM_CPP PROGRESS] Time:     26200 cycle
