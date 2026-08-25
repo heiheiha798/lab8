@@ -2,6 +2,10 @@ import numpy as np
 import argparse
 import os
 
+# --- 输出目录: 所有中间文件统一放到仓库根目录下的 output/ ---
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(REPO_ROOT, "output")
+
 # 固定参数
 TILE_DIM = 16
 PE_ACCUM_BITS = 32   # 结果元素位宽
@@ -16,9 +20,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Reorder tiled SINT32 matrix data from CSV to row-major CSV.")
     parser.add_argument('--matrix_dim', type=int, required=True,
                         help="Dimension of the square matrix. Must be a multiple of TILE_DIM.")
-    parser.add_argument('--input_csv', type=str, default="result_mem.csv",
+    parser.add_argument('--input_csv', type=str, default=os.path.join(OUTPUT_DIR, "result_mem.csv"),
                         help="Input CSV file name containing raw hardware output.")
-    parser.add_argument('--output_csv', type=str, default="result_mem_reordered_sint32.csv",
+    parser.add_argument('--output_csv', type=str, default=os.path.join(OUTPUT_DIR, "result_mem_reordered_sint32.csv"),
                         help="Output CSV file name for reordered data.")
     return parser.parse_args()
 

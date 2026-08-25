@@ -5,29 +5,33 @@
 MATRIX_DIM ?= 48
 NUM_THREADS ?= 8
 
+# --- 中间/生成文件统一输出目录 (已 gitignore) ---
+OUTPUT_DIR ?= output
+
 # --- MODIFIED: 更新 Verilog 源文件列表 ---
 # 包含了所有设计模块和新的测试平台
+# 设计 RTL 位于 hdl/，测试平台位于 tb/
 VERILOG_SOURCES = \
-	tb_accelerator.v \
-	accelerator.v \
-	loader.v \
-	writer.v \
-	data_formatter.v \
-	sa_enhanced.v \
-	pe.v \
-	sram_banked.v \
-	sram_c.v 
+	tb/tb_accelerator.v \
+	hdl/accelerator.v \
+	hdl/loader.v \
+	hdl/writer.v \
+	hdl/data_formatter.v \
+	hdl/sa_enhanced.v \
+	hdl/pe.v \
+	hdl/sram_banked.v \
+	hdl/sram_c.v 
 
 # --- MODIFIED: 更新顶层模块和 C++ Wrapper ---
 TARGET_MODULE = tb_accelerator
 EXECUTABLE_NAME = V$(TARGET_MODULE)
-CPP_WRAPPER = sim_main.cpp # 保持 C++ 文件名不变
+CPP_WRAPPER = tb/sim_main.cpp # 保持 C++ 文件名不变
 
-# --- Python 脚本 ---
+# --- Python 脚本 (位于 utils/) ---
 PYTHON = python3
-INPUT_GEN_SCRIPT = InputGen.py
-CHECK_RESULT_SCRIPT = CheckResult.py
-REORDER_SCRIPT = reorder_result_mem.py # Assuming this is still relevant for your CSV format
+INPUT_GEN_SCRIPT = utils/InputGen.py
+CHECK_RESULT_SCRIPT = utils/CheckResult.py
+REORDER_SCRIPT = utils/reorder_result_mem.py # Assuming this is still relevant for your CSV format
 
 # --- Verilator 配置 ---
 VERILATOR_FLAGS ?= -Wall
@@ -58,20 +62,23 @@ compile_cpp: compile_verilog
 compile: compile_cpp
 
 run_sim: compile # Ensure compilation before running
-	@echo "### Running simulation: ./obj_dir/$(EXECUTABLE_NAME)"
-	./obj_dir/$(EXECUTABLE_NAME)
+	@echo "### Running simulation from $(OUTPUT_DIR)/ : ../obj_dir/$(EXECUTABLE_NAME)"
+	mkdir -p $(OUTPUT_DIR)
+	cd $(OUTPUT_DIR) && ../obj_dir/$(EXECUTABLE_NAME)
 	@echo "### Simulation finished. Assuming tb_accelerator produces necessary output files if any (e.g., from $finish or $display)."
 
 # These Python script targets might need adjustment based on how tb_accelerator interacts with files
 generate_input:
-	@echo "### Generating input_mem.csv for simulation..."
+	@echo "### Generating input_mem.csv for simulation ($(OUTPUT_DIR)/)..."
+	mkdir -p $(OUTPUT_DIR)
 	$(PYTHON) $(INPUT_GEN_SCRIPT) --matrix_dim $(MATRIX_DIM)
 
 reorder_result:
 	@echo "### Reordering hardware result..."
-	$(PYTHON) $(REORDER_SCRIPT) --matrix_dim $(MATRIX_DIM) --input_csv result_mem.csv --output_csv result_mem_reordered.csv
-	@if [ -f "result_mem.csv" ]; then cp result_mem.csv result_mem_original.csv; fi
-	@if [ -f "result_mem_reordered.csv" ]; then mv result_mem_reordered.csv result_mem.csv; fi
+	mkdir -p $(OUTPUT_DIR)
+	$(PYTHON) $(REORDER_SCRIPT) --matrix_dim $(MATRIX_DIM) --input_csv $(OUTPUT_DIR)/result_mem.csv --output_csv $(OUTPUT_DIR)/result_mem_reordered.csv
+	@if [ -f "$(OUTPUT_DIR)/result_mem.csv" ]; then cp $(OUTPUT_DIR)/result_mem.csv $(OUTPUT_DIR)/result_mem_original.csv; fi
+	@if [ -f "$(OUTPUT_DIR)/result_mem_reordered.csv" ]; then mv $(OUTPUT_DIR)/result_mem_reordered.csv $(OUTPUT_DIR)/result_mem.csv; fi
 
 check_result:
 	@echo "### Checking result..."
@@ -80,9 +87,8 @@ check_result:
 clean:
 	@echo "### Cleaning up generated files..."
 	rm -rf obj_dir
-	rm -f input_mem.csv result_mem.csv result_mem_reordered.csv result_mem_original.csv # If these are still generated
+	rm -rf output
 	rm -f waveform.fst waveform.vcd # Adjusted for FST trace
-	rm -f matrix_a.npy matrix_b.npy matrix_c_expected_sint32.npy # If these are still generated
 	rm -rf __pycache__
 
 .PHONY: all compile_verilog compile_cpp compile run_sim clean # Removed python script targets unless tb uses them

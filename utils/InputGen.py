@@ -3,6 +3,11 @@ import os
 import math # For exp
 import random # 导入 random 模块
 
+# --- 输出目录: 所有中间文件统一放到仓库根目录下的 output/ ---
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(REPO_ROOT, "output")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 # --- Testbench Parameters (matching testbench_top.v) ---
 MATRIX_DIM_TB = 512
 TILE_DIM_TB = 16
@@ -110,7 +115,7 @@ def main():
             # Calling the column-major conversion function
             all_hex_lines_b.extend(convert_tile_to_hex_lines_col_major(current_tile_b))
 
-    output_file = "input_mem.csv"
+    output_file = os.path.join(OUTPUT_DIR, "input_mem.csv")
     with open(output_file, "w") as f:
         print(f"\nWriting A matrix tiles to {output_file}...")
         for line in all_hex_lines_a:
@@ -120,9 +125,9 @@ def main():
         for line in all_hex_lines_b:
             f.write(f"{line}\n")
 
-    print("\nSaving original matrices and expected result to .npy files...")
-    np.save('matrix_a.npy', matrix_a_orig) # Save SINT8
-    np.save('matrix_b.npy', matrix_b_orig) # Save SINT8
+    print(f"\nSaving original matrices and expected result to {OUTPUT_DIR} ...")
+    np.save(os.path.join(OUTPUT_DIR, 'matrix_a.npy'), matrix_a_orig) # Save SINT8
+    np.save(os.path.join(OUTPUT_DIR, 'matrix_b.npy'), matrix_b_orig) # Save SINT8
 
     # --- Calculate Expected C Matrix (Exact SINT32) ---
     # Note: This calculation uses the original matrices and is not affected by storage order.
@@ -133,7 +138,7 @@ def main():
     if np.any(expected_c_exact_int64 > 2**31 - 1) or np.any(expected_c_exact_int64 < -(2**31)):
         print("Warning: Expected C matrix elements exceed SINT32 range during calculation!")
     expected_c_sint32 = expected_c_exact_int64.astype(np.int32) # Hardware accumulator is SINT32
-    np.save('matrix_c_expected_sint32.npy', expected_c_sint32)
+    np.save(os.path.join(OUTPUT_DIR, 'matrix_c_expected_sint32.npy'), expected_c_sint32)
 
     print("\nScript finished successfully.")
 

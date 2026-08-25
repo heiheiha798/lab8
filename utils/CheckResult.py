@@ -2,6 +2,10 @@ import numpy as np
 import os
 import math # 仍然可以保留，以防未来需要其他数学运算
 
+# --- 输出目录: 所有中间文件统一放到仓库根目录下的 output/ ---
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(REPO_ROOT, "output")
+
 # --- Testbench/Hardware 参数 ---
 MATRIX_DIM_TB = 512
 PE_ACCUM_BITS_TB = 32
@@ -11,7 +15,9 @@ SINT32_PER_RAM_WORD_TB = RAM_DATA_WIDTH_TB // PE_ACCUM_BITS_TB
 if RAM_DATA_WIDTH_TB % PE_ACCUM_BITS_TB != 0:
     raise ValueError("RAM_DATA_WIDTH_TB must be a multiple of PE_ACCUM_BITS_TB.")
 
-def read_hw_result_sint32_direct(fileName="result_mem.csv", matrix_dim_arg=MATRIX_DIM_TB):
+def read_hw_result_sint32_direct(fileName=None, matrix_dim_arg=MATRIX_DIM_TB):
+    if fileName is None:
+        fileName = os.path.join(OUTPUT_DIR, "result_mem.csv")
     all_sint32_elements_flat = []
     try:
         with open(fileName, "r") as f:
@@ -71,14 +77,14 @@ def read_hw_result_sint32_direct(fileName="result_mem.csv", matrix_dim_arg=MATRI
 
 # --- 主程序 ---
 def main():
-    hw_result_file = "result_mem.csv"
+    hw_result_file = os.path.join(OUTPUT_DIR, "result_mem.csv")
 
     try:
-        matrix_a_sint8 = np.load("matrix_a.npy")
-        matrix_b_sint8 = np.load("matrix_b.npy")
-        golden_c_sint32 = np.load("matrix_c_expected_sint32.npy")
+        matrix_a_sint8 = np.load(os.path.join(OUTPUT_DIR, "matrix_a.npy"))
+        matrix_b_sint8 = np.load(os.path.join(OUTPUT_DIR, "matrix_b.npy"))
+        golden_c_sint32 = np.load(os.path.join(OUTPUT_DIR, "matrix_c_expected_sint32.npy"))
     except FileNotFoundError:
-        print("Error: matrix_a.npy, matrix_b.npy, or matrix_c_expected_sint32.npy not found. Run data generation script first.")
+        print(f"Error: {OUTPUT_DIR}/matrix_*.npy not found. Run data generation script (utils/InputGen.py) first.")
         return
 
     DISPLAY_SUB_DIM = min(MATRIX_DIM_TB, 8)

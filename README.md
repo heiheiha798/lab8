@@ -48,7 +48,41 @@
 
 仿真：bash run.sh [matrix_dim] 比如 bash run.sh 512 。终端会100周期输出一次。512要226w周期左右
 
-综合：bash yosys_setup.sh 然后 bash synth.sh 即可。综合结果在output_synth_V4文件夹中
+综合：bash tools/yosys_setup.sh 然后 bash syn/synth.sh 即可。综合结果在output_synth_V4文件夹中
+
+**0.5、 目录结构（整理后）**
+
+```
+sa-gemm-accelerator/
+├── README.md / README.pdf / 要求.md
+├── makefile                 # Verilator 仿真构建 (obj_dir/)
+├── run.sh                   # 一键仿真: 生成输入 -> 编译仿真 -> 重排 -> 校验
+├── output/                  # 仿真中间文件 (已 gitignore): csv / npy / 日志
+├── hdl/                     # 可综合 RTL 设计源文件
+│   ├── accelerator.v        #   顶层控制器 (计算FSM + 写回FSM)
+│   ├── loader.v / writer.v / data_formatter.v
+│   ├── sa_enhanced.v / pe.v
+│   └── sram_banked.v / sram_c.v
+├── tb/                      # 测试平台
+│   ├── tb_accelerator.v     #   Verilog 顶层测试平台
+│   └── sim_main.cpp         #   Verilator C++ wrapper
+├── utils/                   # Python 辅助脚本
+│   ├── InputGen.py          #   生成输入 input_mem.csv / golden 结果
+│   ├── reorder_result_mem.py#   硬件输出瓦片序 -> 行主序
+│   └── CheckResult.py       #   硬件结果 vs golden 校验
+├── syn/                     # 逻辑综合 / STA
+│   ├── synth.sh             #   综合脚本 (先 tools/yosys_setup.sh)
+│   ├── accelerator_synth.v  #   综合友好顶层
+│   └── accelerator.sdc      #   时序约束
+├── tools/
+│   ├── yosys_setup.sh       #   解压/初始化 yosys-sta 工具链
+│   └── yosys-sta.tar.gz
+├── data/                    # 静态数据/参考
+│   └── SRAM_Specs_45nm.CSV
+├── docs/                    # 文档与历史日志
+│   └── output_512_16.txt
+└── output_synth_V4/         # 综合输出结果
+```
 
 **一、 模块功能简介与整体计算流程**
 

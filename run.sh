@@ -1,6 +1,10 @@
 #!/bin/bash
 
-LOG_FILE="output.txt"
+# --- 中间/生成文件统一输出目录 (已 gitignore) ---
+OUTPUT_DIR="output"
+mkdir -p "${OUTPUT_DIR}"
+
+LOG_FILE="${OUTPUT_DIR}/output.txt"
 > "${LOG_FILE}" # 清空旧日志
 
 {
@@ -28,6 +32,7 @@ LOG_FILE="output.txt"
     echo "线程数: ${NUM_THREADS}"
     echo "Verilator 警告标志: '${VERILATOR_FLAGS}'"
     echo "所有日志将同步输出到终端和文件: ${LOG_FILE}"
+    echo "中间文件输出目录: ${OUTPUT_DIR}/"
     echo "----------------------------------------"
 
     # --- 检查 MATRIX_DIM 是否为 16 的倍数 ---
@@ -45,13 +50,13 @@ LOG_FILE="output.txt"
     SED_OPTION=(-i)
     [[ "$OSTYPE" == "darwin"* ]] && SED_OPTION=(-i '')
 
-    sed "${SED_OPTION[@]}" "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" InputGen.py
-    sed "${SED_OPTION[@]}" "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" CheckResult.py
-    sed "${SED_OPTION[@]}" "s/\(parameter P_MATRIX_SIZE *= *\)[0-9]*;/\1${MATRIX_DIM};/" tb_accelerator.v
+    sed "${SED_OPTION[@]}" "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" utils/InputGen.py
+    sed "${SED_OPTION[@]}" "s/MATRIX_DIM_TB = [0-9]*/MATRIX_DIM_TB = ${MATRIX_DIM}/" utils/CheckResult.py
+    sed "${SED_OPTION[@]}" "s/\(parameter P_MATRIX_SIZE *= *\)[0-9]*;/\1${MATRIX_DIM};/" tb/tb_accelerator.v
 
-    echo "已更新 InputGen.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
-    echo "已更新 CheckResult.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
-    echo "已更新 tb_accelerator.v 中的 P_MATRIX_SIZE 为 ${MATRIX_DIM}"
+    echo "已更新 utils/InputGen.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
+    echo "已更新 utils/CheckResult.py 中的 MATRIX_DIM_TB 为 ${MATRIX_DIM}"
+    echo "已更新 tb/tb_accelerator.v 中的 P_MATRIX_SIZE 为 ${MATRIX_DIM}"
     echo "----------------------------------------"
 
     echo ""
@@ -67,12 +72,12 @@ LOG_FILE="output.txt"
     make run_sim MATRIX_DIM=${MATRIX_DIM} NUM_THREADS=${NUM_THREADS} VERILATOR_FLAGS="${VERILATOR_FLAGS}"
 
     echo ""
-    echo "步骤 3: 正在重排硬件结果 (result_mem.csv)..."
+    echo "步骤 3: 正在重排硬件结果 (${OUTPUT_DIR}/result_mem.csv)..."
     echo "----------------------------------------"
-    python3 reorder_result_mem.py --matrix_dim ${MATRIX_DIM} --input_csv result_mem.csv --output_csv result_mem_reordered.csv
-    cp result_mem.csv result_mem_original.csv
-    mv result_mem_reordered.csv result_mem.csv
-    echo "重排完成，result_mem.csv 已被更新。"
+    python3 utils/reorder_result_mem.py --matrix_dim ${MATRIX_DIM} --input_csv ${OUTPUT_DIR}/result_mem.csv --output_csv ${OUTPUT_DIR}/result_mem_reordered.csv
+    cp ${OUTPUT_DIR}/result_mem.csv ${OUTPUT_DIR}/result_mem_original.csv
+    mv ${OUTPUT_DIR}/result_mem_reordered.csv ${OUTPUT_DIR}/result_mem.csv
+    echo "重排完成，${OUTPUT_DIR}/result_mem.csv 已被更新。"
 
     echo ""
     echo "步骤 4: 正在检查重排后的仿真结果..."

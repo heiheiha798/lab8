@@ -1,23 +1,27 @@
 #!/bin/bash
 
+# --- Location-independent: 无论从哪里调用，都先切到仓库根目录 ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}/.."
+
 # --- Configuration ---
 TOP_MODULE_RTL="accelerator"
 
-# --- RTL Source Files ---
+# --- RTL Source Files (设计 RTL 在 hdl/，综合用顶层在 syn/) ---
 RTL_FILES=(
-    "./pe.v"
-    "./sa_enhanced.v"
-    "./loader.v"
-    "./data_formatter.v"
-    "./writer.v"
-    "./accelerator_synth.v" # The synthesis-friendly top module
+    "./hdl/pe.v"
+    "./hdl/sa_enhanced.v"
+    "./hdl/loader.v"
+    "./hdl/data_formatter.v"
+    "./hdl/writer.v"
+    "./syn/accelerator_synth.v" # The synthesis-friendly top module
 )
 
 # --- Tool & Output Configuration ---
 SYNTH_OUTPUT_DIR="./output_synth_V4"
 
 # Path to the Synopsys Design Constraints file.
-SDC_FILE="./accelerator.sdc"
+SDC_FILE="./syn/accelerator.sdc"
 
 # Clock Configuration for STA.
 CLK_FREQ_MHZ=893
@@ -33,14 +37,15 @@ echocmd() {
 
 # --- Script Execution ---
 
-# Sanity check: Ensure script is run from the correct directory.
-if [ ! -f "./accelerator_synth.v" ]; then
-    echo "Error: Top RTL file './accelerator_synth.v' not found."
-    echo "Please run this script from your project's root directory."
+# Sanity check: Ensure the script is being run from the project root directory.
+if [ ! -f "./syn/accelerator_synth.v" ]; then
+    echo "Error: Top RTL file './syn/accelerator_synth.v' not found."
+    echo "Please check the repository layout."
     exit 1
 fi
 if [ ! -d "./yosys-sta" ]; then
     echo "Error: The './yosys-sta' directory was not found."
+    echo "Please run './tools/yosys_setup.sh' first to extract and initialize it."
     exit 1
 fi
 
